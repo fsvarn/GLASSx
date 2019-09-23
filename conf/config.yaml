@@ -6,22 +6,13 @@ from_source: 0
 
 ## Database settings
 db:
-  configfile: "/projects/verhaak-lab/GLASS-analysis/.odbc.ini"
-  configsection: "GLASSv2"
+  configfile: "/projects/varnf/GLASS-III/GLASS-III/.odbc.ini"
+  configsection: "GLASSv3"
 
 ## Data paths
 data:
-  source_path: "/projects/verhaak-lab/GLASS-analysis/data"
-  realn_path: "/projects/verhaak-lab/GLASS-analysis/results/align/bqsr"
-
-#### JSON files (as alternative to database)
-# json:
-#   cases:       "/projects/barthf/GLASS-WG/data/manifest/cases.json"
-#   samples:     "/projects/barthf/GLASS-WG/data/manifest/samples.json"
-#   aliquots:    "/projects/barthf/GLASS-WG/data/manifest/aliquots.json"
-#   files:       "/projects/barthf/GLASS-WG/data/manifest/files.json"
-#   readgroups:  "/projects/barthf/GLASS-WG/data/manifest/readgroups.json"
-#   pairs:       "/projects/barthf/GLASS-WG/data/manifest/pairs.json"
+  source_path: "/projects/varnf/GLASS-III/GLASS-III/data"
+  realn_path: "/projects/varnf/GLASS-III/GLASS-III/results/align/bqsr"
 
 ## Full path to cluster settings
 cluster_json:     "conf/cluster.json"
