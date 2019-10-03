@@ -33,6 +33,7 @@ class ManifestHandler:
         
         self.locateFiles(source_file_basepath, aligned_file_basepath)
         
+    	#Subset  aliquots to a case source, or cohort (if necessary)
         self.selected_aliquots = set()
         if from_source:
             if by_cohort is not None:
@@ -44,7 +45,7 @@ class ManifestHandler:
                 self.selected_aliquots.update([f["aliquot_barcode"] for (file_name, f) in self.files.items() if f["case_source"] == by_cohort and len(f["file_path"]) > 0 and f["file_format"] == ALIGNED_BAM_TYPE])
             else:
                 self.selected_aliquots.update([f["aliquot_barcode"] for (file_name, f) in self.files.items() if len(f["file_path"]) > 0 and f["file_format"] == ALIGNED_BAM_TYPE])
-
+				
         self.selected_pairs = set()
         for (pair_barcode, pair) in self.pairs.items():
             if(pair["tumor_barcode"] in self.selected_aliquots and pair["normal_barcode"] in self.selected_aliquots):
@@ -76,12 +77,19 @@ class ManifestHandler:
         s += "Selected {} of {} total cases.\n".format(n_cases_selected, n_cases)
         s += "Selected {} of {} possible pairs.\n".format(n_pairs_selected, n_pairs)
         return(s)
-        
-    def getSelectedAliquots(self):
+       
+#	  original getSelectedAliquots that was built assuming one analyte type (DNA)        
+#     def getSelectedAliquots(self):
+#         """
+#         Return a list of selected aliquots
+#         """
+#         return list(self.selected_aliquots)
+
+    def getSelectedAliquots(self, analyte = 'D'):
         """
-        Return a list of selected aliquots
+        Return a list of selected aliquots of a given analyte, default is DNA
         """
-        return list(self.selected_aliquots)
+        return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_analyte_type"] == analyte]
 
     def getSelectedCases(self):
         """
@@ -152,7 +160,7 @@ class ManifestHandler:
         Returns a file format type (str) given an aliquot barcode (str)
         """     
         return [f["file_format"] for (file_name, f) in self.files.items() if f["aliquot_barcode"] == aliquot_barcode][0]
-    
+
     def getAliquotsByCase(self, case_barcode):
         """
         Returns a list of aliquots given a case barcode
@@ -344,7 +352,7 @@ class ManifestHandler:
         s = list(set([pa["case_barcode"] for pa in self.pyclone_aliquots]) & set(self.getSelectedCases()))
         return s
 
-    def getFASTQ(self, aliquot_barcode, readgroup_idtag):
+    def getFASTQ(self, aliquot_barcode, readgroup_idtag, analyte = 'D'):
         """
         Returns a list of FASTQ filenames given an aliquot barcode and RGID tag
         """

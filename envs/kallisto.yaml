@@ -1,0 +1,15 @@
+name: kallisto
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - hdf5=1.10.4=nompi_h3c11f04_1106
+  - kallisto=0.46.0=hb6a4e58_0
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libgfortran-ng=7.3.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - zlib=1.2.11=h516909a_1005
+prefix: /projects/varnf/SofWar/anaconda3/envs/kallisto
+

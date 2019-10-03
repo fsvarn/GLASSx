@@ -44,26 +44,30 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 ## We do not want the additional DAG processing if not from source
 #if(config["from_source"]):
-#    include: "snakemake/download.smk"
-#include: "snakemake/align.smk"
 
-# include: "snakemake/haplotype-map.smk"
+#DNA modules
+#include: "snakemake/download.smk"
+#include: "snakemake/align.smk"
+#include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
-include: "snakemake/telseq.smk"
+#include: "snakemake/telseq.smk"
 #include: "snakemake/mutect2.smk"
-include: "snakemake/mutect2-post.smk"
-# include: "snakemake/varscan2.smk"
-# include: "snakemake/cnvnator.smk"
-# include: "snakemake/lumpy.smk"
-# include: "snakemake/delly.smk"
-# include: "snakemake/manta.smk"
+#include: "snakemake/mutect2-post.smk"
+#include: "snakemake/varscan2.smk"
+#include: "snakemake/cnvnator.smk"
+#include: "snakemake/lumpy.smk"
+#include: "snakemake/delly.smk"
+#include: "snakemake/manta.smk"
 #include: "snakemake/cnv.smk"
 #include: "snakemake/sequenza.smk"
 #include: "snakemake/optitype.smk"
 #include: "snakemake/pvacseq.smk"
 #include: "snakemake/cnv-post.smk"
-include: "snakemake/titan.smk"
-include: "snakemake/pyclone.smk"
+#include: "snakemake/titan.smk"
+#include: "snakemake/pyclone.smk"
+
+#RNA modules
+include: "snakemake/kallisto.smk"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Upload coverage to database
@@ -256,8 +260,6 @@ rule varscan2:
 ## Run snakemake with target 'svprepare'
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 
-
-
 rule cnv:
     input:
         expand("results/cnv/plots/{aliquot_barcode}.pdf", aliquot_barcode = manifest.getSelectedAliquots()),
@@ -291,6 +293,16 @@ rule fingerprint:
        expand("results/fingerprinting/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots()),
        expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases())
        #"results/fingerprinting/GLASS.crosscheck_metrics",
-       
+ 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run kallisto pipeline
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
+rule quant_tpm:
+    input:
+        "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv"
+                
+          
+#Trigger the RNAseq vs DNA difference here using the analyte parameter (default is 'DNA')
 
 ## END ##

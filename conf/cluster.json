@@ -5,7 +5,7 @@
         "name" : "{rule}.{wildcards.aliquot_barcode}",
         "j" : "oe",
         "m" : "a",
-        "M" : "floris.barthel@jax.org",
+        "M" : "Frederick.Varn@jax.org",
         "nodes" : 1,
         "ppn" : 2,
         "walltime" : "72:00:00",
@@ -1157,5 +1157,39 @@
         "name" : "{rule}.{wildcards.case_barcode}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.case_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.case_barcode}.err"
+    },
+    "fastp" :
+    {
+        "ppn" : 1,
+        "walltime" : "12:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
+    },
+    "kallisto" :
+    {
+        "ppn" : 1,
+        "walltime" : "12:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "mergetpm" :
+    {
+        "ppn" : 1,
+        "walltime" : "4:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
+    },
+    "tpm2db" :
+    {
+        "ppn" : 1,
+        "walltime" : "8:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
     }
+
+    
 }
