@@ -1189,6 +1189,14 @@
         "name" : "{rule}",
         "stdout" : "logs/drmaa/{rule}.out",
         "stderr" : "logs/drmaa/{rule}.err"
+    },
+    "tpm_matrix" :
+    {
+        "ppn" : 2,
+        "walltime" : "8:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
     }
 
     

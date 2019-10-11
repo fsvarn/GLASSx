@@ -1,5 +1,5 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Kallisto pipeline sor quantifying transcript expression in TPM
+## Kallisto pipeline for quantifying transcript expression in TPM
 ## Author: Frederick Varn
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 
@@ -96,4 +96,40 @@ rule tpm2db:
     script:
     	"../R/snakemake/tpm2db.R"
 
+		
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Create a tpm matrix to store locally:
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+	
+rule tpm_matrix:
+    input:
+        expand("results/kallisto/kallisto/aliquot/{aliquot_barcode}/abundance.tsv",aliquot_barcode=manifest.getSelectedAliquots(analyte='R'))
+    output:
+        transcript = protected("results/kallisto/kallisto/final/transcript_tpm_matrix_all_samples.tsv"),
+        gene = protected("results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv")
+    params:
+    	dir_str = "results\/kallisto\/kallisto\/aliquot\/",
+    	head_tmp = "results/kallisto/kallisto/final/header.tsv",
+    	mat_tmp = "results/kallisto/kallisto/final/transcript_tpm_matrix_all_samples.tsv2"
+    log:
+        "logs/RNAseq/post/tpm_matrix.log"
+    message:
+        "Merging aliquot TPMs into a transcript and gene-level matrix"
+    shell:
+    	"""
+		num=$(ls -f1 {input} | wc -l)
+		upper=$(echo "$((5 * $num))")
+		myseq=$(seq 5 5 $upper | sed 's/^\|$//g' | paste -sd,)
+		myseq=$(echo "1,2,"$myseq)
+		paste {input} | cut -f $myseq > {output.transcript}
+
+		ls -f1 {input} | sed 's/{params.dir_str}//g' | perl -ne 'chomp $_; if ($_ =~ /(\S+)\/abundance\.tsv/){{print "\t$1"}}' | perl -ne 'print "target_id\tlength$_\n"' > {params.head_tmp}
+		cat {params.head_tmp} {output.transcript} | grep -v "tpm" > {params.mat_tmp}
+		mv {params.mat_tmp} {output.transcript}
+		rm -f {params.head_tmp} 
+		
+		Rscript R/snakemake/transcript2gene.R {output.transcript} {config[ensembl_transcript_mapping]} {output.gene}
+		2>{log}
+    	"""	
+		
 		

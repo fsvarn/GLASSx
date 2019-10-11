@@ -300,7 +300,8 @@ rule fingerprint:
 
 rule quant_tpm:
     input:
-        "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv"
+       "results/kallisto/kallisto/final/transcript_tpm_matrix_all_samples.tsv",
+       "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv"
                 
           
 #Trigger the RNAseq vs DNA difference here using the analyte parameter (default is 'DNA')
