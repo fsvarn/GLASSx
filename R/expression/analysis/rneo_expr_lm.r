@@ -36,7 +36,7 @@ for(i in 1:nrow(sub_genes))
 	cat("\r", i)
 	mygene = as.numeric(sub_genes[i,])
 	xx = cbind(mygene, clin)
-	formula_vec = paste("rneo ~ mygene +", paste(colnames(clin)[2:4],collapse=" + ",sep=" "))
+	formula_vec = paste("rneo ~ mygene +", paste(colnames(clin)[3:4],collapse=" + ",sep=" "))
 	mylm <- lm(formula_vec, data = xx)	
 	mylm = summary(mylm)
 	pval[i] =  mylm[["coefficients"]][2, 4]
@@ -49,7 +49,7 @@ fdr <- p.adjust(pval,"BH")
 #Create results
 res <- data.frame(rownames(sub_genes),pval,fdr,eff)
 colnames(res)[1] <- "gene_symbol"
-res <- res[order(res[,"fdr"]),]
+res <- res[order(res[,"pval"]),]
 
 #Get the genes negatively associated with the ratio
 res_neg <- res[which(res[,"eff"] < 0 & res[,"pval"] < 0.05),]
