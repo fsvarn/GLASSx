@@ -1,6 +1,6 @@
 #######################################################
-# Create manifest for RNAseq and CU PD-1 samples
-# Date: 2019.09.23
+# Create manifest for SF RNAseq samples
+# Date: 2019.10.22
 # Author: Fred V.
 #######################################################
 #Local Directory for github repo
@@ -8,12 +8,12 @@ mybasedir = "/Users/varnf/Documents/Projects/GLASS/GLASS-III/GLASS-III/"
 setwd(mybasedir)
 
 #Files with information about fastq information and barcodes
-case_file <- "data/metadata/cases.txt"
-sample_file <- "data/metadata/samples.txt"
-aliquot_file <- "data/metadata/aliquots.txt"
-readgroup_file <- "data/metadata/readgroups.txt"
-file_file <- "data/metadata/files.txt"
-files_readgroups_file <- "data/metadata/files_readgroups.txt"
+case_file <- "data/metadata/sf_cases.txt"
+sample_file <- "data/metadata/sf_samples.txt"
+aliquot_file <- "data/metadata/sf_aliquots.txt"
+readgroup_file <- "data/metadata/sf_readgroups.txt"
+file_file <- "data/metadata/sf_files.txt"
+files_readgroups_file <- "data/metadata/sf_files_readgroups.txt"
 
 #######################################################
 
@@ -44,8 +44,8 @@ dbWriteTable(con, Id(schema="clinical", table="cases"), cases_master, append=TRU
 ### Samples ###
 samples <- read.delim(sample_file, stringsAsFactor=FALSE)
 samples_master <- samples %>% mutate(case_barcode = case_barcode,
-                                 sample_barcode = sample_barcode,
-                                 sample_type = sample_type)
+                                     sample_barcode = sample_barcode,
+                                     sample_type = sample_type)
 
 #Write to database
 dbWriteTable(con, Id(schema="biospecimen", table="samples"), samples_master, append=TRUE)
@@ -58,7 +58,7 @@ aliquots_master <- aliquots %>% mutate(aliquot_barcode = aliquot_barcode,
                                        aliquot_analyte_type = aliquot_analyte_type,
                                        aliquot_analysis_type = aliquot_analysis_type,
                                        aliquot_batch = aliquot_batch) %>%
-                  rename(sample_barcode = aliquot_sample)
+  rename(sample_barcode = aliquot_sample)
 
 #Write to database
 dbWriteTable(con, Id(schema="biospecimen", table="aliquots"), aliquots_master, append=TRUE)
@@ -92,8 +92,8 @@ dbWriteTable(con, Id(schema="analysis", table="files"), files_master, append=TRU
 ### files_readgroups ###
 files_readgroups <- read.delim(files_readgroups_file, stringsAsFactor=FALSE)
 files_readgroups_master <- files_readgroups %>% mutate(file_name = file_name,
-                                 readgroup_idtag = readgroup_idtag,
-                                 readgroup_sample_id = readgroup_sample_id)
+                                                       readgroup_idtag = readgroup_idtag,
+                                                       readgroup_sample_id = readgroup_sample_id)
 
 #Write to database
 dbWriteTable(con, Id(schema="analysis", table="files_readgroups"), files_readgroups_master, append=TRUE)
