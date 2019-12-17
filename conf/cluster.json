@@ -52,6 +52,12 @@
         "ppn" : 2,
         "mem" : 12,
         "walltime" : "72:00:00"
+    },    
+    "gencode_coverage" :
+    {
+        "ppn" : 2,
+        "mem" : 12,
+        "walltime" : "72:00:00"
     },
     "markadapters" :
     {
@@ -214,9 +220,9 @@
         "ppn" : 2,
         "mem" : 12,
         "walltime" : "72:00:00",
-        "name" : "{rule}.{wildcards.pair_barcode}",
-        "stdout" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.out",
-        "stderr" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.err"
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
     },
     "selectvariants" :
     {
@@ -1177,14 +1183,6 @@
     "mergetpm" :
     {
         "ppn" : 1,
-        "walltime" : "4:00:00",
-        "name" : "{rule}",
-        "stdout" : "logs/drmaa/{rule}.out",
-        "stderr" : "logs/drmaa/{rule}.err"
-    },
-    "tpm2db" :
-    {
-        "ppn" : 1,
         "walltime" : "8:00:00",
         "name" : "{rule}",
         "stdout" : "logs/drmaa/{rule}.out",
@@ -1197,7 +1195,30 @@
         "name" : "{rule}",
         "stdout" : "logs/drmaa/{rule}.out",
         "stderr" : "logs/drmaa/{rule}.err"
+    },
+    "tpm_gct" :
+    {
+        "ppn" : 2,
+        "walltime" : "8:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
+    },
+    "transcript_class" :
+    {
+        "ppn" : 2,
+        "walltime" : "8:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
+    },
+    "merge_xcr" :
+    {
+        "ppn" : 2,
+        "mem" : 12,
+        "walltime" : "72:00:00",
+        "name" : "{rule}.{wildcards.xcr}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.xcr}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.xcr}.err"
     }
-
-    
 }

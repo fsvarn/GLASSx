@@ -78,7 +78,7 @@ class ManifestHandler:
         s += "Selected {} of {} possible pairs.\n".format(n_pairs_selected, n_pairs)
         return(s)
        
-#	  original getSelectedAliquots that was built assuming one analyte type (DNA)        
+#  original getSelectedAliquots that was built assuming one analyte type (DNA)        
 #     def getSelectedAliquots(self):
 #         """
 #         Return a list of selected aliquots
@@ -89,7 +89,8 @@ class ManifestHandler:
         """
         Return a list of selected aliquots of a given analyte, default is DNA
         """
-        return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_analyte_type"] == analyte]
+        selected_aliquots_by_analyte = [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_analyte_type"] == analyte]
+        return list(set(selected_aliquots_by_analyte).intersection(self.selected_aliquots))
 
     def getSelectedCases(self):
         """
@@ -161,11 +162,11 @@ class ManifestHandler:
         """     
         return [f["file_format"] for (file_name, f) in self.files.items() if f["aliquot_barcode"] == aliquot_barcode][0]
 
-    def getAliquotsByCase(self, case_barcode):
+    def getAliquotsByCase(self, case_barcode, analyte = 'D'):
         """
         Returns a list of aliquots given a case barcode
         """
-        return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["case_barcode"] == case_barcode]
+        return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["case_barcode"] == case_barcode and al["aliquot_analyte_type"] == analyte]
     
     def getAliquotsByProject(self, case_project):
         """
@@ -352,7 +353,7 @@ class ManifestHandler:
         s = list(set([pa["case_barcode"] for pa in self.pyclone_aliquots]) & set(self.getSelectedCases()))
         return s
 
-    def getFASTQ(self, aliquot_barcode, readgroup_idtag, analyte = 'D'):
+    def getFASTQ(self, aliquot_barcode, readgroup_idtag):
         """
         Returns a list of FASTQ filenames given an aliquot barcode and RGID tag
         """

@@ -13,7 +13,7 @@ con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 args = commandArgs(trailingOnly=TRUE)
 
-# test if there is at least one argument: if not, return an error
+# test if there is at least two arguments: if not, return an error
 if (length(args) < 2) {
   stop("Please provide an input and a mapping file", call.=FALSE)
 } else if (length(args)==2) {

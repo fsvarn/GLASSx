@@ -2,8 +2,8 @@ library(DBI)
 library(odbc)
 library(tidyverse)
 library(ComplexHeatmap)
-library(circlize)
 library(RColorBrewer)
+library(sva)
 
 rm(list=ls())
 
@@ -12,6 +12,9 @@ myinf1 <- "/projects/varnf/GLASS-III/GLASS-III/results/kallisto/kallisto/final/g
 
 genes <- read.delim(myinf1,row.names=1)
 colnames(genes) <- gsub("\\.","-",colnames(genes))
+
+#-----------------------------------------------------------------
+#No correction
 
 gene_sums <- apply(genes,1,sum)
 sub_genes <- genes[which(gene_sums>0),]
@@ -41,10 +44,13 @@ ggplot(data = scores, aes(x = PC1, y = PC2, colour=aliquot_batch)) +
   geom_point() +
   geom_hline(yintercept = 0, colour = "gray65") +
   geom_vline(xintercept = 0, colour = "gray65") +
-  scale_colour_manual(values=brewer.pal(11,"Set3")) +
+  scale_colour_manual(values=brewer.pal(12,"Set3")) +
   ggtitle("PCA plot of GLASS RNAseq aliquots") +
   theme_classic()
 dev.off()
+
+#-----------------------------------------------------------------
+#Quantile normalization
 
 myrk <- qn_genes <- matrix(0, nrow(genes), ncol(genes))
 rownames(qn_genes) <- rownames(genes)
@@ -75,7 +81,7 @@ ggplot(data = scores, aes(x = PC1, y = PC2, colour=aliquot_batch)) +
   geom_point() +
   geom_hline(yintercept = 0, colour = "gray65") +
   geom_vline(xintercept = 0, colour = "gray65") +
-  scale_colour_manual(values=brewer.pal(11,"Set3")) +
+  scale_colour_manual(values=brewer.pal(12,"Set3")) +
   ggtitle("PCA plot of GLASS RNAseq aliquots") +
   theme_classic()
 dev.off()
@@ -85,7 +91,8 @@ ggplot(data = scores, aes(x = PC1, y = PC2, colour=aliquot_batch, shape = subtyp
   geom_point() +
   geom_hline(yintercept = 0, colour = "gray65") +
   geom_vline(xintercept = 0, colour = "gray65") +
-  scale_colour_manual(values=brewer.pal(11,"Set3")) +
+  scale_colour_manual(values=brewer.pal(12,"Set3")) +
   ggtitle("PCA plot of GLASS RNAseq aliquots") +
   theme_classic()
 dev.off()
+

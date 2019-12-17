@@ -52,7 +52,7 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
 #include: "snakemake/mutect2.smk"
-#include: "snakemake/mutect2-post.smk"
+include: "snakemake/mutect2-post.smk"
 #include: "snakemake/varscan2.smk"
 #include: "snakemake/cnvnator.smk"
 #include: "snakemake/lumpy.smk"
@@ -67,7 +67,8 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 #include: "snakemake/pyclone.smk"
 
 #RNA modules
-include: "snakemake/kallisto.smk"
+#include: "snakemake/kallisto.smk"
+#include: "snakemake/mixcr.smk"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Upload coverage to database
@@ -181,7 +182,7 @@ rule ssmutect2:
 
 rule m2db:
     input:
-        #"results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.tsv",
+        "results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.tsv",
         "results/mutect2/consensusvcf/consensus.normalized.sorted.vep.vcf",
         expand("results/mutect2/geno2db/{case_barcode}.info.tsv", case_barcode = manifest.getSelectedCases()),
         expand("results/mutect2/geno2db/{case_barcode}.geno.tsv", case_barcode = manifest.getSelectedCases())
@@ -300,10 +301,19 @@ rule fingerprint:
 
 rule quant_tpm:
     input:
+       "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv",
        "results/kallisto/kallisto/final/transcript_tpm_matrix_all_samples.tsv",
-       "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv"
+       "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv",
+       "results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt"
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run MiXCR
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
+rule mixcr:
+    input:
+        "results/mixcr/final/merged_clones_tcr.txt",
+        "results/mixcr/final/merged_clones_bcr.txt"
                 
           
-#Trigger the RNAseq vs DNA difference here using the analyte parameter (default is 'DNA')
-
 ## END ##

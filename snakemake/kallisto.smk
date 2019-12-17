@@ -59,7 +59,7 @@ rule kallisto:
 		{input}) 2>{log}"
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Merge tpms together:
+## Merge tpms together and upload to db:
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 	
 rule mergetpm:
@@ -70,32 +70,20 @@ rule mergetpm:
     log:
         "logs/RNAseq/kallisto/mergetpm.log"
     message:
-        "Merging aliquot TPMs into one file"
+        "Merging aliquot TPMs into one file and uploading to database"
     shell:
     	"""
     	set +o pipefail; 
     	cat {input} | head -1 | sed 's/^/aliquot_barcode\t/' > {output}    	
     	for f in {input}
     	do
-    		al=$(echo $f | cut -c 35-64)
+    		al=$(echo $f | cut -c 35-64)				#Get aliquot barcode from file name
     		sed "s/^/$al\t/g" $f | tail -n+2 -q >> {output}
-    	done 2>{log}
+    	done 
+    	
+    	Rscript R/snakemake/tpm2db.R {output}
+    	2>{log}
     	"""
-
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Upload transcripts to db
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
-
-rule tpm2db:
-    input:
-        "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv"
-    log:
-        "logs/RNAseq/kallisto/tpm2db.log"
-    message:
-        "Uploading transcripts to the database"
-    script:
-    	"../R/snakemake/tpm2db.R"
-
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Create a tpm matrix to store locally:
@@ -132,4 +120,42 @@ rule tpm_matrix:
 		2>{log}
     	"""	
 		
-		
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Create a tpm gct file for certain applications:
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule tpm_gct:
+    input:
+        "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv"
+    output:
+        "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.gct"
+    log:
+        "logs/RNAseq/post/tpm_gct.log"
+    message:
+        "Creating gct file"
+    shell:
+    	"""
+		Rscript R/snakemake/gct_create.R {input} {output}
+		2>{log}
+    	"""			
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run transcriptional subtype classifier and upload to db:
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule transcript_class:
+    input:
+        "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.gct"
+    output:
+        protected("results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt")
+    conda:
+        "../envs/transcript_class.yaml"
+    log:
+        "logs/RNAseq/post/transcript_class.log"
+    message:
+        "Running transcriptional subtype classifier and uploading to db"
+    shell:
+    	"""
+		Rscript R/snakemake/transcriptclass2db.R {input} {output}
+		2>{log}
+    	"""			

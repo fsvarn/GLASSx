@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 #######################################################
 
 library(tidyverse)
@@ -9,7 +11,13 @@ library(DBI)
 #Establish connection
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
-transcript_tpm <- "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv"
+args = commandArgs(trailingOnly=TRUE)
+
+# test if there is at least one argument: if not, return an error
+if (length(args) < 1) {
+  stop("Please provide an input", call.=FALSE)}
+
+transcript_tpm <- args[1]
 
 cat("Reading in inputs...")
 ttpm <- read.delim(transcript_tpm,stringsAsFactors=FALSE)

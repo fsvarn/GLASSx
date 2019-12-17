@@ -228,15 +228,18 @@ rule plotcr:
         "Plot denoised and standardized read counts\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g PlotDenoisedCopyRatios \
+        """
+        module load R/3.3.2 #R and the gatk4.1.0 packages in conda are no longer compatible 
+        gatk --java-options -Xmx{params.mem}g PlotDenoisedCopyRatios \
             --standardized-copy-ratios {input.standardized} \
             --denoised-copy-ratios {input.denoised} \
             --sequence-dictionary {config[reference_dict]} \
             --minimum-contig-length {config[cnv][min_contig_len]} \
             --output {params.outputdir} \
             --output-prefix {params.outputprefix} \
-            > {log} 2>&1"
-
+            2>{log}
+        """
+        
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Model segments
 ## Use a guassian-kernel binary-segmentation algorithm to group contiguouis copy ratios into segments
@@ -359,15 +362,18 @@ rule plotmodeledsegments:
         "Plot modelled segments\n"
         "Aliquot barcode: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g PlotModeledSegments \
+        """
+        module load R/3.3.2 #R and the gatk4.1.0 packages in conda are no longer compatible 
+        gatk --java-options -Xmx{params.mem}g PlotModeledSegments \
             --denoised-copy-ratios {input.denoisedCR} \
             --allelic-counts {input.hets} \
             --segments {input.segments} \
             --sequence-dictionary {config[reference_dict]} \
             --minimum-contig-length 46709983 \
             --output {params.outputdir} \
-            --output-prefix {params.outputprefix} \
-            > {log} 2>&1"
+            --output-prefix {params.outputprefix}
+            2>{log}
+        """
 
 rule combinecnvplots:
     input:
