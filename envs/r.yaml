@@ -54,7 +54,7 @@ dependencies:
   - pcre=8.39=0
   - pixman=0.34.0=2
   - r-assertthat=0.2.0=r3.4.1_0
-  - r-base=3.4.1=1
+#  - r-base=3.4.1=1
   - r-bh=1.62.0_1=r3.4.1_0
   - r-bindr=0.1=r3.4.1_0
   - r-bindrcpp=0.2=r3.4.1_0

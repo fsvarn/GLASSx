@@ -133,11 +133,19 @@ vepplugins:       "/projects/varnf/SofWar/VEP_plugins/"
 ## pVACseq iedb install directory 
 iedb:             "/projects/varnf/SofWar/pvactools/IEDB/"
 
+## LOHHLA HLA reference files
+lohhla_rscript:     "/projects/varnf/SofWar/lohhla/LOHHLAscript_grch37.R"
+hla_all_fasta:      "/projects/varnf/SofWar/lohhla/data/hla_all.fasta"
+hla_exon_loc:       "/projects/varnf/SofWar/lohhla/data/hla.dat"
+lohhla_workdir:     "/fastscratch/varnf/lohhla/"
+
 ## Kallisto index
-kallisto_idx:   "/projects/varnf/SofWar/kallisto/Ensembl_v96_homo_sapiens/homo_sapiens/transcriptome.idx"
+kallisto_idx:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcriptome.idx"
+kallisto_gtf:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.gtf"
+kallisto_ref:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.cdna.all.fa"
 
 ## Kallisto mapping
-ensembl_transcript_mapping: "/projects/varnf/SofWar/kallisto/Ensembl_v96_homo_sapiens/homo_sapiens/transcripts_to_genes.txt"
+ensembl_transcript_mapping: "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcripts_to_genes.txt"
 
 seconds_between_progress_updates: 900
 

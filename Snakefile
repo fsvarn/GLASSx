@@ -47,12 +47,11 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 #DNA modules
 #include: "snakemake/download.smk"
-#include: "snakemake/align.smk"
+include: "snakemake/align.smk"
 #include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
 #include: "snakemake/mutect2.smk"
-include: "snakemake/mutect2-post.smk"
 #include: "snakemake/varscan2.smk"
 #include: "snakemake/cnvnator.smk"
 #include: "snakemake/lumpy.smk"
@@ -60,8 +59,9 @@ include: "snakemake/mutect2-post.smk"
 #include: "snakemake/manta.smk"
 #include: "snakemake/cnv.smk"
 #include: "snakemake/sequenza.smk"
-#include: "snakemake/optitype.smk"
+include: "snakemake/optitype.smk"
 #include: "snakemake/pvacseq.smk"
+#include: "snakemake/lohhla.smk"
 #include: "snakemake/cnv-post.smk"
 #include: "snakemake/titan.smk"
 #include: "snakemake/pyclone.smk"
@@ -74,25 +74,27 @@ include: "snakemake/mutect2-post.smk"
 ## Upload coverage to database
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 
-rule cov2db:
-    input:
-        metrics = lambda wildcards: expand("results/align/wgsmetrics/{aliquot_barcode}.WgsMetrics.txt", aliquot_barcode = manifest.getSelectedAliquots())
-    output:
-        tsv = "results/align/wgsmetrics.merged.tsv"
-    params:
-        mem = CLUSTER_META["cov2db"]["mem"]
-    threads:
-        CLUSTER_META["cov2db"]["ppn"]
-    #conda:
-    #    "../envs/r.yaml"
-    log:
-        "logs/align/cov2db/cov2db.log"
-    benchmark:
-        "benchmarks/align/cov2db/cov2db.txt"
-    message:
-        "Merge coverage file and convert to TSV for easy database upload"
-    script:
-        "R/snakemake/cov2db.R"
+#This is currently done manually as new cohorts are added, as this rule does not support cohort-specific uploads
+
+# rule cov2db:
+#     input:
+#         metrics = lambda wildcards: expand("results/align/wgsmetrics/{aliquot_barcode}.WgsMetrics.txt", aliquot_barcode = manifest.getSelectedAliquots())
+#     output:
+#         tsv = "results/align/wgsmetrics.merged.tsv"
+#     params:
+#         mem = CLUSTER_META["cov2db"]["mem"]
+#     threads:
+#         CLUSTER_META["cov2db"]["ppn"]
+#     #conda:
+#     #    "../envs/r.yaml"
+#     log:
+#         "logs/align/cov2db/cov2db.log"
+#     benchmark:
+#         "benchmarks/align/cov2db/cov2db.txt"
+#     message:
+#         "Merge coverage file and convert to TSV for easy database upload"
+#     script:
+#         "R/snakemake/cov2db.R"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Haplotype map creation rule
@@ -117,39 +119,8 @@ rule align:
 
 rule gencode:
     input:
-        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getSelectedAliquots())
+        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getAliquotsByBatch('GLSS-PD-WXS'))
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Get genic coverage given a BAM file
-## URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-
-#rule gencode_coverage:
-#    input:
-#        "results/align/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam"
-#    output:
-#        "results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv"
-#    params:
-#        mem = CLUSTER_META["gencode_coverage"]["mem"]
-#    conda:
-#        "envs/align.yaml"
-#    threads:
-#        CLUSTER_META["gencode_coverage"]["ppn"]
-#    log:
-#        "logs/align/gencode-coverage/{aliquot_barcode}.log"
-#    benchmark:
-#        "benchmarks/align/gencode-coverage/{aliquot_barcode}.txt"
-#    message:
-#        "Computing coverage using flattened gencode GTF\n"
-#        "Sample: {wildcards.aliquot_barcode}"
-#    shell:
-#        "set +o pipefail; /opt/software/helix/samtools/1.8/bin/samtools view -q 10 -b {input} | \
-#            /opt/software/helix/BEDtools/2.27.0/bin/bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d -sorted -g {config[bedtools_genome]} | \
-#            /opt/software/helix/BEDtools/2.27.0/bin/bedtools groupby -i stdin -g 1,2,3,4,5 -c 7 -o sum | \
-#            sort -k5,5 | \
-#            /opt/software/helix/BEDtools/2.27.0/bin/bedtools groupby -i stdin -g 5 -c 4,6 -o sum,sum | \
-#            awk -F\"[+\\t]\" 'BEGIN {{OFS=\"\\t\"}}{{for(i=1;i<(NF-1);i++){{split($i,g,\".\"); print g[1],$(NF-1),$NF}}}}' \
-#            > {output} 2> {log}"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Download only rule
@@ -183,7 +154,7 @@ rule ssmutect2:
 rule m2db:
     input:
         "results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.tsv",
-        "results/mutect2/consensusvcf/consensus.normalized.sorted.vep.vcf",
+        "results/mutect2/consensusvcf/consensus.normalized.sorted.vep.maf",
         expand("results/mutect2/geno2db/{case_barcode}.info.tsv", case_barcode = manifest.getSelectedCases()),
         expand("results/mutect2/geno2db/{case_barcode}.geno.tsv", case_barcode = manifest.getSelectedCases())
 
@@ -238,8 +209,9 @@ rule titancna:
 
 rule call_hla:
 	input:
-		expand("results/optitype/HLA_calls/{aliquot_barcode}/{aliquot_barcode}_result.tsv", aliquot_barcode = manifest.getSelectedAliquots())
-		
+		expand("results/optitype/HLA_calls/{aliquot_barcode}/{aliquot_barcode}_result.tsv", aliquot_barcode = manifest.getSelectedAliquots()),
+		expand("results/optitype/HLA_calls/{aliquot_barcode}/{aliquot_barcode}_extended_result.tsv", aliquot_barcode = manifest.getSelectedAliquots())
+	
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Neoantigen rule (pVACseq)
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -264,7 +236,17 @@ rule varscan2:
 rule cnv:
     input:
         expand("results/cnv/plots/{aliquot_barcode}.pdf", aliquot_barcode = manifest.getSelectedAliquots()),
-        expand("results/cnv/callsegments/{aliquot_barcode}.called.seg", aliquot_barcode = manifest.getSelectedAliquots())
+        expand("results/cnv/callsegments/{aliquot_barcode}.called.seg", aliquot_barcode = manifest.getSelectedAliquots()),
+        "results/cnv/callsegments.merged.tsv"		#May need to remove this if it breaks the pipeline
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Call loss of heterozygosity in HLA regions (LOHHLA)
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
+rule lohhla:
+    input:
+        expand("results/lohhla/final/{pair_barcode}/{minCoverageFilter}/{pair_barcode}.{minCoverageFilter}.DNA.HLAlossPrediction_CI.xls", pair_barcode = manifest.getSelectedPairs(), minCoverageFilter=[5,10,20,30])
+        #expand("results/lohhla/final/{pair_barcode}/{pair_barcode}.DNA.HLAlossPrediction_CI.txt", pair_barcode = manifest.getSelectedPairs())
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Estimate TL using telseq
@@ -304,7 +286,9 @@ rule quant_tpm:
        "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv",
        "results/kallisto/kallisto/final/transcript_tpm_matrix_all_samples.tsv",
        "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv",
-       "results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt"
+       "results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt",
+       "results/kallisto/pizzly/final/fusions_all_samples.tsv"
+       
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Run MiXCR

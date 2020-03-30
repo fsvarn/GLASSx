@@ -149,3 +149,34 @@ rule optitype:
         --dna \
         -v \
         -o {params.output_dir}) 2>> {log}"
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Call long HLAtype with modified OptiType (used for LOHHLA)
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule optitype_long:
+    input:
+        F = "results/optitype/HLA_reads/{aliquot_barcode}.fished_1.fastq",
+        F2 = "results/optitype/HLA_reads/{aliquot_barcode}.fished_2.fastq"
+    output:
+        pdf = "results/optitype/HLA_calls/{aliquot_barcode}/{aliquot_barcode}_extended_coverage_plot.pdf",
+        res = "results/optitype/HLA_calls/{aliquot_barcode}/{aliquot_barcode}_extended_result.tsv"
+    params:
+        output_dir = "results/optitype/HLA_calls/{aliquot_barcode}/",
+        prefix = "{aliquot_barcode}"
+    conda:
+        "../envs/optitype.yaml"
+    log:
+        "logs/optitype_long/{aliquot_barcode}.log"
+    message:
+        "Calling HLA type (extended) \n"
+        "Sample: {wildcards.aliquot_barcode}"
+    shell:
+        "(/projects/varnf/SofWar/OptiType/OptiTypePipeline_mod.py \
+        -i {input.F} \
+        {input.F2} \
+        --config conf/optitype_config.ini \
+        --prefix {params.prefix} \
+        --dna \
+        -v \
+        -o {params.output_dir}) 2>> {log}"

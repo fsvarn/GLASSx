@@ -9,7 +9,7 @@ con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 myDir1 <- "/projects/varnf/GLASS-III/GLASS-III/results/kallisto/kallisto/aliquot"
 myinf1 <- paste(myDir1,dir(myDir1),sep="/")
-myinf1 <- sapply(myinf1,function(x)paste(x,dir(x)[3],sep="/"),USE.NAMES=FALSE)
+myinf1 <- sapply(myinf1,function(x)paste(x,dir(x)[4],sep="/"),USE.NAMES=FALSE)
 
 jsons <- lapply(myinf1,function(x)fromJSON(file=x))
 names(jsons) <- dir(myDir1)

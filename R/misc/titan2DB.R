@@ -3,7 +3,7 @@
 library(tidyverse)
 library(DBI)
 library(odbc)
-con <- DBI::dbConnect(odbc::odbc(), "VerhaakDB")
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 segfiles <- list.files('results/cnv/titanfinal/seg', full.names = TRUE)
 

@@ -1,5 +1,6 @@
 ## CNV
-## postproessing
+## postprocessing
+## DEPRECATED, do not use
 
 # rule combinetracks:
 #     input:

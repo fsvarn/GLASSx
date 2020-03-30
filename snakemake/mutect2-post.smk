@@ -177,7 +177,7 @@ rule annoconsensusvcf:
     threads:
         CLUSTER_META["annoconsensusvcf"]["ppn"]
     conda:
-        "../envs/bcftools.yaml"
+        "../envs/funcotate.yaml"
     log:
         "logs/mutect2/annoconsensusvcf/annoconsensusvcf.log"
     benchmark:
@@ -218,8 +218,8 @@ rule maf2db:
         mem = CLUSTER_META["maf2db"]["mem"]
     threads:
         CLUSTER_META["maf2db"]["ppn"]
-    #conda:
-    #    "../envs/r.yaml"
+    conda:
+        "../envs/variantannotation_r.yaml"
     log:
         "logs/mutect2/maf2db/maf2db.log"
     benchmark:
@@ -237,9 +237,9 @@ rule annotate_vep:
     input:
         vcf = "results/mutect2/consensusvcf/consensus.normalized.sorted.vcf.gz"
     output:
-        vcf_uncompressed = temp("results/mutect2/annoconsensusvcf/consensus.normalized.sorted.uncompressed.vcf"),
-        vcf_reformatted = temp("results/mutect2/annoconsensusvcf/consensus.normalized.sorted.vcf"),
-        maf = protected("results/mutect2/annoconsensusvcf/consensus.normalized.sorted.vep.maf")
+        vcf_uncompressed = temp("results/mutect2/consensusvcf/consensus.normalized.sorted.uncompressed.vcf"),
+        vcf_reformatted = temp("results/mutect2/consensusvcf/consensus.normalized.sorted.reformatted.vcf"),
+        maf = protected("results/mutect2/consensusvcf/consensus.normalized.sorted.vep.maf")
     params:
         mem = CLUSTER_META["annoconsensusvcf"]["mem"]
     threads:
@@ -247,9 +247,9 @@ rule annotate_vep:
     conda:
         "../envs/vcf2maf.yaml"
     log:
-        "logs/mutect2/annoconsensusvcf/annoconsensusvcf.log"
+        "logs/mutect2/annoconsensusvcf/annoconsensusvcf_vep.log"
     benchmark:
-        "benchmarks/mutect2/annoconsensusvcf/annoconsensusvcf.txt"
+        "benchmarks/mutect2/annoconsensusvcf/annoconsensusvcf_vep.txt"
     message:
         "Annotate consensus variants using VEP"
     shell:
@@ -305,7 +305,6 @@ rule annotate_vep:
 ## Upload genotype to database
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 
-
 rule geno2db:
     input:
         vcf = "results/mutect2/dropgt/{case_barcode}.filtered.normalized.sorted.vcf.gz",
@@ -318,8 +317,8 @@ rule geno2db:
         mem = CLUSTER_META["geno2db"]["mem"]
     threads:
         CLUSTER_META["geno2db"]["ppn"]
-    #conda:
-    #    "../envs/r.yaml"
+    conda:
+        "../envs/variantannotation_r.yaml"
     log:
         "logs/mutect2/geno2db/{case_barcode}.log"
     benchmark:
@@ -328,6 +327,8 @@ rule geno2db:
         "Copy M2 calls to TSV for uploading to database\n"
         "Aliquot: {wildcards.case_barcode}"
     script:
-        "../R/snakemake/geno2db.R"
-        
+        """
+        ../R/snakemake/geno2db.R
+        """
+     
 # ## END ##

@@ -33,7 +33,7 @@ rule fastp:
 		-h {output.html}) 2>{log}"
 		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Run kallisto to quantify transcripts:
+## Run kallisto to quantify transcripts, also outputs potential fusion reads:
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 rule kallisto:
@@ -42,7 +42,8 @@ rule kallisto:
     output:
         tsv = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/abundance.tsv",
         h5 = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/abundance.h5",
-        json = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/run_info.json"
+        json = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/run_info.json",
+        fusion = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/fusion.txt"
     params:
     	output_dir = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/"
     conda:
@@ -55,6 +56,7 @@ rule kallisto:
     shell:
     	"(kallisto quant \
 		-i {config[kallisto_idx]} \
+		--fusion \
 		-o {params.output_dir} \
 		{input}) 2>{log}"
 		
@@ -159,3 +161,71 @@ rule transcript_class:
 		Rscript R/snakemake/transcriptclass2db.R {input} {output}
 		2>{log}
     	"""			
+    	
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run pizzly to call transcript fusions:
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule pizzly:
+    input:
+        kfus = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/fusion.txt",
+        h5 = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/abundance.h5"
+    output:
+        cache = "results/kallisto/pizzly/{aliquot_barcode}/index.cache.txt",
+        fusions = "results/kallisto/pizzly/{aliquot_barcode}/{aliquot_barcode}.fusions.fasta",
+        json = "results/kallisto/pizzly/{aliquot_barcode}/{aliquot_barcode}.json",
+        tsv = "results/kallisto/pizzly/{aliquot_barcode}/{aliquot_barcode}.fusions.tsv"
+    params:
+    	output = "results/kallisto/pizzly/{aliquot_barcode}/{aliquot_barcode}",
+    	align_score = 2
+    conda:
+        "../envs/pizzly.yaml"
+    log:
+        "logs/RNAseq/pizzly/{aliquot_barcode}.log"
+    message:
+        "Calling fusions with pizzly \n"
+        "Sample: {wildcards.aliquot_barcode}"
+    shell:
+    	"""
+    	fr=$(pizzly_get_fragment_length.py {input.h5})
+    	echo $fr
+    	
+		pizzly -k 31 \
+		--gtf {config[kallisto_gtf]} \
+		--cache {output.cache} \
+		--align-score {params.align_score} \
+        --insert-size $fr \
+        --fasta {config[kallisto_ref]} \
+        --output {params.output} \
+        {input.kfus}
+ 		
+ 		pizzly_flatten_json.py {output.json} > {output.tsv}
+ 		2>{log}
+	   	"""				
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Merge fusions together into a single table
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule mergefusions:
+    input:
+        expand("results/kallisto/pizzly/{aliquot_barcode}/{aliquot_barcode}.fusions.tsv",aliquot_barcode=manifest.getSelectedAliquots(analyte='R'))
+    output:
+        protected("results/kallisto/pizzly/final/fusions_all_samples.tsv")
+    log:
+        "logs/RNAseq/pizzly/mergefusions.log"
+    message:
+        "Merging all fusions into one file and uploading to database"
+    shell:
+    	"""
+    	set +o pipefail; 
+    	cat {input} | head -1 | sed "s/^/aliquot_barcode\t/" > {output}    	
+    	for f in {input}
+    	do
+    		al=$(echo $f | cut -c 25-54)				#Get aliquot barcode from file name
+    		sed "s/^/$al\t/g" $f | tail -n+2 -q >> {output}
+    	done 
+    	
+    	Rscript R/snakemake/pizzly2db.R {output}
+    	2>{log}
+    	"""

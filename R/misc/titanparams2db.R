@@ -3,7 +3,7 @@
 library(tidyverse)
 library(DBI)
 library(odbc)
-con <- DBI::dbConnect(odbc::odbc(), "VerhaakDB")
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 paramfiles <- list.files('results/cnv/titanfinal/params', full.names = TRUE)
 
@@ -42,4 +42,4 @@ dat = data.table::rbindlist(datlist) %>%
          loglik,
          sdbw)
 
-dbWriteTable(con, Id(schema="analysis",table="titan_params"), dat, append = FALSE)
+dbWriteTable(con, Id(schema="variants",table="titan_params"), dat, append = TRUE)

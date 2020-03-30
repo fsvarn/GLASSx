@@ -611,14 +611,16 @@ rule gencode_coverage:
         "Computing coverage using flattened gencode GTF\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:"""
+    	set +o pipefail;
         module load samtools;
-        module load bedtools;
+        #module load bedtools;
         samtools view -q 10 -b {input} | 
-            bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d | 
+            bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d -sorted -g {config[bedtools_genome]} | 
             bedtools groupby -i stdin -g 1,2,3,4,5 -c 7 -o sum | 
-            bedtools groupby -i stdin -g 5 -c 4,6 -o sum,sum
-            1> {output}
-            2> {log}
+            sort -k5,5 |
+            bedtools groupby -i stdin -g 5 -c 4,6 -o sum,sum |
+            awk -F\"[+\\t]\" 'BEGIN {{OFS=\"\\t\"}}{{for(i=1;i<(NF-1);i++){{split($i,g,\".\"); print g[1],$(NF-1),$NF}}}}' \
+            > {output} 2> {log}
         """
 
 ## END ##

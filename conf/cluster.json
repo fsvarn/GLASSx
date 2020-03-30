@@ -319,7 +319,10 @@
     {
         "ppn" : 2,
         "mem" : 12,
-        "walltime" : "48:00:00"
+        "walltime" : "48:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
     },
     "cov2db" :
     {
@@ -1057,24 +1060,24 @@
     },
     "samtoolsview" :
     {
-        "ppn" : 8,
-        "walltime" : "24:00:00",
+        "ppn" : 4,
+        "walltime" : "8:00:00",
         "name" : "{rule}.{wildcards.aliquot_barcode}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
     },
     "samtoolsmerge" :
     {
-        "ppn" : 8,
-        "walltime" : "24:00:00",
+        "ppn" : 4,
+        "walltime" : "8:00:00",
         "name" : "{rule}.{wildcards.aliquot_barcode}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
     },
     "samtofastq" :
     {
-        "ppn" : 8,
-        "walltime" : "24:00:00",
+        "ppn" : 4,
+        "walltime" : "12:00:00",
         "name" : "{rule}.{wildcards.aliquot_barcode}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
@@ -1097,8 +1100,16 @@
     },
     "optitype" :
     {
-        "ppn" : 8,
-        "walltime" : "24:00:00",
+        "ppn" : 4,
+        "walltime" : "8:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "optitype_long" :
+    {
+        "ppn" : 4,
+        "walltime" : "8:00:00",
         "name" : "{rule}.{wildcards.aliquot_barcode}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
@@ -1164,6 +1175,38 @@
         "stdout" : "logs/drmaa/{rule}.{wildcards.case_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.case_barcode}.err"
     },
+    "hla_reformat" :
+    {
+        "ppn" : 2,
+        "walltime" : "8:00:00",
+        "name" : "{rule}.{wildcards.normal_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.normal_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.normal_barcode}.err"
+    },
+    "lohhla_solutions" :
+    {
+        "ppn" : 2,
+        "walltime" : "8:00:00",
+        "name" : "{rule}.{wildcards.pair_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.err"
+    },
+    "lohhla_run" :
+    {
+        "ppn" : 4,
+        "walltime" : "72:00:00",
+        "name" : "{rule}.{wildcards.pair_barcode}.{wildcards.minCoverageFilter}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.{wildcards.minCoverageFilter}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.{wildcards.minCoverageFilter}.err"
+    },
+    "lohhla_clean" :
+    {
+        "ppn" : 2,
+        "walltime" : "24:00:00",
+        "name" : "{rule}.{wildcards.pair_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.pair_barcode}.err"
+    },
     "fastp" :
     {
         "ppn" : 1,
@@ -1208,6 +1251,14 @@
     {
         "ppn" : 2,
         "walltime" : "8:00:00",
+        "name" : "{rule}",
+        "stdout" : "logs/drmaa/{rule}.out",
+        "stderr" : "logs/drmaa/{rule}.err"
+    },    
+    "mergefusions" :
+    {
+        "ppn" : 1,
+        "walltime" : "4:00:00",
         "name" : "{rule}",
         "stdout" : "logs/drmaa/{rule}.out",
         "stderr" : "logs/drmaa/{rule}.err"

@@ -335,7 +335,7 @@ rule seg2db:
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Plot modeled segments
-## Use a guassian-kernel binary-segmentation algorithm to group contiguouis copy ratios into segments
+## Use a gaussian-kernel binary-segmentation algorithm to group contiguouis copy ratios into segments
 ## See: https://gatkforums.broadinstitute.org/dsde/discussion/11683/
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 

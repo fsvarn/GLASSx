@@ -14,10 +14,11 @@ rule preparetitan:
     message:
         "Prepare TitanCNA\n"
         "Pair ID: {wildcards.pair_barcode}"
-    shell:"""
+    shell:
+    	"""
         cat {input.hets} | awk '/^[^@]/ {{ print $1,$2,$5,$3,$6,$4 }}' | tr ' ' '\\t' > {output.hets}
         cat {input.seg} | awk -F\\t 'BEGIN{{print"chr\\tstart\\tend\\tlog2_TNratio_corrected"}} /^[^@C]/ {{ print $0 }}' > {output.seg}
-    """
+    	"""
 
 rule titan:
     input:
@@ -49,29 +50,30 @@ rule titan:
         "Pair ID: {wildcards.pair_barcode}\n"
         "Cluster: {wildcards.cluster}\n"
         "Ploidy: {wildcards.ploidy}"
-    shell:"""
-        set +u
-        source activate R341
+    shell:
+    	"""
+    	set +u
+        source activate r_3.4.1
         set -u
-        Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
-            --genomeBuild hg19 \
-            --id {wildcards.pair_barcode} \
-            --hetFile {input.hets} \
-            --cnFile {input.seg} \
-            --numClusters {wildcards.cluster} \
-            --numCores {threads} \
-            --normal_0 0.5 \
-            --ploidy_0 {wildcards.ploidy} \
-            --alphaK {params.alphaK} \
-            --alphaKHigh {params.alphaKHigh} \
-            --minDepth 5 \
-            --maxDepth 50000 \
-            --gender {params.gender} \
-            --estimatePloidy TRUE \
-            --outDir {params.outdir} \
-            --libdir /projects/barthf/opt/TitanCNA \
-            > {log} 2>&1
-    """
+    	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
+			--genomeBuild hg19 \
+			--id {wildcards.pair_barcode} \
+			--hetFile {input.hets} \
+			--cnFile {input.seg} \
+			--numClusters {wildcards.cluster} \
+			--numCores {threads} \
+			--normal_0 0.5 \
+			--ploidy_0 {wildcards.ploidy} \
+			--alphaK {params.alphaK} \
+			--alphaKHigh {params.alphaKHigh} \
+			--minDepth 5 \
+			--maxDepth 50000 \
+			--gender {params.gender} \
+			--estimatePloidy TRUE \
+			--outDir {params.outdir} \
+			--libdir /projects/barthf/opt/TitanCNA 
+			> {log} 2>&1
+    	"""
 
 rule selecttitan:
     input:
@@ -90,17 +92,18 @@ rule selecttitan:
     message:
         "Select optimal TitanCNA cluster and ploidy\n"
         "Pair ID: {wildcards.pair_barcode}"
-    shell:"""
-        set +u
-        source activate R341
+    shell:
+    	"""
+    	set +u
+        source activate r_3.4.1
         set -u
-        Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
-            --ploidyRun2=results/cnv/titan/{wildcards.pair_barcode}/ploidy2 \
-            --ploidyRun3=results/cnv/titan/{wildcards.pair_barcode}/ploidy3 \
-            --threshold=0.15 \
-            --outFile {output.txt} \
-            > {log} 2>&1
-    """
+    	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
+			--ploidyRun2=results/cnv/titan/{wildcards.pair_barcode}/ploidy2 \
+			--ploidyRun3=results/cnv/titan/{wildcards.pair_barcode}/ploidy3 \
+			--threshold=0.15 \
+			--outFile {output.txt} 
+			> {log} 2>&1
+    	"""
 
 
 rule finaltitan:
@@ -120,12 +123,13 @@ rule finaltitan:
     message:
         "Copy selected (final) TitanCNA results\n"
         "Pair ID: {wildcards.pair_barcode}"
-    shell:"""
-        TITANDIR=$(cat {input} | awk -F'\\t' '{{print $11}}' | sed -n 2p)
-        cp "${{TITANDIR}}.segs.txt" {output.segs}
-        cp "${{TITANDIR}}.seg" {output.igv}
-        cp "${{TITANDIR}}.params.txt" {output.params}
-        /opt/software/helix/ImageMagick/7.0.7-26/bin/montage $TITANDIR/*_CNA.pdf $TITANDIR/*_LOH.pdf $TITANDIR/*_CF.pdf -tile 1x3 -geometry +0+0 {output.pdf}
-    """
+    shell:
+    	"""
+		TITANDIR=$(cat {input} | awk -F'\\t' '{{print $11}}' | sed -n 2p)
+		cp "${{TITANDIR}}.segs.txt" {output.segs}
+		cp "${{TITANDIR}}.seg" {output.igv}
+		cp "${{TITANDIR}}.params.txt" {output.params}
+		/opt/software/helix/ImageMagick/7.0.7-26/bin/montage $TITANDIR/*_CNA.pdf $TITANDIR/*_LOH.pdf $TITANDIR/*_CF.pdf -tile 1x3 -geometry +0+0 {output.pdf}
+    	"""
 
 ## END ##
