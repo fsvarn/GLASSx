@@ -47,7 +47,7 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 #DNA modules
 #include: "snakemake/download.smk"
-include: "snakemake/align.smk"
+#include: "snakemake/align.smk"
 #include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
@@ -59,7 +59,7 @@ include: "snakemake/align.smk"
 #include: "snakemake/manta.smk"
 #include: "snakemake/cnv.smk"
 #include: "snakemake/sequenza.smk"
-include: "snakemake/optitype.smk"
+#include: "snakemake/optitype.smk"
 #include: "snakemake/pvacseq.smk"
 #include: "snakemake/lohhla.smk"
 #include: "snakemake/cnv-post.smk"
@@ -69,6 +69,7 @@ include: "snakemake/optitype.smk"
 #RNA modules
 #include: "snakemake/kallisto.smk"
 #include: "snakemake/mixcr.smk"
+include: "snakemake/prada.smk"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Upload coverage to database
@@ -289,6 +290,14 @@ rule quant_tpm:
        "results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt",
        "results/kallisto/pizzly/final/fusions_all_samples.tsv"
        
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run PRADA for fusions and EGFRvIII variants
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
+rule prada:
+    input:
+        expand("results/prada/{aliquot_barcode}/fusion/prada.fus.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
+        expand("results/prada/{aliquot_barcode}/guess-if/{gene}/{gene}.GUESS-IF.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R'), gene=['EGFR'])
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Run MiXCR

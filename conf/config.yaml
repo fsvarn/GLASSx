@@ -147,6 +147,10 @@ kallisto_ref:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sa
 ## Kallisto mapping
 ensembl_transcript_mapping: "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcripts_to_genes.txt"
 
+## PRADA directory
+prada_dir:      "/projects/varnf/SofWar/pyPRADA_1.2"
+prada_conf:      "/projects/varnf/SofWar/pyPRADA_1.2/conf.txt"
+
 seconds_between_progress_updates: 900
 
 ## JAVA options

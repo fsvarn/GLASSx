@@ -1271,5 +1271,30 @@
         "name" : "{rule}.{wildcards.xcr}",
         "stdout" : "logs/drmaa/{rule}.{wildcards.xcr}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.xcr}.err"
+    },
+    "prada_preprocess" :
+    {
+        "ppn" : 12,
+        "walltime" : "72:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "prada_fusion" :
+    {
+        "ppn" : 12,
+        "walltime" : "72:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "prada_guessif" :
+    {
+        "ppn" : 12,
+        "walltime" : "72:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.err"
     }
+    
 }

@@ -64,3 +64,42 @@ for(i in 1:length(cells))
 }
 
 
+###################################################
+# Step 2: Repeat analysis with purity
+##################################################
+
+q <- 
+"
+SELECT ds.*,es.stromal_score, es.immune_score, es.estimate_score, es.purity
+FROM analysis.drivers_by_aliquot ds
+JOIN analysis.analyte_sets an ON an.dna_barcode = ds.aliquot_barcode
+JOIN analysis.estimate es ON es.aliquot_barcode = an.rna_barcode
+ORDER BY ds.aliquot_barcode
+"
+
+dat <- dbGetQuery(con,q)
+
+# Create driver mutation variables:
+dat[,"nf1_status"] <- as.numeric(grepl("NF1", dat[,"snv_driver"]))
+dat[,"pten_status"] <- as.numeric(grepl("PTEN", dat[,"snv_driver"]))
+dat[,"egfr_status"] <- as.numeric(grepl("EGFR", dat[,"cnv_driver"]))
+
+# Set idh_codel_subtype variable to factor so that IDHwt is the reference in the model
+dat[,"idh_codel_subtype"] <- factor(dat[,"idh_codel_subtype"], levels = c("IDHwt","IDHmut-noncodel","IDHmut-codel"))
+
+# Run model on purity
+lmm <- lmer(purity ~  + idh_codel_subtype + nf1_status + pten_status + egfr_status + (1|case_barcode), data = dat)
+eff <- summary(lmm)[["coefficients"]][c(2,4:6),3]
+p.val <- Anova(lmm)[["Pr(>Chisq)"]]
+
+names(p.val) <- c("idh_codel_subtype","nf1_status","pten_status","egfr_status")
+
+# eff
+# idh_codel_subtypeIDHmut-noncodel                       nf1_status 
+#                         6.317484                        -1.645499 
+#                      pten_status                      egfr_status 
+#                        -1.276889                         3.536391 
+#  
+# p.val                      
+# idh_codel_subtype        nf1_status       pten_status       egfr_status 
+#      4.543869e-11      9.986699e-02      2.016416e-01      4.056333e-04

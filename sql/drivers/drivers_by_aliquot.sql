@@ -2,7 +2,7 @@ WITH
 partitioned_aliquots AS
 (
 	SELECT bl.aliquot_barcode, sa.case_barcode, cs.idh_codel_subtype,
-	row_number() OVER (PARTITION BY \"substring\"(bl.aliquot_barcode, 1, 20) ORDER BY (\"substring\"(bl.aliquot_barcode, 21, 3)) DESC) AS priority
+	row_number() OVER (PARTITION BY "substring"(bl.aliquot_barcode, 1, 20) ORDER BY ("substring"(bl.aliquot_barcode, 21, 3)) DESC) AS priority
 	FROM biospecimen.aliquots al
 	JOIN analysis.blocklist bl ON bl.aliquot_barcode = al.aliquot_barcode
 	JOIN biospecimen.samples sa ON sa.sample_barcode = al.sample_barcode
@@ -65,6 +65,7 @@ variants_by_case_and_gene AS
 	sg.protein_change,
 	gtc.ssm2_pass_call,
 	gtc.ad_alt,
+	gtc.pyclone_ccf,
 	lag(gtc.ad_alt > 0) OVER w = (gtc.ad_alt > 0) AS is_same_variant,
 	row_number() OVER w AS priority
 	FROM variants.passgeno gtc
@@ -98,6 +99,11 @@ variants_by_case AS
 		WHEN vg.case_call > 0 AND vg.ad_alt > 0 THEN ((vg.gene_symbol::text || ' '::text) || vg.protein_change::text) || ', '::text
 		ELSE ''::text
 	END, ''::text), ', '::text) AS driver,
+	btrim(string_agg(
+	CASE
+		WHEN vg.case_call > 0 AND vg.ad_alt > 0 THEN (COALESCE(vg.pyclone_ccf::text, 'NA') || ', '::text)
+		ELSE ''::text
+	END, ''::text), ', '::text) AS driver_ccf,	
 	count(DISTINCT vg.gene_symbol) AS driver_count
 	FROM variants_case_select vg
 	LEFT JOIN clinical.subtypes cs ON cs.case_barcode = vg.case_barcode
@@ -111,6 +117,7 @@ driver_status AS
 	variants_by_case.aliquot_barcode,
 	variants_by_case.idh_codel_subtype,
 	variants_by_case.driver,
+	variants_by_case.driver_ccf,
 	variants_by_case.driver_count
 	FROM variants_by_case
 	),
@@ -127,7 +134,11 @@ driver_stability AS
 	CASE
 	WHEN ds.driver <> ''::text THEN ds.driver
 	ELSE NULL::text
-	END AS snv_driver
+	END AS snv_driver,
+	CASE
+	WHEN ds.driver_ccf <> ''::text THEN ds.driver_ccf
+	ELSE NULL::text
+	END AS snv_driver_ccf
 	FROM driver_status ds
     RIGHT JOIN selected_aliquots sa ON ds.aliquot_barcode = sa.aliquot_barcode
 ),
@@ -210,7 +221,8 @@ cnv_by_aliquot_gene AS
 	END AS cnv_state,
 	round((c1.wcr - ss1.hldel_fwmean) / ss1.hldel_fwsd, 6) AS hldel_zs,
 	round((c1.wcr - ss1.hlamp_fwmean) / ss1.hlamp_fwsd, 6) AS hlamp_zs,
-	c1.hlvl_call AS cn
+	c1.hlvl_call AS cn,
+	c1.cellular_prevalence
 	FROM selected_cnv_genes_samples sgs
 	LEFT JOIN analysis.gatk_cnv_by_gene c1 ON c1.aliquot_barcode = sgs.aliquot_barcode AND c1.gene_symbol::text = sgs.gene_symbol::text
 	LEFT JOIN seg_stats_optimized ss1 ON ss1.aliquot_barcode = sgs.aliquot_barcode
@@ -222,7 +234,8 @@ cnv_by_aliquot AS
 	sa.aliquot_barcode,
 	sa.idh_codel_subtype,
 	count(DISTINCT cpg.gene_symbol) AS cnv_driver_count,
-	string_agg(cpg.gene_symbol::text || ' '::text || cpg.effect, ', '::text) AS cnv_driver
+	string_agg(cpg.gene_symbol::text || ' '::text || cpg.effect, ', '::text) AS cnv_driver,
+	string_agg(COALESCE(cpg.cellular_prevalence::text, 'NA'),', '::text) AS cnv_driver_ccf
 	FROM cnv_by_aliquot_gene cpg
 	RIGHT JOIN selected_aliquots sa ON sa.aliquot_barcode = cpg.aliquot_barcode
 	LEFT JOIN ref.gistic_genes gg ON gg.gene_symbol = cpg.gene_symbol::text AND gg.idh_codel_subtype = sa.idh_codel_subtype::text
@@ -233,7 +246,9 @@ ds.aliquot_barcode,
 ds.idh_codel_subtype,
 ds.snv_driver_count,
 ds.snv_driver,
+ds.snv_driver_ccf,
 ca.cnv_driver_count,
-ca.cnv_driver
+ca.cnv_driver,
+ca.cnv_driver_ccf
 FROM driver_stability ds
 JOIN cnv_by_aliquot ca ON ca.aliquot_barcode = ds.aliquot_barcode;
