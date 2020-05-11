@@ -1,5 +1,5 @@
 ###################################################
-# How does the acquisition/loss of copy number variants associate with purity changes
+# How does the acquisition/loss of copy number variants associate with immune changes
 # Updated: 2020.04.20
 # Author: Frederick Varn
 ##################################################
@@ -46,7 +46,7 @@ dc.idh_codel_subtype, dc.cnv_driver_shared, dc.cnv_driver_change_a, dc.cnv_drive
 ds.snv_driver_shared, ds.snv_driver_change_a, ds.snv_driver_change_b, 
 ts1.subtype AS subtype_a, ts2.subtype AS subtype_b,
 eg1.egfrviii_status AS egfrviii_a, eg2.egfrviii_status AS egfrviii_b,
-es1.purity AS purity_a, es2.purity AS purity_b
+es1.immune_score AS immune_a, es2.immune_score AS immune_b
 FROM analysis.platinum_set ps
 JOIN analysis.driver_status_cnv dc ON dc.tumor_barcode_a = ps.dna_barcode_a AND dc.tumor_barcode_b = ps.dna_barcode_b
 JOIN analysis.driver_status_snv ds ON ds.tumor_barcode_a = ps.dna_barcode_a AND ds.tumor_barcode_b = ps.dna_barcode_b
@@ -101,16 +101,16 @@ for(i in 1:length(cnv_genes))
 {
 	if(nrow(dat[grep(cnv_genes[i],dat[,"cnv_driver_change_a"]),]) > 0)
 	{
-		g1 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_a"]),"purity_a"]
-		g2 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_a"]),"purity_b"]
+		g1 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_a"]),"immune_a"]
+		g2 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_a"]),"immune_b"]
 		gain_p.val[i] <- wilcox.test(g1,g2,paired=TRUE)$p.value
 		gain_eff[i] <- median(g2 - g1)
 	}
 
 	if(nrow(dat[grep(cnv_genes[i],dat[,"cnv_driver_change_b"]),]) > 0)
 	{
-		g1 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_b"]),"purity_a"]
-		g2 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_b"]),"purity_b"]
+		g1 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_b"]),"immune_a"]
+		g2 <- dat[grep(cnv_genes[i],dat[,"cnv_driver_change_b"]),"immune_b"]
 		loss_p.val[i] <- wilcox.test(g1,g2,paired=TRUE)$p.value
 		loss_eff[i] <- median(g2 - g1)
 	}
@@ -138,16 +138,16 @@ for(i in 1:length(snv_genes))
 {
 	if(nrow(dat[grep(snv_genes[i],dat[,"snv_driver_change_a"]),]) > 0)
 	{
-		g1 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_a"]),"purity_a"]
-		g2 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_a"]),"purity_b"]
+		g1 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_a"]),"immune_a"]
+		g2 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_a"]),"immune_b"]
 		gain_p.val[i] <- wilcox.test(g1,g2,paired=TRUE)$p.value
 		gain_eff[i] <- median(g2 - g1)
 	}
 
 	if(nrow(dat[grep(snv_genes[i],dat[,"snv_driver_change_b"]),]) > 0)
 	{
-		g1 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_b"]),"purity_a"]
-		g2 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_b"]),"purity_b"] 
+		g1 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_b"]),"immune_a"]
+		g2 <- dat[grep(snv_genes[i],dat[,"snv_driver_change_b"]),"immune_b"] 
 		loss_p.val[i] <- wilcox.test(g1,g2,paired=TRUE)$p.value
 		loss_eff[i] <- median(g2 - g1)
 	}
@@ -155,23 +155,23 @@ for(i in 1:length(snv_genes))
 
 snv_results <- data.frame(snv_genes, gain_p.val, gain_eff, loss_p.val, loss_eff)
 
-# Only two significant results: Gains of CDKN2A associate with increased purity, losses of EGFR associate with decreased purity
+# Only two significant results: Gains of CDKN2A associate with increased immune, losses of EGFR associate with decreased immune
 # Plot them:
 
 sub_dat <- dat[grep("EGFR",dat[,"cnv_driver_change_b"]),]
 case_barcode <- rep(sub_dat[,"case_barcode"],2)
-purity <- c(sub_dat[,"purity_a"], sub_dat[,"purity_b"])
+immune <- c(sub_dat[,"immune_a"], sub_dat[,"immune_b"])
 subtype <- c(sub_dat[,"subtype_a"],sub_dat[,"subtype_b"])
 timepoint <- c(rep("Initial",nrow(sub_dat)),rep("Recurrent",nrow(sub_dat)))
-egfr_dat <- data.frame(case_barcode, purity, subtype, timepoint)
+egfr_dat <- data.frame(case_barcode, immune, subtype, timepoint)
 pval1 <- round(cnv_results[2,4],2)
 
 sub_dat <- dat[grep("CDKN2A",dat[,"cnv_driver_change_a"]),]
 case_barcode <- rep(sub_dat[,"case_barcode"],2)
-purity <- c(sub_dat[,"purity_a"], sub_dat[,"purity_b"])
+immune <- c(sub_dat[,"immune_a"], sub_dat[,"immune_b"])
 subtype <- c(sub_dat[,"subtype_a"],sub_dat[,"subtype_b"])
 timepoint <- c(rep("Initial",nrow(sub_dat)),rep("Recurrent",nrow(sub_dat)))
-cdkn2a_dat <- data.frame(case_barcode, purity, subtype, timepoint)
+cdkn2a_dat <- data.frame(case_barcode, immune, subtype, timepoint)
 pval2 <- round(cnv_results[1,2],2)
 
 egfr_dat[,"subtype"] <- factor(egfr_dat[,"subtype"],levels=c("Proneural","Classical","Mesenchymal"))
@@ -182,37 +182,35 @@ cdkn2a_dat[,"subtype"] <- factor(cdkn2a_dat[,"subtype"],levels=c("Proneural","Cl
 ##################################################
 
 pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/ckn2a_egfr_gain_loss_ladder.pdf",width=3,height=2)
-egfr <- ggplot(egfr_dat ,aes(x = timepoint, y = purity)) +
+egfr <- ggplot(egfr_dat ,aes(x = timepoint, y = immune)) +
 geom_boxplot(outlier.size=0,colour="black") +
 geom_line(size=0.8,alpha=0.4,aes(group=case_barcode)) +
 geom_point(size=1,aes(colour=subtype)) +
 scale_colour_manual(values=c("#00458a","#008a22","#8a0000")) +
-labs(title="EGFR amplification loss", y = "Purity") +
-annotate("text", x=1.1, y = 0, 
+labs(title="EGFR amplification loss", y = "Immune score") +
+annotate("text", x=1.1, y = min(egfr_dat[,"immune"]) + 0.05 * (max(egfr_dat[,"immune"] - min(egfr_dat[,"immune"]))), 
 	label=deparse((bquote(italic("P") ~" = " ~ .(pval1)))), parse=TRUE, size=2.5) +
 theme_bw() +
 theme(axis.text.x= element_text(size=7,angle=45,hjust=1),axis.text.y= element_text(size=7),
 axis.title.x = element_blank(),axis.title.y = element_text(size=7),
 plot.title = element_text(size=7,hjust=0.5),
 panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
-legend.position="none") +
-coord_cartesian(ylim=c(0,1))
+legend.position="none")
 
-cdkn2a <- ggplot(cdkn2a_dat ,aes(x = timepoint, y = purity)) +
+cdkn2a <- ggplot(cdkn2a_dat ,aes(x = timepoint, y = immune)) +
 geom_boxplot(outlier.size=0,colour="black") +
 geom_line(size=0.8,alpha=0.4,aes(group=case_barcode)) +
 geom_point(size=1,aes(colour=subtype)) +
 scale_colour_manual(values=c("#00458a","#008a22","#8a0000")) +
-labs(title="CDKN2A deletion gain", y = "Purity") +
-annotate("text", x=1.1, y = 0, 
+labs(title="CDKN2A deletion gain", y = "Immune score") +
+annotate("text", x=1.1,  y = min(cdkn2a_dat[,"immune"]) + 0.05 * (max(cdkn2a_dat[,"immune"] - min(cdkn2a_dat[,"immune"]))), 
 	label=deparse((bquote(italic("P") ~" = " ~ .(pval2)))), parse=TRUE, size=2.5) +
 theme_bw() +
 theme(axis.text.x= element_text(size=7,angle=45,hjust=1),axis.text.y= element_text(size=7),
 axis.title.x = element_blank(),axis.title.y = element_text(size=7),
 plot.title = element_text(size=7,hjust=0.5),
 panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
-legend.position="none") +
-coord_cartesian(ylim=c(0,1))
+legend.position="none") 
 
 grid.arrange(egfr,cdkn2a,nrow=1)
 dev.off()
@@ -225,7 +223,7 @@ case_barcode <- rep(dat[,"case_barcode"],2)
 aliquot_barcode <- c(dat[,"rna_barcode_a"], dat[,"rna_barcode_b"])
 idh_codel_subtype <- rep(dat[,"idh_codel_subtype"],2)
 transcriptional_subtype <- c(dat[,"subtype_a"], dat[,"subtype_b"])
-purity <- c(dat[,"purity_a"], dat[,"purity_b"])
+immune <- c(dat[,"immune_a"], dat[,"immune_b"])
 timepoint <- c(rep("Initial",nrow(dat)), rep("Recurrent",nrow(dat)))
 egfr_status <- rep("", length(case_barcode))
 egfrviii <- as.logical(as.numeric(c(dat[,"egfrviii_a"], dat[,"egfrviii_b"])))
@@ -319,7 +317,7 @@ egfr_status[which(egfrviii)] <- "EGFRvIII"
 
 
 
-plot_egfr_class <- data.frame(case_barcode, aliquot_barcode, idh_codel_subtype, transcriptional_subtype, purity, timepoint, egfr_status)
+plot_egfr_class <- data.frame(case_barcode, aliquot_barcode, idh_codel_subtype, transcriptional_subtype, immune, timepoint, egfr_status)
 
 # Get p-values comparing each alteration to wildtype:
 #--------------------------------------------------
@@ -328,23 +326,23 @@ uni_stat <- unique(egfr_status)
 egfr_ini_pval <- egfr_rec_pval <- rep(0, length(uni_stat))
 for(i in 1:length(uni_stat))
 {
-	g1 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Initial" & plot_egfr_class[,"egfr_status"] == uni_stat[i]), "purity"]
-	g2 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Initial" & plot_egfr_class[,"egfr_status"] == "WT"), "purity"]
+	g1 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Initial" & plot_egfr_class[,"egfr_status"] == uni_stat[i]), "immune"]
+	g2 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Initial" & plot_egfr_class[,"egfr_status"] == "WT"), "immune"]
 	egfr_ini_pval[i] <- wilcox.test(g1, g2)$p.value
 
-	g1 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Recurrent" & plot_egfr_class[,"egfr_status"] == uni_stat[i]), "purity"]
-	g2 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Recurrent" & plot_egfr_class[,"egfr_status"] == "WT"), "purity"]
+	g1 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Recurrent" & plot_egfr_class[,"egfr_status"] == uni_stat[i]), "immune"]
+	g2 <- plot_egfr_class[which(plot_egfr_class[,"timepoint"] == "Recurrent" & plot_egfr_class[,"egfr_status"] == "WT"), "immune"]
 	egfr_rec_pval[i] <- wilcox.test(g1, g2)$p.value
 }
 egfr_res <- data.frame(uni_stat, egfr_ini_pval, egfr_rec_pval)
 
 pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/egfr_status_ini_rec_box.pdf",width=4,height=2)
-ggplot(plot_egfr_class ,aes(x = egfr_status, y = purity)) +
+ggplot(plot_egfr_class ,aes(x = egfr_status, y = immune)) +
 geom_boxplot(outlier.size=0,colour="black") +
 #geom_line(size=0.8,alpha=0.4,aes(group=case_barcode)) +
 geom_quasirandom(size=1,aes(colour=transcriptional_subtype)) +
 scale_colour_manual(values=c("#008a22","#8a0000","#00458a")) +
-labs(title="EGFR status", y = "Purity") +
+labs(title="EGFR status", y = "Immune score") +
 # annotate("text", x=1.1, y = 0, 
 # 	label=deparse((bquote(italic("P") ~" = " ~ .(pval1)))), parse=TRUE, size=2.5) +
 facet_grid(.~timepoint) +
@@ -355,12 +353,11 @@ plot.title = element_text(size=7,hjust=0.5),
 panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
 strip.text = element_text(size=7),
 strip.background = element_blank(),
-legend.position="none") +
-coord_cartesian(ylim=c(0,1))
+legend.position="none")
 dev.off()
 
 ###################################################
-# Step 4: Examine how each alteration changes purity in a given patient
+# Step 4: Examine how each alteration changes immune in a given patient
 ##################################################
 
 ini_egfr_class <- plot_egfr_class[which(plot_egfr_class[,"timepoint"]=="Initial"),]
@@ -371,21 +368,21 @@ change_egfr_class <- data.frame(ini_egfr_class[,"case_barcode"],
 								rec_egfr_class[,"aliquot_barcode"],
 								ini_egfr_class[,"transcriptional_subtype"],
 								rec_egfr_class[,"transcriptional_subtype"],
-								ini_egfr_class[,"purity"],
-								rec_egfr_class[,"purity"],
+								ini_egfr_class[,"immune"],
+								rec_egfr_class[,"immune"],
 								ini_egfr_class[,"egfr_status"],
 								rec_egfr_class[,"egfr_status"])
 colnames(change_egfr_class) <- c("case_barcode","tumor_barcode_a","tumor_barcode_b",
 								 "transcriptional_subtype_a","transcriptional_subtype_b",
-								 "purity_a","purity_b","egfr_status_a","egfr_status_b")
+								 "immune_a","immune_b","egfr_status_a","egfr_status_b")
 
 # Testing changes in EGFRvIII status
 
-g1 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] == "EGFRvIII" & change_egfr_class[,"egfr_status_b"] != "EGFRvIII"),"purity_a"]
-g2 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] == "EGFRvIII" & change_egfr_class[,"egfr_status_b"] != "EGFRvIII"),"purity_b"]
-wilcox.test(g1,g2,paired=TRUE)		#0.375
+g1 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] == "EGFRvIII" & change_egfr_class[,"egfr_status_b"] != "EGFRvIII"),"immune_a"]
+g2 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] == "EGFRvIII" & change_egfr_class[,"egfr_status_b"] != "EGFRvIII"),"immune_b"]
+wilcox.test(g1,g2,paired=TRUE)		#0.875
 
 
-g1 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] != "EGFRvIII" & change_egfr_class[,"egfr_status_b"] == "EGFRvIII"),"purity_a"]
-g2 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] != "EGFRvIII" & change_egfr_class[,"egfr_status_b"] == "EGFRvIII"),"purity_b"]
+g1 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] != "EGFRvIII" & change_egfr_class[,"egfr_status_b"] == "EGFRvIII"),"immune_a"]
+g2 <- change_egfr_class[which(change_egfr_class[,"egfr_status_a"] != "EGFRvIII" & change_egfr_class[,"egfr_status_b"] == "EGFRvIII"),"immune_b"]
 wilcox.test(g1,g2,paired=TRUE)		#1.00

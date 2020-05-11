@@ -1288,6 +1288,14 @@
         "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
         "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
     },
+    "prada_taf" :
+    {
+        "ppn" : 2,
+        "walltime" : "2:00:00",
+        "name" : "{rule}.{wildcards.aliquot_barcode}",
+        "stdout" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.out",
+        "stderr" : "logs/drmaa/{rule}.{wildcards.aliquot_barcode}.err"
+    },
     "prada_guessif" :
     {
         "ppn" : 12,

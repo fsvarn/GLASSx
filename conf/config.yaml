@@ -149,7 +149,8 @@ ensembl_transcript_mapping: "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sa
 
 ## PRADA directory
 prada_dir:      "/projects/varnf/SofWar/pyPRADA_1.2"
-prada_conf:      "/projects/varnf/SofWar/pyPRADA_1.2/conf.txt"
+prada_conf:     "/projects/varnf/SofWar/pyPRADA_1.2/conf.txt"
+prada_gtf:      "/projects/varnf/SofWar/pyPRADA_1.2/ref/PRADA-reference-hg19/Homo_sapiens.GRCh37.64.gtf"
 
 seconds_between_progress_updates: 900
 

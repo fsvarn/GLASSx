@@ -51,6 +51,7 @@ JOIN agg ts2 ON ts2.aliquot_barcode = ps.rna_barcode_b
 JOIN analysis.estimate es1 ON es1.aliquot_barcode = ps.rna_barcode_a
 JOIN analysis.estimate es2 ON es2.aliquot_barcode = ps.rna_barcode_b
 JOIN clinical.subtypes cs ON cs.case_barcode = ps.case_barcode
+--WHERE idh_codel_subtype = 'IDHwt'
 "
 
 dat <- dbGetQuery(con,q)
@@ -92,12 +93,12 @@ rec_pur_pval <- formatC(rec_pur_pval, format = "e", digits = 0)
 # Initial chromosomal instability
 g1 <- dat[which(dat[,"subtype_a"]=="Mesenchymal"),"prop_aneuploidy_a"]
 g2 <- dat[which(dat[,"subtype_a"]!="Mesenchymal"),"prop_aneuploidy_a"]
-wilcox.test(g1,g2)			#9e-9
+wilcox.test(g1,g2)		
 
 # Recurrent chromosomal instability
 g1 <- dat[which(dat[,"subtype_b"]=="Mesenchymal"),"prop_aneuploidy_b"]
 g2 <- dat[which(dat[,"subtype_b"]!="Mesenchymal"),"prop_aneuploidy_b"]
-wilcox.test(g1,g2)			#2e-8
+wilcox.test(g1,g2)			
 
 # Initial chromosomal instability ANOVA
 init_an_pval <- round(summary(aov(dat[,"prop_aneuploidy_a"]~dat[,"subtype_a"]))[[1]][["Pr(>F)"]][1],2)
@@ -162,7 +163,7 @@ geom_boxplot(outlier.shape=NA,colour="black") +
 geom_jitter(size=1,aes(colour = transcriptional_subtype)) +
 scale_colour_manual(values=c("#00458a","#008a22","#8a0000")) +
 facet_grid(. ~ timepoint) +
-labs(y = "Purity") +
+labs(y = "Proportion of genome with CNV") +
 geom_text(data=annotation_text,label=p_val, size=2.5, parse=TRUE) +
 theme_bw() +
 theme(axis.text.x= element_text(size=7,angle=45,hjust=1),axis.text.y= element_text(size=7),

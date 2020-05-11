@@ -65,13 +65,13 @@ rule prada_preprocess:
         R1 = "results/prada/{aliquot_barcode}/{aliquot_barcode}.end1.fastq",
         R2 = "results/prada/{aliquot_barcode}/{aliquot_barcode}.end2.fastq"
     output:
-        bam = temp("results/prada/{aliquot_barcode}/preprocessing/{aliquot_barcode}.withRG.GATKRecalibrated.flagged.bam"),
+        bam = "results/prada/{aliquot_barcode}/preprocessing/{aliquot_barcode}.withRG.GATKRecalibrated.flagged.bam",
         bai = "results/prada/{aliquot_barcode}/preprocessing/{aliquot_barcode}.withRG.GATKRecalibrated.flagged.bam.bai"
     params:
     	input_dir = "results/prada/{aliquot_barcode}/",
     	sample = "{aliquot_barcode}",
     	output_dir = "results/prada/{aliquot_barcode}/preprocessing/",
-    	shell = "results/prada/{aliquot_barcode}/preprocessing/script.sh"
+        shell = "results/prada/{aliquot_barcode}/preprocessing/script.sh"
     conda:
         "../envs/prada.yaml"
     log:
@@ -148,10 +148,41 @@ rule prada_fusion:
     	
     	2>{log}
     	"""
-		
+    	
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Run the GUESS-IF module of PRADA to call EGFRvIII variants:
+## Calculate transcript allele frequency from fusion data:
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+rule prada_taf:
+    input:
+    	fusion = "results/prada/{aliquot_barcode}/fusion/prada.fus.summary.txt",
+        bam = "results/prada/{aliquot_barcode}/preprocessing/{aliquot_barcode}.withRG.GATKRecalibrated.flagged.bam"
+    output:
+        "results/prada/{aliquot_barcode}/fusion/prada.fus.summary.taf.txt"
+    conda:
+        "../envs/prada.yaml"
+    log:
+        "logs/prada/prada_fusion/{aliquot_barcode}.log"
+    message:
+        "Calculating TAF \n"
+        "Sample: {wildcards.aliquot_barcode}"
+    shell:
+    	"""
+		set +o pipefail; 
+    	module load java/1.7.0
+
+		python taf.py \
+		--gtf {config[prada_conf]} \
+		--fusion {input.fusion}\
+		--bam {input.bam} \
+		--out {output}
+    	
+    	2>{log}
+    	"""
+				
+# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+# Run the GUESS-IF module of PRADA to call EGFRvIII variants:
+# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 	
 rule prada_guessif:
     input:

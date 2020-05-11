@@ -297,6 +297,7 @@ rule quant_tpm:
 rule prada:
     input:
         expand("results/prada/{aliquot_barcode}/fusion/prada.fus.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
+        expand("results/prada/{aliquot_barcode}/fusion/prada.fus.summary.taf.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
         expand("results/prada/{aliquot_barcode}/guess-if/{gene}/{gene}.GUESS-IF.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R'), gene=['EGFR'])
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
