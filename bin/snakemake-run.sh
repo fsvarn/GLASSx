@@ -7,6 +7,34 @@
 ## DRMAA
 #snakemake -p markduplicates/testT-A.realn.dedup.bam markduplicates/testT-B.realn.dedup.bam --jobs 100 --latency-wait 120 --max-jobs-per-second 8 --cluster-config cluster.json --jobname "{jobid}.{cluster.name}" --drmaa " -S /bin/bash -j {cluster.j} -M {cluster.M} -m {cluster.m} -l nodes={cluster.nodes}:ppn={cluster.ppn},walltime={cluster.walltime} -l mem={cluster.mem} -e {cluster.stderr} -o {cluster.stdout}"
 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## SLURM config
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
+## get dir where run_snakemake.sh is present
+## https://stackoverflow.com/a/246128/1243763
+## SMKDIR is being referenced in cluster profile under ~/.config/snakemake/
+## get dir where run_snakemake.sh is present
+## https://stackoverflow.com/a/246128/1243763
+## SMKDIR is being referenced in cluster profile under ~/.config/snakemake/
+SMKDIR="/projects/verhaak-lab/GLASS-III"
+
+cd "${SMKDIR}" && \
+export SMKDIR
+
+
+## snakemake config dir for jobscript, pre and post-job scripts
+SMK_CONF_DIR="${HOME}/.config/snakemake/sumner"
+
+if [[ ! -d "${SMK_CONF_DIR}" ]]; then
+	echo -e "ERROR: snakemake config directory is missing at ${SMK_CONF_DIR}\n" >&2
+fi
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## Run snakemake
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+
 CONFIGFILE="conf/config.yaml"
 CLUSTRCONF="conf/cluster.json"
 NUM_JOBS=800
@@ -119,8 +147,10 @@ elif [ ${DAG} == 1 ];
 then
 	snakemake --configfile "${CONFIGFILE}" --dag | dot -Tpng > dag.png
 else
-	mkdir -p "${WORKDIR}/logs/drmaa"
-	snakemake ${OPTS} --jobs ${NUM_JOBS} -k --use-conda --latency-wait 120 --max-jobs-per-second 2 --config workdir="${WORKDIR}" cluster_json="${CLUSTRCONF}" from_source="${FROMSOURCE}" cohort="${COHORT}" --restart-times 0 --cluster-config "${CLUSTRCONF}" --configfile "${CONFIGFILE}" --jobname "{jobid}.{cluster.name}" --drmaa " -S /bin/bash -j {cluster.j} -M {cluster.M} -m {cluster.m} -q {cluster.queu} -l nodes={cluster.nodes}:ppn={cluster.ppn},walltime={cluster.walltime} -l mem={cluster.mem}gb -e ${WORKDIR}/{cluster.stderr} -o ${WORKDIR}/{cluster.stdout}" $EXTRA_OPTS $TARGET
+	mkdir -p "${WORKDIR}/logs/slurm"
+	snakemake ${OPTS} --jobs ${NUM_JOBS} -k --use-conda --latency-wait 120 --max-jobs-per-second 2 --config workdir="${WORKDIR}" cluster_json="${CLUSTRCONF}" from_source="${FROMSOURCE}" cohort="${COHORT}" --restart-times 0 --cluster-config "${CLUSTRCONF}" --configfile "${CONFIGFILE}" --jobname "{jobid}.{cluster.job-name}" --profile glass $EXTRA_OPTS $TARGET
+	#snakemake ${OPTS} --jobs ${NUM_JOBS} -k --use-conda --latency-wait 120 --max-jobs-per-second 2 --config workdir="${WORKDIR}" cluster_json="${CLUSTRCONF}" from_source="${FROMSOURCE}" cohort="${COHORT}" --restart-times 0 --cluster-config "${CLUSTRCONF}" --configfile "${CONFIGFILE}" --job-name "{jobid}.{cluster.name}" --profile glass -S /bin/bash --mail-user "{cluster.mail-user}" --mail-type "{cluster.mail-type}" --qos "{cluster.qos}" --nodes "{cluster.nodes}" --cpus-per-task "{cluster.cpus-per-task}" --time "{cluster.time}" --mem "{cluster.mem}" --error "${WORKDIR}/{cluster.error}" --output "${WORKDIR}/{cluster.output}" $EXTRA_OPTS $TARGET
 fi
+
 
 ## END ##

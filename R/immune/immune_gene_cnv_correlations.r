@@ -48,9 +48,13 @@ mycor <- cor_pval <- matrix(NA,nrow=length(gene_symbol),ncol=length(subtypes))
 rownames(mycor) <- rownames(cor_pval) <- gene_symbol
 colnames(mycor) <- colnames(cor_pval) <- subtypes
 
-del_eff <- del_pval <- inc_eff <- inc_pval <- matrix(NA,nrow=length(gene_symbol),ncol=length(subtypes))
-rownames(del_eff) <- rownames(del_pval) <- rownames(inc_eff) <- rownames(inc_pval) <- gene_symbol
-colnames(del_eff) <- colnames(del_pval) <- colnames(inc_eff) <- colnames(inc_pval) <- subtypes
+mean_change <- sd_change <- matrix(NA,nrow=length(gene_symbol),ncol=length(subtypes))
+rownames(mean_change) <- rownames(sd_change) <- gene_symbol
+colnames(mean_change) <- colnames(sd_change) <- subtypes
+
+# del_eff <- del_pval <- inc_eff <- inc_pval <- matrix(NA,nrow=length(gene_symbol),ncol=length(subtypes))
+# rownames(del_eff) <- rownames(del_pval) <- rownames(inc_eff) <- rownames(inc_pval) <- gene_symbol
+# colnames(del_eff) <- colnames(del_pval) <- colnames(inc_eff) <- colnames(inc_pval) <- subtypes
 
 for(i in 1:length(gene_symbol))
 {
@@ -63,6 +67,9 @@ for(i in 1:length(gene_symbol))
 		mycor[i,j] <- cor(sub_dat[,"immune_dif"],sub_dat[,"delta_log2_copy_ratio"],method="s")
 		cor_pval[i,j] <- cor.test(sub_dat[,"immune_dif"],sub_dat[,"delta_log2_copy_ratio"],method="s")$p.value
 		
+		mean_change[i,j] <- mean(sub_dat[,"delta_log2_copy_ratio"])
+		sd_change[i,j] <- sd(sub_dat[,"delta_log2_copy_ratio"])
+
 # 		if(length(which(sub_dat[,"cnv_call"]==-1)) > 0 & length(which(sub_dat[,"cnv_call"] == 0)) > 0)
 # 		{		
 # 			del_eff[i,j] <- median(sub_dat[which(sub_dat[,"cnv_call"]==-1),"immune_dif"]) - median(sub_dat[which(sub_dat[,"cnv_call"]==0),"immune_dif"])
@@ -107,7 +114,7 @@ mycor[order(mycor[,2],decreasing=TRUE),]
 # Step 2: Plot the differences for IDHwt only (only tumor with significance)
 ##################################################
 
-# Create plotting data
+# Create position map 
 pos_map <- dat[,c("gene_symbol","chrom","pos")]
 pos_map <- aggregate(pos_map,by=list(pos_map[,"gene_symbol"]),function(x)x[1])
 pos_map[,"pos_start"] <- as.numeric(gsub("\\[","",sapply(strsplit(pos_map[,"pos"],","),function(x)x[1])))
@@ -119,6 +126,7 @@ pos_map <- pos_map[order(pos_map[,"chrom"],pos_map[,"pos_start"],pos_map[,"pos_e
 pos_map[which(duplicated(pos_map[,c("chrom","pos_start")])),"pos_start"] <- pos_map[which(duplicated(pos_map[,c("chrom","pos_start")])),"pos_start"] + 1
 pos_map[which(duplicated(pos_map[,c("chrom","pos_start")])),"pos_start"] <- pos_map[which(duplicated(pos_map[,c("chrom","pos_start")])),"pos_start"] + 1
 
+# Create plotting data for correlation barplot
 rho <- mycor[pos_map[,"gene_symbol"],2]
 pval <- cor_pval[,2]
 adj_pval <- cor_pval_adj[,2]
@@ -155,6 +163,66 @@ plot_cor[order(plot_cor[,"rho"], decreasing=TRUE),c("gene_symbol","chrom","pos",
 
 sig_results <- plot_cor[which(plot_cor[,"adj_pval"] < 0.1),]
 sig_results <- sig_results[order(sig_results[,"rho"]),c("gene_symbol","chrom","pos","rho","pval","adj_pval"),]
+sig_results[,"mean_change"] <- mean_change[sig_results[,"gene_symbol"],"IDHwt"]
 
-myoutf <- "/projects/varnf/GLASS-III/GLASS-III/data/res/cnv_gene_immune_sig_results.txt"
+myoutf <- "/projects/verhaak-lab/GLASS-III/data/res/cnv_gene_immune_sig_results.txt"
 write.table(sig_results, myoutf, sep="\t", quote=FALSE, col.names=TRUE, row.names=FALSE)
+
+
+##################################################
+# Step 3: Plot the mean change in copy number for IDHwt only (only tumor with significance)
+##################################################
+
+# Not a very useful plot: Most copy number changes averages are right around 0
+
+# Uses the position map in step 2
+avg <- 2^mean_change[pos_map[,"gene_symbol"],2]
+err <- sd_change[,2]
+lower <- avg - err
+upper <- avg + err
+plot_avg <- data.frame(pos_map, avg, err, lower, upper)
+plot_avg <- plot_avg[,-1]
+plot_avg <- plot_avg[-which(is.na(plot_avg[,"avg"])),]
+
+pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/immune_cnv_gene_pos_avg_line.pdf",width=2,height=5.5)
+ggplot(plot_avg, aes(x=pos_start)) +
+geom_line(stat="identity",aes(y=avg)) +
+geom_ribbon(aes(ymin=lower, ymax=upper), alpha=0.1) +
+facet_grid(chrom~., scales="free", space= "free") +
+scale_fill_manual(values=c("royalblue4","tomato3")) +
+theme_bw() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+axis.title=element_blank(),
+axis.ticks = element_blank(),
+axis.text.x=element_text(size=7),
+axis.text.y=element_blank(),
+strip.text = element_text(size=5, hjust=0.5),
+strip.background = element_blank(),
+panel.spacing = unit(0, "lines"),
+legend.position="none") +
+geom_hline(yintercept=0) +
+#coord_flip()
+coord_flip(ylim=c(0.5,1.5))
+dev.off()
+
+##################################################
+# Step 4: Specific examples
+##################################################
+
+idhwt_dat <- dat[which(dat[,"idh_codel_subtype"] == "IDHwt"),]
+
+#PDGFRA 
+sub_gene1 <- idhwt_dat[which(idhwt_dat[,"gene_symbol"] == "PDGFRA"),]
+g1 <- sub_gene1[which(sub_gene1[,"delta_log2_copy_ratio"] > 0), "immune_dif"]
+g2 <- sub_gene1[which(sub_gene1[,"delta_log2_copy_ratio"] < 0), "immune_dif"]
+wilcox.test(g1,g2)		#8e-5
+
+#Top chromosome 13 hit: SLITRK5
+sub_gene2 <- idhwt_dat[which(idhwt_dat[,"gene_symbol"] == "SLITRK5"),]
+g1 <- sub_gene2[which(sub_gene2[,"delta_log2_copy_ratio"] > 0), "immune_dif"]
+g2 <- sub_gene2[which(sub_gene2[,"delta_log2_copy_ratio"] < 0), "immune_dif"]
+wilcox.test(g1,g2)		#8e-3
+
+
+

@@ -1,18 +1,18 @@
-## Snakemake configuration
-## @Author Floris Barthel
+## Snakemake configuration v 5.17
+## @Author Frederick Varn and Floris Barthel
 
 ## Boolean indicating whether the starting point should be raw source files (eg. source BAM or FASTQ to be aligned) or aligned data (eg. realigned BAM files)
 from_source: 0
 
 ## Database settings
 db:
-  configfile: "/projects/varnf/GLASS-III/GLASS-III/.odbc.ini"
+  configfile: "/projects/verhaak-lab/GLASS-III/.odbc.ini"
   configsection: "GLASSv3"
 
 ## Data paths
 data:
-  source_path: "/projects/varnf/GLASS-III/GLASS-III/data"
-  realn_path: "/projects/varnf/GLASS-III/GLASS-III/results/align/bqsr"
+  source_path: "/projects/verhaak-lab/GLASS-III/data"
+  realn_path: "/projects/verhaak-lab/GLASS-III/results/align/bqsr"
 
 ## Full path to cluster settings
 cluster_json:     "conf/cluster.json"
@@ -153,6 +153,9 @@ prada_conf:     "/projects/varnf/SofWar/pyPRADA_1.2/conf.txt"
 prada_gtf:      "/projects/varnf/SofWar/pyPRADA_1.2/ref/PRADA-reference-hg19/Homo_sapiens.GRCh37.64.gtf"
 
 seconds_between_progress_updates: 900
+
+## Path to Java 1.7
+java_1.7:   "/projects/varnf/SofWar/java/jre1.7.0_80/bin"
 
 ## JAVA options
 samtofastq_java_opt: "'-Dsamjdk.buffer_size=131072 -Dsamjdk.compression_level=1 -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xmx128m'"

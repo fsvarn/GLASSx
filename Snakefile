@@ -1,5 +1,5 @@
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-## Snakefile for GLASS-WG pipeline
+## Snakefile for GLASS pipeline
 ## Authors: Floris Barthel, Samir Amin, Frederick Varn
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 

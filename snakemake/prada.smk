@@ -82,8 +82,8 @@ rule prada_preprocess:
     shell:
     	"""
 		set +o pipefail; 
-    	module load java/1.7.0
-    	
+		export PATH="{config[java_1.7]}":$PATH
+			
     	{config[prada_dir]}/prada-preprocess-bi \
     	-ref {config[prada_conf]} \
 		-inputdir {params.input_dir} \
@@ -94,9 +94,9 @@ rule prada_preprocess:
 		-outdir {params.output_dir} \
 		-submit no
 		
-    	head -1 {params.output_dir}/{params.sample}.pbs > {params.shell}
+    	head -1 {params.output_dir}{params.sample}.pbs > {params.shell}
     	echo 'cd {params.output_dir}' >> {params.shell}
-		tail -n +9 {params.output_dir}/{params.sample}.pbs >> {params.shell}
+		tail -n +9 {params.output_dir}{params.sample}.pbs >> {params.shell}
 		bash {params.shell}
 		
 		2>{log}
@@ -125,7 +125,7 @@ rule prada_fusion:
     shell:
     	"""
 		set +o pipefail; 
-    	module load java/1.7.0
+		export PATH="{config[java_1.7]}":$PATH
 
     	readlength=$({config[prada_dir]}/tools/samtools-0.1.16/samtools view {input} | \
     	head -n 1000 | \
@@ -169,10 +169,10 @@ rule prada_taf:
     shell:
     	"""
 		set +o pipefail; 
-    	module load java/1.7.0
+		export PATH="{config[java_1.7]}":$PATH
 
-		python taf.py \
-		--gtf {config[prada_conf]} \
+		python {config[prada_dir]}/taf.py \
+		--gtf {config[prada_gtf]} \
 		--fusion {input.fusion}\
 		--bam {input.bam} \
 		--out {output}
@@ -205,7 +205,7 @@ rule prada_guessif:
     shell:
     	"""
 		set +o pipefail; 
-    	module load java/1.7.0
+		export PATH="{config[java_1.7]}":$PATH
 
     	readlength=$({config[prada_dir]}/tools/samtools-0.1.16/samtools view {input} | \
     	head -n 1000 | \
