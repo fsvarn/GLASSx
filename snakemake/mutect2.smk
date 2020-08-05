@@ -29,7 +29,7 @@ rule callpon:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["callpon"]["ppn"]
+        CLUSTER_META["callpon"]["cpus-per-task"]
     log:
         "logs/mutect2/callpon/{aliquot_barcode}.{interval}.log"
     benchmark:
@@ -39,7 +39,7 @@ rule callpon:
         "Aliquot: {wildcards.aliquot_barcode}\n"
         "Interval: {wildcards.interval}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g Mutect2 \
+        "gatk --java-options -Xmx{params.mem} Mutect2 \
             -R {config[reference_fasta]} \
             -I {input.bam} \
             -L {input.intervallist} \
@@ -70,7 +70,7 @@ rule mergepon:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["mergepon"]["ppn"]
+        CLUSTER_META["mergepon"]["cpus-per-task"]
     log:
         "logs/mutect2/mergepon/{aliquot_barcode}.log"
     benchmark:
@@ -79,7 +79,7 @@ rule mergepon:
         "Merging VCF files (PON)\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g MergeVcfs \
+        "gatk --java-options -Xmx{params.mem} MergeVcfs \
             {params.input_files} \
             -O {output.vcf} \
             > {log} 2>&1"
@@ -106,7 +106,7 @@ rule createpon:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["createpon"]["ppn"]
+        CLUSTER_META["createpon"]["cpus-per-task"]
     log:
         "logs/mutect2/createpon/{aliquot_batch}.log"
     benchmark:
@@ -115,7 +115,7 @@ rule createpon:
         "Creating panel of normals from multiple Mutect2 VCFs\n"
         "Batch: {wildcards.aliquot_batch}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CreateSomaticPanelOfNormals \
+        "gatk --java-options -Xmx{params.mem} CreateSomaticPanelOfNormals \
             {params.vcfs} \
             --output {output.vcf} \
             > {log} 2>&1"
@@ -155,7 +155,7 @@ rule callsnv:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["callsnv"]["ppn"]
+        CLUSTER_META["callsnv"]["cpus-per-task"]
     log:
         "logs/mutect2/callsnv/{case_barcode}.{interval}.log"
     benchmark:
@@ -165,7 +165,7 @@ rule callsnv:
         "Case: {wildcards.case_barcode}\n"
         "Interval: {wildcards.interval}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g Mutect2 \
+        "gatk --java-options -Xmx{params.mem} Mutect2 \
             -R {config[reference_fasta]} \
             {params.sample_paths} \
             {params.normal_sample_tags} \
@@ -206,7 +206,7 @@ rule sscallsnv:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["sscallsnv"]["ppn"]
+        CLUSTER_META["sscallsnv"]["cpus-per-task"]
     log:
         "logs/mutect2/sscallsnv/{pair_barcode}.{interval}.log"
     benchmark:
@@ -216,7 +216,7 @@ rule sscallsnv:
         "Pair: {wildcards.pair_barcode}\n"
         "Interval: {wildcards.interval}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g Mutect2 \
+        "gatk --java-options -Xmx{params.mem} Mutect2 \
             -R {config[reference_fasta]} \
             -I {input.tumor} \
             -I {input.normal} \
@@ -256,7 +256,7 @@ rule mergesnv:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["mergesnv"]["ppn"]
+        CLUSTER_META["mergesnv"]["cpus-per-task"]
     log:
         "logs/mutect2/mergesnv/{case_barcode}.log"
     benchmark:
@@ -265,7 +265,7 @@ rule mergesnv:
         "Merging VCF files (M2)\n"
         "Case: {wildcards.case_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g MergeVcfs \
+        "gatk --java-options -Xmx{params.mem} MergeVcfs \
             {params.input_files} \
             -O {output.vcf} \
             > {log} 2>&1"
@@ -288,7 +288,7 @@ rule ssmergesnv:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["ssmergesnv"]["ppn"]
+        CLUSTER_META["ssmergesnv"]["cpus-per-task"]
     log:
         "logs/mutect2/ssmergesnv/{pair_barcode}.log"
     benchmark:
@@ -297,7 +297,7 @@ rule ssmergesnv:
         "Single Sample Merging VCF files (M2)\n"
         "Pair: {wildcards.pair_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g MergeVcfs \
+        "gatk --java-options -Xmx{params.mem} MergeVcfs \
             {params.input_files} \
             -O {output} \
             > {log} 2>&1"
@@ -313,7 +313,7 @@ rule mergem2bam:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["mergem2bam"]["ppn"]
+        CLUSTER_META["mergem2bam"]["cpus-per-task"]
     log:
         "logs/mutect2/mergem2bam/{case_barcode}.log"
     benchmark:
@@ -322,7 +322,7 @@ rule mergem2bam:
         "Merging BAM files (M2)\n"
         "Case: {wildcards.case_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g MergeSamFiles \
+        "gatk --java-options -Xmx{params.mem} MergeSamFiles \
             {params.input_files} \
             -O {output} \
             > {log} 2>&1"
@@ -341,7 +341,7 @@ rule pileupsummaries:
     conda:
         "../envs/gatk4.yaml"
     threads:
-        CLUSTER_META["pileupsummaries"]["ppn"]
+        CLUSTER_META["pileupsummaries"]["cpus-per-task"]
     log:
         "logs/mutect2/pileupsummaries/{aliquot_barcode}.log"
     benchmark:
@@ -350,7 +350,7 @@ rule pileupsummaries:
         "Generating pileupsummaries\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g GetPileupSummaries \
+        "gatk --java-options -Xmx{params.mem} GetPileupSummaries \
             -I {input} \
             -V {config[mutect2][tiny_vcf]} \
             -L {config[mutect2][tiny_vcf]} \
@@ -374,7 +374,7 @@ rule calculatecontamination:
     params:
         mem = CLUSTER_META["calculatecontamination"]["mem"]
     threads:
-        CLUSTER_META["calculatecontamination"]["ppn"]
+        CLUSTER_META["calculatecontamination"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -385,7 +385,7 @@ rule calculatecontamination:
         "Computing contamination\n"
         "Pair: {wildcards.pair_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CalculateContamination \
+        "gatk --java-options -Xmx{params.mem} CalculateContamination \
             -I {input.tumortable} \
             --matched-normal {input.normaltable} \
             --output {output.cont} \
@@ -410,7 +410,7 @@ rule filtermutect:
         tseg = lambda _, input: " ".join(["--tumor-segmentation " + s for s in input["seg"]]),
         ttab = lambda _, input: " ".join(["--contamination-table " + s for s in input["tab"]]),
     threads:
-        CLUSTER_META["filtermutect"]["ppn"]
+        CLUSTER_META["filtermutect"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -421,7 +421,7 @@ rule filtermutect:
         "Filtering Mutect2 calls\n"
         "Case: {wildcards.case_barcode}"
     shell:    
-        "gatk --java-options -Xmx{params.mem}g FilterMutectCalls \
+        "gatk --java-options -Xmx{params.mem} FilterMutectCalls \
             -V {input.vcf} \
             {params.tseg} \
             {params.ttab} \
@@ -447,7 +447,7 @@ rule ssfiltermutect:
     params:
         mem = CLUSTER_META["ssfiltermutect"]["mem"]
     threads:
-        CLUSTER_META["ssfiltermutect"]["ppn"]
+        CLUSTER_META["ssfiltermutect"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -458,7 +458,7 @@ rule ssfiltermutect:
         "Single-Sample Filtering Mutect2 calls\n"
         "Pair: {wildcards.pair_barcode}"
     shell:    
-        "gatk --java-options -Xmx{params.mem}g FilterMutectCalls \
+        "gatk --java-options -Xmx{params.mem} FilterMutectCalls \
             -V {input.vcf} \
             --tumor-segmentation {input.seg} \
             --contamination-table {input.tab} \
@@ -482,7 +482,7 @@ rule collectartifacts:
         prefix = "results/mutect2/artifacts/{aliquot_barcode}",
         mem = CLUSTER_META["collectartifacts"]["mem"]
     threads:
-        CLUSTER_META["collectartifacts"]["ppn"]
+        CLUSTER_META["collectartifacts"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -493,7 +493,7 @@ rule collectartifacts:
         "Collecting sequencing artifact metrics\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CollectF1R2Counts \
+        "gatk --java-options -Xmx{params.mem} CollectF1R2Counts \
             -R {config[reference_fasta]} \
             -I {input} \
             -alt-table {output.tab} \
@@ -515,7 +515,7 @@ rule filterorientation:
     params:
         mem = CLUSTER_META["filterorientation"]["mem"]
     threads:
-        CLUSTER_META["filterorientation"]["ppn"]
+        CLUSTER_META["filterorientation"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -526,7 +526,7 @@ rule filterorientation:
         "Calculating orientation bias\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g LearnReadOrientationModel \
+        "gatk --java-options -Xmx{params.mem} LearnReadOrientationModel \
             -alt-table {input.tab} \
             -ref-hist {input.ref} \
             -alt-hist {input.alt} \

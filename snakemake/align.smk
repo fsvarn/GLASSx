@@ -34,9 +34,9 @@ rule revertsam:
     params:
         dir = "results/align/revertsam/{aliquot_barcode}",
         mem = CLUSTER_META["revertsam"]["mem"],
-        walltime = CLUSTER_META["revertsam"]["walltime"]
+        walltime = CLUSTER_META["revertsam"]["time"]
     threads:
-        CLUSTER_META["revertsam"]["ppn"]
+        CLUSTER_META["revertsam"]["cpus-per-task"]
     log: 
         "logs/align/revertsam/{aliquot_barcode}.log"
     benchmark:
@@ -66,7 +66,7 @@ rule revertsam:
         for f in other_rg_f:
             touch_file(f)
 
-        shell("gatk --java-options -Xmx{params.mem}g RevertSam \
+        shell("gatk --java-options -Xmx{params.mem} RevertSam \
             --INPUT={input} \
             --OUTPUT_BY_READGROUP=true \
             --OUTPUT_BY_READGROUP_FILE_FORMAT=bam \
@@ -107,9 +107,9 @@ rule bam2ubam:
         RGSM = lambda wildcards: manifest.getRGTag(wildcards.aliquot_barcode, wildcards.readgroup, "readgroup_sample_id"), ## Sample name
         RGCN = lambda wildcards: manifest.getRGTag(wildcards.aliquot_barcode, wildcards.readgroup, "readgroup_center"), ## Center
         mem = CLUSTER_META["bam2ubam"]["mem"],
-        walltime = CLUSTER_META["bam2ubam"]["walltime"]
+        walltime = CLUSTER_META["bam2ubam"]["time"]
     threads:
-        CLUSTER_META["bam2ubam"]["ppn"]
+        CLUSTER_META["bam2ubam"]["cpus-per-task"]
     log:
         "logs/align/bam2ubam/{aliquot_barcode}.{readgroup}.log"
     benchmark:
@@ -119,7 +119,7 @@ rule bam2ubam:
         "Sample: {wildcards.aliquot_barcode}\n"
         "Readgroup: {wildcards.readgroup}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g AddOrReplaceReadGroups \
+        "gatk --java-options -Xmx{params.mem} AddOrReplaceReadGroups \
             --INPUT={input.rgbam} \
             --OUTPUT={output} \
             --RGID=\"{params.RGID}\" \
@@ -153,7 +153,7 @@ rule fq2ubam:
         RGCN = lambda wildcards: manifest.getRGTag(wildcards.aliquot_barcode, wildcards.readgroup, "readgroup_center"), ## Center
         mem = CLUSTER_META["fq2ubam"]["mem"]
     threads:
-        CLUSTER_META["fq2ubam"]["ppn"]
+        CLUSTER_META["fq2ubam"]["cpus-per-task"]
     log:
         "logs/align/fq2ubam/{aliquot_barcode}.{readgroup}.log"
     benchmark:
@@ -163,7 +163,7 @@ rule fq2ubam:
         "Sample: {wildcards.aliquot_barcode}\n"
         "Readgroup: {wildcards.readgroup}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g FastqToSam \
+        "gatk --java-options -Xmx{params.mem} FastqToSam \
             --FASTQ={input.R1} \
             --FASTQ2={input.R2} \
             --OUTPUT={output} \
@@ -194,11 +194,11 @@ rule fastqc:
     params:
         dir = "results/align/fastqc/{aliquot_barcode}",
         mem = CLUSTER_META["fastqc"]["mem"],
-        walltime = CLUSTER_META["fastqc"]["walltime"]
+        walltime = CLUSTER_META["fastqc"]["time"]
     conda:
         "../envs/align.yaml"
     threads:
-        CLUSTER_META["fastqc"]["ppn"]
+        CLUSTER_META["fastqc"]["cpus-per-task"]
     log:
         "logs/align/fastqc/{aliquot_barcode}.{readgroup}.log"
     benchmark:
@@ -230,11 +230,11 @@ rule markadapters:
         metric = "results/align/markadapters/{aliquot_barcode}/{aliquot_barcode}.{readgroup}.markadapters.metrics.txt"
     params:
         mem = CLUSTER_META["markadapters"]["mem"],
-        walltime = CLUSTER_META["revertsam"]["walltime"]
+        walltime = CLUSTER_META["revertsam"]["time"]
     conda:
         "../envs/align.yaml"
     threads:
-        CLUSTER_META["markadapters"]["ppn"]
+        CLUSTER_META["markadapters"]["cpus-per-task"]
     params:
         mem = CLUSTER_META["markadapters"]["mem"]
     log: 
@@ -246,7 +246,7 @@ rule markadapters:
         "Sample: {wildcards.aliquot_barcode}\n"
         "Readgroup: {wildcards.readgroup}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g MarkIlluminaAdapters \
+        "gatk --java-options -Xmx{params.mem} MarkIlluminaAdapters \
             --INPUT={input} \
             --OUTPUT={output.bam} \
             --METRICS={output.metric} \
@@ -286,12 +286,12 @@ rule samtofastq_bwa_mergebamalignment:
         bam = temp("results/align/bwa/{aliquot_barcode}/{aliquot_barcode}.{readgroup}.realn.bam"),
         bai = temp("results/align/bwa/{aliquot_barcode}/{aliquot_barcode}.{readgroup}.realn.bai")
     threads:
-        CLUSTER_META["samtofastq_bwa_mergebamalignment"]["ppn"]
+        CLUSTER_META["samtofastq_bwa_mergebamalignment"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     params:
         mem = CLUSTER_META["samtofastq_bwa_mergebamalignment"]["mem"],
-        walltime = CLUSTER_META["samtofastq_bwa_mergebamalignment"]["walltime"]
+        walltime = CLUSTER_META["samtofastq_bwa_mergebamalignment"]["time"]
     log: 
         "logs/align/samtofastq_bwa_mergebamalignment/{aliquot_barcode}.{readgroup}.log"
     benchmark:
@@ -344,12 +344,12 @@ rule markduplicates:
         metrics = "results/align/markduplicates/{aliquot_barcode}.metrics.txt"
     params:
         max_records = 6000000,
-        walltime = lambda wildcards: CLUSTER_META["markduplicates"]["walltime"],
+        walltime = lambda wildcards: CLUSTER_META["markduplicates"]["time"],
         mem = lambda wildcards: CLUSTER_META["markduplicates"]["mem"]
     #resources:
     # 	mem = lambda wildcards, attempt: CLUSTER_META["markduplicates"]["mem"] if attempt == 1 else CLUSTER_META["markduplicates"]["mem_if_fail"]
     threads:
-        CLUSTER_META["markduplicates"]["ppn"]
+        CLUSTER_META["markduplicates"]["cpus-per-task"]
     log:
         "logs/align/markduplicates/{aliquot_barcode}.log"
     benchmark:
@@ -360,7 +360,7 @@ rule markduplicates:
         "Sample: {wildcards.aliquot_barcode}"
     run:
         multi_input = " ".join(["--INPUT=" + s for s in input])
-        shell("gatk --java-options -Xmx{params.mem}g MarkDuplicates \
+        shell("gatk --java-options -Xmx{params.mem} MarkDuplicates \
             {multi_input} \
             --OUTPUT={output.bam} \
             --METRICS_FILE={output.metrics} \
@@ -388,9 +388,9 @@ rule baserecalibrator:
         "results/align/bqsr/{aliquot_barcode}.bqsr.txt"
     params:
         mem = CLUSTER_META["baserecalibrator"]["mem"],
-        walltime = CLUSTER_META["baserecalibrator"]["walltime"]
+        walltime = CLUSTER_META["baserecalibrator"]["time"]
     threads:
-        CLUSTER_META["baserecalibrator"]["ppn"]
+        CLUSTER_META["baserecalibrator"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     log:
@@ -401,7 +401,7 @@ rule baserecalibrator:
         "Calculating base recalibration scores.\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g BaseRecalibrator \
+        "gatk --java-options -Xmx{params.mem} BaseRecalibrator \
             -R {config[reference_fasta]} \
             -I {input} \
             -O {output} \
@@ -424,9 +424,9 @@ rule applybqsr:
         protected("results/align/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam")
     params:
         mem = CLUSTER_META["applybqsr"]["mem"],
-        walltime = CLUSTER_META["applybqsr"]["walltime"]
+        walltime = CLUSTER_META["applybqsr"]["time"]
     threads:
-        CLUSTER_META["applybqsr"]["ppn"]
+        CLUSTER_META["applybqsr"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     log:
@@ -437,7 +437,7 @@ rule applybqsr:
         "Applying base recalibration scores and generating final BAM file\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g ApplyBQSR \
+        "gatk --java-options -Xmx{params.mem} ApplyBQSR \
             -R {config[reference_fasta]} \
             -I {input.bam} \
             -OQ true \
@@ -460,9 +460,9 @@ rule wgsmetrics:
         "results/align/wgsmetrics/{aliquot_barcode}.WgsMetrics.txt"
     params:
         mem = CLUSTER_META["wgsmetrics"]["mem"],
-        walltime = CLUSTER_META["wgsmetrics"]["walltime"]
+        walltime = CLUSTER_META["wgsmetrics"]["time"]
     threads:
-        CLUSTER_META["wgsmetrics"]["ppn"]
+        CLUSTER_META["wgsmetrics"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     log:
@@ -473,7 +473,7 @@ rule wgsmetrics:
         "Computing WGS Metrics\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CollectWgsMetrics \
+        "gatk --java-options -Xmx{params.mem} CollectWgsMetrics \
             -R {config[reference_fasta]} \
             -I {input} \
             -O {output} \
@@ -497,9 +497,9 @@ rule validatebam:
         "results/align/validatebam/{aliquot_barcode}.ValidateSamFile.txt"
     params:
         mem = CLUSTER_META["validatebam"]["mem"],
-        walltime = CLUSTER_META["validatebam"]["walltime"]
+        walltime = CLUSTER_META["validatebam"]["time"]
     threads:
-        CLUSTER_META["validatebam"]["ppn"]
+        CLUSTER_META["validatebam"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     log:
@@ -510,7 +510,7 @@ rule validatebam:
         "Validating BAM file\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g ValidateSamFile \
+        "gatk --java-options -Xmx{params.mem} ValidateSamFile \
             -I {input} \
             -O {output} \
             -M SUMMARY \
@@ -537,9 +537,9 @@ rule multiqc:
     params:
         dir = "results/align/multiqc",
         mem = CLUSTER_META["multiqc"]["mem"],
-        walltime = CLUSTER_META["multiqc"]["walltime"]
+        walltime = CLUSTER_META["multiqc"]["time"]
     threads:
-        CLUSTER_META["multiqc"]["ppn"]
+        CLUSTER_META["multiqc"]["cpus-per-task"]
     conda:
         "../envs/align.yaml"
     log:
@@ -571,7 +571,7 @@ rule fastqc_bam:
     conda:
         "../envs/align.yaml"
     threads:
-        CLUSTER_META["fastqc_bam"]["ppn"]
+        CLUSTER_META["fastqc_bam"]["cpus-per-task"]
     log:
         "logs/align/fastqc-bam/{aliquot_barcode}.log"
     benchmark:
@@ -602,7 +602,7 @@ rule gencode_coverage:
     conda:
         "../envs/align.yaml"
     threads:
-        CLUSTER_META["gencode_coverage"]["ppn"]
+        CLUSTER_META["gencode_coverage"]["cpus-per-task"]
     log:
         "logs/align/gencode-coverage/{aliquot_barcode}.log"
     benchmark:

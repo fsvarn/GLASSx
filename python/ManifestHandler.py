@@ -200,11 +200,11 @@ class ManifestHandler:
         """
         return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch and al["sample_type"] in ["NB","NM"]]) & set(self.getSelectedAliquots()))
     
-    def getAliquotsByBatch(self, aliquot_batch):
+    def getAliquotsByBatch(self, aliquot_batch, analyte = 'D'):
         """
         Returns a list of aliquots given a batch
         """
-        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch]) & set(self.getSelectedAliquots()))
+        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch]) & set(self.getSelectedAliquots(analyte)))
 
     def parseBatch(self, batch_str):
         parser = batch_str.split('-')

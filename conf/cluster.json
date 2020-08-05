@@ -19,86 +19,88 @@
         "output" : "logs/slurm/{rule}.{wildcards.uuid}.out",
         "error" : "logs/slurm/{rule}.{wildcards.uuid}.err",
         "cpus-per-task" : 6,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "revertsam" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "72:00:00"
     },
     "bam2ubam" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "fq2ubam" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "fastqc" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "fastqc_bam" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },    
     "gencode_coverage" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "markadapters" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "samtofastq_bwa_mergebamalignment" :
     {
         "cpus-per-task" : 12,
         "time" : "72:00:00",
-        "mem" : "72"
+        "mem" : "72g",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
     },
     "markduplicates" :
     {
         "cpus-per-task" : 12,
         "time" : "72:00:00",
-        "mem" : 72
+        "mem" : "72g"
     },
     "baserecalibrator" :
     {
         "cpus-per-task" : 2,
         "time" : "72:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "applybqsr" :
     {
         "cpus-per-task" : 2,
         "time" : "72:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "wgsmetrics" :
     {
         "cpus-per-task" : 2,
         "time" : "72:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "validatebam" :
     {
         "cpus-per-task" : 2,
         "time" : "72:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "multiqc" :
     {
@@ -107,18 +109,18 @@
         "error" : "logs/slurm/{rule}.err",
         "cpus-per-task" : 2,
         "time" : "72:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "callpon" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00"
     },
     "mergepon" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "6:00:00"
     },
     "createpon" :
@@ -128,12 +130,12 @@
         "error" : "logs/slurm/{rule}.err",
         "cpus-per-task" : 2,
         "time" : "12:00:00",
-        "mem" : 12
+        "mem" : "12g"
     },
     "callsnv" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.{wildcards.interval}.out",
@@ -142,7 +144,7 @@
     "sscallsnv" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.{wildcards.interval}.out",
@@ -151,7 +153,7 @@
     "mergesnv" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -160,7 +162,7 @@
     "ssmergesnv" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -169,7 +171,7 @@
     "mergem2bam" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -178,13 +180,13 @@
     "pileupsummaries" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "calculatecontamination" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -193,7 +195,7 @@
     "filtermutect" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -202,7 +204,7 @@
     "ssfiltermutect" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -211,13 +213,13 @@
     "collectartifacts" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "filterorientation" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.aliquot_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.out",
@@ -226,7 +228,7 @@
     "selectvariants" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -235,7 +237,7 @@
     "ssselectvariants" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -244,7 +246,7 @@
     "vcf2maf" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -253,7 +255,7 @@
     "consensusvcf" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -262,7 +264,7 @@
     "annoconsensusvcf" :
     {
         "cpus-per-task" : 8,
-        "mem" : 48,
+        "mem" : "48g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -271,7 +273,7 @@
     "maf2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -280,7 +282,7 @@
 	"annotate_vep" :
     {
         "cpus-per-task" : 12,
-        "mem" : 72,
+        "mem" : "72g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -289,7 +291,7 @@
     "vep2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -298,26 +300,26 @@
     "genotypesample" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00"
     },
     "freebayes" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "48:00:00"
     },
     "freebayes_batch" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "48:00:00",
         "queu" : "batch"
     },
     "geno2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "48:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -326,7 +328,7 @@
     "cov2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "48:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -335,7 +337,7 @@
     "seg2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "48:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -344,13 +346,13 @@
     "batches2db" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "48:00:00"
     },
     "mutect2postprocess" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -359,26 +361,26 @@
     "extractsplitter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "480:00:00",
         "queu" : "long"
     },
     "extractdiscordant" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00"
     },
     "collectreadcounts" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00"
     },
     "createcnvpon" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -387,55 +389,55 @@
     "denoisereadcounts" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00"
     },
     "mergedenoisedreadcounts" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00"
     },
     "plotcr" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00"
     },
     "collecthets" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "12:00:00"
     },
     "modelsegments" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00"
     },
     "callsegments" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00"
     },
     "plotmodeledsegments" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00"
     },
     "combinecnvplots" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00"
     },
     "bam2seqz" :
     {
         "cpus-per-task" : 24,
-        "mem" : 48,
+        "mem" : "48g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -444,7 +446,7 @@
     "seqz_binning" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -453,7 +455,7 @@
     "mergeseqz" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -462,7 +464,7 @@
     "seqzR" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -471,7 +473,7 @@
     "combinetracks" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -480,7 +482,7 @@
     "prepare_acs" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -489,7 +491,7 @@
     "filter_tagged" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -498,7 +500,7 @@
     "merge_annotation" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -507,7 +509,7 @@
     "acs_convert" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -516,7 +518,7 @@
     "igv_convert" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -525,7 +527,7 @@
     "gistic_convert" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -534,7 +536,7 @@
     "runabsolute" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -543,7 +545,7 @@
     "titanhets" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -552,7 +554,7 @@
     "preparetitan" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -561,7 +563,7 @@
     "titan" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}.{wildcards.cluster}.{wildcards.ploidy}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.{wildcards.cluster}.{wildcards.ploidy}.out",
@@ -570,7 +572,7 @@
     "selecttitan" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -579,7 +581,7 @@
     "finaltitan" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -588,13 +590,13 @@
     "pileup" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "varscan" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.{wildcards.interval}.out",
@@ -603,7 +605,7 @@
     "mergevarscan" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -612,7 +614,7 @@
     "fixvs2header" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "4:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.{wildcards.interval}.out",
@@ -621,7 +623,7 @@
     "compressvarscan" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -630,7 +632,7 @@
     "processsomatic" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -639,7 +641,7 @@
     "somaticfilter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "70:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -648,7 +650,7 @@
     "bamreadcount" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -657,7 +659,7 @@
     "fpfilter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -666,7 +668,7 @@
     "mergevarscanfinal" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.pair_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -675,7 +677,7 @@
     "fingerprintsample" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.aliquot_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.out",
@@ -684,7 +686,7 @@
     "fingerprintcase" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -693,7 +695,7 @@
     "fingerprintproject" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "420:00:00",
         "queu" : "long",
         "job-name" : "{rule}.{wildcards.project}",
@@ -703,7 +705,7 @@
     "fingerprintall" :
     {
         "cpus-per-task" : 2,
-        "mem" : 96,
+        "mem" : "96g",
         "time" : "420:00:00",
         "queu" : "long",
         "job-name" : "{rule}",
@@ -713,7 +715,7 @@
     "clusterfingerprintproject" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.project}",
         "output" : "logs/slurm/{rule}.{wildcards.project}.out",
@@ -722,7 +724,7 @@
     "clusterfingerprintall" :
     {
         "cpus-per-task" : 2,
-        "mem" : 96,
+        "mem" : "96g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
@@ -731,7 +733,7 @@
     "delly_call" :
     {
         "cpus-per-task" : 8,
-        "mem" : 48,
+        "mem" : "48g",
         "queu" : "batch",
         "time" : "72:00:00",
         "job-name" : "{rule}",
@@ -741,7 +743,7 @@
     "delly_prefilter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -750,7 +752,7 @@
     "delly_genotype_controls" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -759,7 +761,7 @@
     "delly_postfilter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -768,13 +770,13 @@
     "cnvnator_to_bedpe" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "lumpy_call" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "480:00:00",
         "queu" : "long",
         "job-name" : "{rule}",
@@ -784,7 +786,7 @@
     "svtyper_run" :
     {
         "cpus-per-task" : 8,
-        "mem" : 48,
+        "mem" : "48g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -793,7 +795,7 @@
     "lumpy_libstat" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -802,7 +804,7 @@
     "lumpy_filter" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -811,7 +813,7 @@
     "manta_config" :
     {
         "cpus-per-task" : 1,
-        "mem" : 1,
+        "mem" : "1g",
         "time" : "1:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -820,7 +822,7 @@
     "manta_execute" :
     {
         "cpus-per-task" : 8,
-        "mem" : 48,
+        "mem" : "48g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -829,14 +831,14 @@
     "pyclone_tsv" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00",
         "job-name" : "{rule}"
     },
     "pyclone_setup" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "2:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -845,7 +847,7 @@
     "pyclone_run" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "queu" : "batch",
         "time" : "72:00:00",
         "job-name" : "{rule}",
@@ -855,7 +857,7 @@
     "pyclone_build_table" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.{wildcards.table_type}.out",
@@ -864,7 +866,7 @@
     "pyclone_plot_loci" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.{wildcards.plot_type}.out",
@@ -873,7 +875,7 @@
     "pyclone_plot_clusters" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.{wildcards.plot_type}.out",
@@ -882,49 +884,49 @@
     "cnvnator_tree" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "cnvnator_his" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "cnvnator_stat" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "cnvnator_partition" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "cnvnator_call" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "cnvnator2vcf" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "telseq_run" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00"
     },
     "haplotype_map_merge" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "1:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -933,7 +935,7 @@
     "download_vcf" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -942,7 +944,7 @@
     "download_map" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "2:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -951,7 +953,7 @@
     "extract_similar_SNPs" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "queu" : "batch",
         "job-name" : "{rule}.{wildcards.chr}",
@@ -961,7 +963,7 @@
     "create_VCFs" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -970,7 +972,7 @@
     "sort_VCF" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -979,7 +981,7 @@
     "create_PLINK_binary" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -988,7 +990,7 @@
     "LD_score" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -997,7 +999,7 @@
     "order" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1006,7 +1008,7 @@
     "prune" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1015,7 +1017,7 @@
     "LD_separate" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1024,7 +1026,7 @@
     "clump" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1033,7 +1035,7 @@
     "reformat_clumps" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1042,7 +1044,7 @@
     "detect_negative_LD" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1051,7 +1053,7 @@
     "switch_alleles" :
     {
         "cpus-per-task" : 1,
-        "mem" : 6,
+        "mem" : "6g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
@@ -1116,7 +1118,7 @@
     "vcf_pass" :
     {
         "cpus-per-task" : 12,
-        "mem" : 72,
+        "mem" : "72g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -1141,7 +1143,7 @@
     "vep_plugins" :
     {
         "cpus-per-task" : 12,
-        "mem" : 72,
+        "mem" : "72g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -1150,7 +1152,7 @@
     "vcf_extract" :
     {
         "cpus-per-task" : 4,
-        "mem" : 24,
+        "mem" : "24g",
         "time" : "24:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -1159,7 +1161,7 @@
     "pvacseq" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "queu" : "long",        
         "time" : "120:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
@@ -1262,10 +1264,42 @@
         "output" : "logs/slurm/{rule}.out",
         "error" : "logs/slurm/{rule}.err"
     },
+    "fastp_nc" :
+    {
+        "cpus-per-task" : 1,
+        "time" : "12:00:00",
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
+    },
+    "kallisto_nc" :
+    {
+        "cpus-per-task" : 1,
+        "time" : "12:00:00",
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "mergetpm_nc" :
+    {
+        "cpus-per-task" : 1,
+        "time" : "8:00:00",
+        "job-name" : "{rule}",
+        "output" : "logs/slurm/{rule}.out",
+        "error" : "logs/slurm/{rule}.err"
+    },
+    "tpm_matrix_nc" :
+    {
+        "cpus-per-task" : 2,
+        "time" : "8:00:00",
+        "job-name" : "{rule}",
+        "output" : "logs/slurm/{rule}.out",
+        "error" : "logs/slurm/{rule}.err"
+    },
     "merge_xcr" :
     {
         "cpus-per-task" : 2,
-        "mem" : 12,
+        "mem" : "12g",
         "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.xcr}",
         "output" : "logs/slurm/{rule}.{wildcards.xcr}.out",

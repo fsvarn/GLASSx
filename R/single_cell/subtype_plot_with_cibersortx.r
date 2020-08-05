@@ -1,3 +1,8 @@
+###################################################
+# Create stacked barplots (transcriptional classifier/simplicity score/CIBERSORTx) of each GLASS sample
+# Updated: 2020.07.06
+# Author: Frederick Varn
+##################################################
 library(tidyverse)
 library(odbc)
 library(DBI)
@@ -61,10 +66,15 @@ END AS grade_change,
 su1.treatment_tmz,
 su1.treatment_radiotherapy,
 CASE WHEN su1.treatment_chemotherapy_other LIKE '%Nivolumab%' OR su1.treatment_chemotherapy_other LIKE '%Pembrolizumab%' THEN true ELSE false END AS treatment_pd1 ,
+ci1.cell_state,
+ci1.fraction AS fraction_a,
+ci2.fraction AS fraction_b,
 su1.idh_codel_subtype
 FROM analysis.rna_silver_set ss
 JOIN analysis.transcriptional_subtype ts1 ON ts1.aliquot_barcode = ss.tumor_barcode_a
 JOIN analysis.transcriptional_subtype ts2 ON ts2.aliquot_barcode = ss.tumor_barcode_b AND ts1.signature_name = ts2.signature_name
+JOIN analysis.cibersortx_scgp ci1 ON ci1.aliquot_barcode = ss.tumor_barcode_a
+JOIN analysis.cibersortx_scgp ci2 ON ci2.aliquot_barcode = ss.tumor_barcode_b AND ci2.cell_state = ci1.cell_state
 JOIN biospecimen.aliquots al1 ON al1.aliquot_barcode = ss.tumor_barcode_a
 JOIN biospecimen.aliquots al2 ON al2.aliquot_barcode = ss.tumor_barcode_b
 JOIN clinical.surgeries su1 ON su1.sample_barcode = al1.sample_barcode
@@ -77,32 +87,33 @@ JOIN subtype_switch sw ON ss.tumor_pair_barcode = sw.tumor_pair_barcode
 WHERE su1.idh_codel_subtype IS NOT NULL -- ts1.p_value < 0.05 OR ts2.p_value < 0.05
 ORDER BY 1, 2 
 "
-
 dat <- dbGetQuery(con, q)
 
-plot_res1 <- dat[,c("case_barcode","tumor_barcode_a","signature_name","pval_a","ss_a","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_codel_subtype")]
-plot_res2 <- dat[,c("case_barcode","tumor_barcode_b","signature_name","pval_b","ss_b","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_codel_subtype")]
+# Correlate CIBERSORTx scores with similarity score (for visual purposes)
+
+cell_states <- unique(dat[,"cell_state"])
+init_cscor <- rec_cscor <- rep(0, length(cell_states))
+names(init_cscor) <- names(rec_cscor) <- cell_states
+for(i in 1:length(cell_states))
+{
+	mystate <- cell_states[i]
+	substate <- dat[which(dat[,"cell_state"] == mystate),c("tumor_pair_barcode","ss_a","ss_b","cell_state","fraction_a","fraction_b")]
+	substate <- distinct(substate)
+		
+	init_cscor[i] <- cor(substate[,"fraction_a"], substate[,"ss_a"],method="s")
+	rec_cscor[i] <- cor(substate[,"fraction_b"], substate[,"ss_b"],method="s")
+
+}
+
+# Build CIBERSORTx scores with similarity score (for visual purposes)
+
+plot_res1 <- dat[,c("case_barcode","tumor_barcode_a","signature_name","pval_a","ss_a","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_codel_subtype","cell_state","fraction_a")]
+plot_res2 <- dat[,c("case_barcode","tumor_barcode_b","signature_name","pval_b","ss_b","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_codel_subtype","cell_state","fraction_b")]
 status <- c(rep("Initial",nrow(plot_res1)),rep("Recurrent",nrow(plot_res2)))
-colnames(plot_res1) <- colnames(plot_res2) <- c("case_barcode","aliquot_barcode","signature_name","pval","ss","switch","grade_change","tmz","rt","aPD1","idh_codel_subtype")
+colnames(plot_res1) <- colnames(plot_res2) <- c("case_barcode","aliquot_barcode","signature_name","pval","ss","switch","grade_change","tmz","rt","aPD1","idh_codel_subtype","cell_state", "proportion")
 plot_res <- rbind(plot_res1,plot_res2)
 plot_res <- cbind(plot_res,status)
 
-aliquots <- unique(plot_res[,"aliquot_barcode"])
-fraction <- c()
-for(i in 1:length(aliquots))
-{
-	sub_dat <- plot_res[which(plot_res[,"aliquot_barcode"]==aliquots[i]),]
-	tmp_fraction <- as.numeric(sub_dat[,"pval"] < 0.05)/sum(as.numeric(sub_dat[,"pval"] < 0.05))
-	if(is.na(sum(tmp_fraction)))
-	{
-		tmp_fraction[which(sub_dat[,"pval"]==min(sub_dat[,"pval"]))] <- 1
-		tmp_fraction[which(sub_dat[,"pval"]!=min(sub_dat[,"pval"]))] <- 0
-		tmp_fraction <- tmp_fraction/sum(tmp_fraction)
-	}
-	fraction <- c(fraction,tmp_fraction)
-}
-
-plot_res <- cbind(plot_res,fraction)
 plot_res <- plot_res[which(!is.na(plot_res[,"idh_codel_subtype"])),]
 plot_res[,"pval"] <- -log(plot_res[,"pval"])
 
@@ -117,6 +128,22 @@ plot_res[,"signature_name"] <- factor(plot_res[,"signature_name"], levels = c("M
 
 #Set order for status
 plot_res[,"status"] <- factor(plot_res[,"status"], levels = c("Recurrent","Initial"))
+
+#Rename the cell states
+plot_res <- plot_res %>%
+	mutate(cell_state = recode(cell_state, "b_cell" = "B cell", "dendritic_cell" = "Dendritic cell",
+						"differentiated_tumor" = "Differentiated tumor", "endothelial" = "Endothelial",
+						"fibroblast" = "Fibroblast", "granulocyte" = "Granulocyte",
+						"myeloid" = "Myeloid", "oligodendrocyte" = "Oligodendrocyte",
+						"pericyte" = "Pericyte", "prolif_stemcell_tumor" = "Proliferating stem cell tumor",
+						"stemcell_tumor" = "Stem cell tumor","t_cell" = "T cell")) %>%
+	mutate(cell_state = as_factor(cell_state)) %>%
+	mutate(cell_state = fct_relevel(cell_state, "B cell", "Granulocyte", "T cell", "Dendritic cell", "Myeloid", 
+									"Oligodendrocyte", 
+									"Endothelial", "Pericyte",
+									"Fibroblast", 
+									"Differentiated tumor", "Stem cell tumor", "Proliferating stem cell tumor"))
+
 
 ######################## 
 ## Common plotting elements
@@ -197,55 +224,75 @@ gg_blank <-
   geom_blank()
 
 gg_simplicity_score <-
-  ggplot(plot_res %>% filter(signature_name=="Mesenchymal"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(signature_name=="Mesenchymal", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=status, alpha= -1 * ss)) +
   scale_fill_manual(values=c("black")) +
   theme(axis.title.y=element_blank())
   
 gg_transcript_subtype_pro <-
-  ggplot(plot_res %>% filter(signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=status, fill=signature_name, alpha= pval)) +
   scale_fill_manual(values=c("#00458a")) +
   theme(axis.title.y=element_blank())
   
 gg_transcript_subtype_cla <-
-  ggplot(plot_res %>% filter(signature_name=="Classical"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(signature_name=="Classical", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=status, fill=signature_name, alpha= pval)) +
   scale_fill_manual(values=c("#008a22")) +
   theme(axis.title.y=element_blank())
   
 gg_transcript_subtype_mes <-
-  ggplot(plot_res %>% filter(signature_name=="Mesenchymal"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(signature_name=="Mesenchymal", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=status, fill=signature_name, alpha= pval)) +
   scale_fill_manual(values=c("#8a0000")) +
   theme(axis.title.y=element_blank())
   
+gg_cell_state_init <- 
+  ggplot(plot_res %>% filter(status=="Initial", signature_name=="Mesenchymal"), aes(x=case_barcode, y = proportion, fill = cell_state)) +
+  geom_bar(position="stack", stat="identity") +
+  scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
+						 "Oligodendrocyte" = "#2ca25f",
+						 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
+						 "Fibroblast" = "#feb24c",
+						 "Stem cell tumor" = "#fb6a4a", "Differentiated tumor" = "#fcbba1", "Proliferating stem cell tumor" = "#a50f15")) +
+  theme(axis.title.y=element_blank())
+
+gg_cell_state_rec <- 
+  ggplot(plot_res %>% filter(status=="Recurrent", signature_name=="Mesenchymal"), aes(x=case_barcode, y = proportion, fill = cell_state)) +
+  geom_bar(position="stack", stat="identity") +
+  scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
+						 "Oligodendrocyte" = "#2ca25f",
+						 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
+						 "Fibroblast" = "#feb24c",
+						 "Stem cell tumor" = "#fb6a4a", "Differentiated tumor" = "#fcbba1", "Proliferating stem cell tumor" = "#a50f15")) +
+  theme(axis.title.y=element_blank())
+   
 gg_subtype_switch <- 
-  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=signature_name, fill=switch)) +
   scale_fill_manual(values=c("white","black")) +
   theme(axis.title.y=element_blank())
   
 gg_grade_change <- 
-  ggplot(plot_res %>% filter(status=="Recurrent",signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(status=="Recurrent",signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=signature_name, fill=grade_change)) +
   scale_fill_manual(values=c("white","black")) +
   theme(axis.title.y=element_blank())
   
 gg_tmz <- 
-  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=signature_name, fill=tmz)) +
   scale_fill_manual(values=c("white","black"),na.value="grey50") +
   theme(axis.title.y=element_blank())
   
 gg_rt <- 
-  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=signature_name, fill=rt)) +
   scale_fill_manual(values=c("white","black"),na.value="grey50") +
   theme(axis.title.y=element_blank())
   
 gg_pd1 <- 
-  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural"), aes(x=case_barcode)) +
+  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural", cell_state == "Stem cell tumor"), aes(x=case_barcode)) +
   geom_tile(aes(y=signature_name, fill=aPD1)) +
   scale_fill_manual(values=c("white","black"),na.value="grey50") +
   theme(axis.title.y=element_blank())
@@ -255,11 +302,13 @@ gb1 <- ggplot_build(nolabels(gg_simplicity_score))
 gb2 <- ggplot_build(nolabels(gg_transcript_subtype_pro))
 gb3 <- ggplot_build(nolabels(gg_transcript_subtype_cla))
 gb4 <- ggplot_build(nolabels(gg_transcript_subtype_mes))
-gb5 <- ggplot_build(nolabels(gg_subtype_switch))
-gb6 <- ggplot_build(nolabels(gg_grade_change))
-gb7 <- ggplot_build(nolabels(gg_tmz))
-gb8 <- ggplot_build(nolabels(gg_rt))
-gb9 <- ggplot_build(nolabels(gg_pd1))
+gb5 <- ggplot_build(nolabels(gg_cell_state_init))
+gb6 <- ggplot_build(nolabels(gg_cell_state_rec))
+gb7 <- ggplot_build(nolabels(gg_subtype_switch))
+gb8 <- ggplot_build(nolabels(gg_grade_change))
+gb9 <- ggplot_build(nolabels(gg_tmz))
+gb10 <- ggplot_build(nolabels(gg_rt))
+gb11 <- ggplot_build(nolabels(gg_pd1))
 
 n1 <- length(gb1$layout$panel_scales_y[[1]]$range$range)
 n2 <- length(gb2$layout$panel_scales_y[[1]]$range$range)
@@ -270,6 +319,8 @@ n6 <- length(gb6$layout$panel_scales_y[[1]]$range$range)
 n7 <- length(gb7$layout$panel_scales_y[[1]]$range$range)
 n8 <- length(gb8$layout$panel_scales_y[[1]]$range$range)
 n9 <- length(gb9$layout$panel_scales_y[[1]]$range$range)
+n10 <- length(gb10$layout$panel_scales_y[[1]]$range$range)
+n11 <- length(gb11$layout$panel_scales_y[[1]]$range$range)
 
 gA <- ggplot_gtable(gb1)
 gB <- ggplot_gtable(gb2)
@@ -280,6 +331,8 @@ gF <- ggplot_gtable(gb6)
 gG <- ggplot_gtable(gb7)
 gH <- ggplot_gtable(gb8)
 gI <- ggplot_gtable(gb9)
+gJ <- ggplot_gtable(gb10)
+gK <- ggplot_gtable(gb11)
 
 g <- gtable:::rbind_gtable(gA, gB, "last")
 g <- gtable:::rbind_gtable(g, gC, "last")
@@ -289,31 +342,36 @@ g <- gtable:::rbind_gtable(g, gF, "last")
 g <- gtable:::rbind_gtable(g, gG, "last")
 g <- gtable:::rbind_gtable(g, gH, "last")
 g <- gtable:::rbind_gtable(g, gI, "last")
+g <- gtable:::rbind_gtable(g, gJ, "last")
+g <- gtable:::rbind_gtable(g, gK, "last")
 
 panels <- g$layout$t[grep("panel", g$layout$name)]
 g$heights[panels[1*3]] <- unit(n1, "null")
 g$heights[panels[2*3]] <- unit(n1, "null")
 g$heights[panels[3*3]] <- unit(n1,"null")
 g$heights[panels[4*3]] <- unit(n1,"null")
-g$heights[panels[5*3]] <- unit(n1/2,"null")
-g$heights[panels[6*3]] <- unit(n1/2,"null")
+g$heights[panels[5*3]] <- unit(n1*3.2,"null")
+g$heights[panels[6*3]] <- unit(n1*3.2,"null")
 g$heights[panels[7*3]] <- unit(n1/2,"null")
 g$heights[panels[8*3]] <- unit(n1/2,"null")
 g$heights[panels[9*3]] <- unit(n1/2,"null")
+g$heights[panels[10*3]] <- unit(n1/2,"null")
+g$heights[panels[11*3]] <- unit(n1/2,"null")
 
 grid.newpage()
 
 #Plot
-pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_v2.pdf",width=7,height=3)
+pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_v3.pdf",width=7,height=5)
 grid.draw(g)
 dev.off()
 
 #Legends
-pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_legends.pdf",width=7,height=7)
+pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_legends_v3.pdf",width=7,height=7)
 grid.arrange(gg_legend(gg_simplicity_score),
 	gg_legend(gg_transcript_subtype_pro),
 	gg_legend(gg_transcript_subtype_cla),
 	gg_legend(gg_transcript_subtype_mes),
+	gg_legend(gg_cell_state_rec),
 	gg_legend(gg_tmz),ncol=5)
 dev.off()
 
