@@ -6,6 +6,7 @@ library(odbc)
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 paramfiles <- list.files('results/cnv/titanfinal/params', full.names = TRUE)
+paramfiles <- paramfiles[grep(".params.txt",paramfiles)]
 
 ## taken from Gavin's script
 formatParams <- function(params){

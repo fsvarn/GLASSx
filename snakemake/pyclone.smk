@@ -9,7 +9,7 @@ rule pyclone_tsv:
     params:
         mem = CLUSTER_META["pyclone_tsv"]["mem"]
     threads:
-        CLUSTER_META["pyclone_tsv"]["ppn"]
+        CLUSTER_META["pyclone_tsv"]["cpus-per-task"]
     conda:
         "../envs/r.yaml"
     log:
@@ -36,7 +36,7 @@ rule pyclone_setup:
         purity = lambda wildcards: " ".join(manifest.getPyClonePurity(wildcards.case_barcode)),
         workdir = "results/pyclone/run/{case_barcode}"
     threads:
-        CLUSTER_META["pyclone_setup"]["ppn"]
+        CLUSTER_META["pyclone_setup"]["cpus-per-task"]
     conda:
         "../envs/pyclone.yaml"
     log:
@@ -70,7 +70,7 @@ rule pyclone_run:
     params:
         mem = CLUSTER_META["pyclone_run"]["mem"]
     threads:
-        CLUSTER_META["pyclone_run"]["ppn"]
+        CLUSTER_META["pyclone_run"]["cpus-per-task"]
     conda:
         "../envs/pyclone.yaml"
     log:
@@ -99,7 +99,7 @@ rule pyclone_plot_loci:
     params:
         mem = CLUSTER_META["pyclone_plot_loci"]["mem"]
     threads:
-        CLUSTER_META["pyclone_plot_loci"]["ppn"]
+        CLUSTER_META["pyclone_plot_loci"]["cpus-per-task"]
     conda:
         "../envs/pyclone.yaml"
     log:
@@ -134,7 +134,7 @@ rule pyclone_plot_clusters:
     params:
         mem = CLUSTER_META["pyclone_plot_clusters"]["mem"]
     threads:
-        CLUSTER_META["pyclone_plot_clusters"]["ppn"]
+        CLUSTER_META["pyclone_plot_clusters"]["cpus-per-task"]
     conda:
         "../envs/pyclone.yaml"
     log:
@@ -169,7 +169,7 @@ rule pyclone_build_table:
     params:
         mem = CLUSTER_META["pyclone_build_table"]["mem"]
     threads:
-        CLUSTER_META["pyclone_build_table"]["ppn"]
+        CLUSTER_META["pyclone_build_table"]["cpus-per-task"]
     conda:
         "../envs/pyclone.yaml"
     log:

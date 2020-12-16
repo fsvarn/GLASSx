@@ -7,6 +7,9 @@ con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 segfiles <- list.files('results/cnv/titanfinal/seg', full.names = TRUE)
 
+q <- "SELECT * FROM analysis.pairs"
+pair <- dbGetQuery(con, q)
+
 lapply(segfiles, function(f){
   message(f)
   dat <- read.delim(f, as.is=T, header=T, row.names = NULL)
@@ -27,7 +30,10 @@ lapply(segfiles, function(f){
               logr_copy_number = logR_Copy_Number,
               corrected_copy_number = Corrected_Copy_Number,
               corrected_call = Corrected_Call)
-  
-    dbWriteTable(con, Id(schema="analysis",table="titan_seg"), df, append=T)
+	
+	df[which(df[,"chrom"]=="X"),"chrom"] <- 23
+	df[which(df[,"chrom"]=="Y"),"chrom"] <- 24
+
+    dbWriteTable(con, Id(schema="variants",table="titan_seg"), df, append=T)
     Sys.sleep(1)
 })

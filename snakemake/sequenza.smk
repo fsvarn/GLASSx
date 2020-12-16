@@ -15,7 +15,7 @@ rule bam2seqz:
         prefix = "results/sequenza/bam2seqz/{pair_barcode}/seqz",
         chrs = lambda _: " ".join([s for s in CHRS])
     threads:
-        CLUSTER_META["bam2seqz"]["ppn"]
+        CLUSTER_META["bam2seqz"]["cpus-per-task"]
     log:
         "logs/sequenza/bam2seqz/{pair_barcode}.log"
     conda:
@@ -50,7 +50,7 @@ rule seqz_binning:
     params:
         mem = CLUSTER_META["seqz_binning"]["mem"]
     threads:
-        CLUSTER_META["seqz_binning"]["ppn"]
+        CLUSTER_META["seqz_binning"]["cpus-per-task"]
     log:
         "logs/sequenza/seqz_binning/{pair_barcode}.{chr}.log"
     conda:
@@ -82,7 +82,7 @@ rule mergeseqz:
         mem = CLUSTER_META["mergeseqz"]["mem"],
         output = "results/sequenza/mergeseqz/{pair_barcode}.small.seqz"
     threads:
-        CLUSTER_META["mergeseqz"]["ppn"]
+        CLUSTER_META["mergeseqz"]["cpus-per-task"]
     log:
         "logs/sequenza/mergeseqz/{pair_barcode}.log"
     conda:
@@ -112,7 +112,9 @@ rule seqzR:
         kmin = config["sequenza"]["kmin"],
         break_method = config["sequenza"]["break_method"]
     threads:
-        CLUSTER_META["seqzR"]["ppn"]
+        CLUSTER_META["seqzR"]["cpus-per-task"]
+    conda:
+        "../envs/seqzR.yaml"
     log:
         "logs/sequenza/seqzR/{pair_barcode}.log"
     benchmark:

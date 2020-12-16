@@ -36,21 +36,30 @@
     },
     "fq2ubam" :
     {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "time" : "72:00:00"
+        "time" : "48:00:00",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
     },
     "fastqc" :
     {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "time" : "72:00:00"
+        "time" : "48:00:00",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
     },
     "fastqc_bam" :
     {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "time" : "72:00:00"
+        "time" : "24:00:00",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
     },    
     "gencode_coverage" :
     {
@@ -60,12 +69,16 @@
     },
     "markadapters" :
     {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "time" : "72:00:00"
+        "time" : "24:00:00",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
     },
     "samtofastq_bwa_mergebamalignment" :
     {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 12,
         "time" : "72:00:00",
         "mem" : "72g",
@@ -75,19 +88,19 @@
     "markduplicates" :
     {
         "cpus-per-task" : 12,
-        "time" : "72:00:00",
+        "time" : "24:00:00",
         "mem" : "72g"
     },
     "baserecalibrator" :
     {
         "cpus-per-task" : 2,
-        "time" : "72:00:00",
+        "time" : "24:00:00",
         "mem" : "12g"
     },
     "applybqsr" :
     {
         "cpus-per-task" : 2,
-        "time" : "72:00:00",
+        "time" : "24:00:00",
         "mem" : "12g"
     },
     "wgsmetrics" :
@@ -99,7 +112,7 @@
     "validatebam" :
     {
         "cpus-per-task" : 2,
-        "time" : "72:00:00",
+        "time" : "24:00:00",
         "mem" : "12g"
     },
     "multiqc" :
@@ -314,7 +327,7 @@
         "cpus-per-task" : 1,
         "mem" : "6g",
         "time" : "48:00:00",
-        "queu" : "batch"
+        "qos" : "batch"
     },
     "geno2db" :
     {
@@ -322,8 +335,8 @@
         "mem" : "12g",
         "time" : "48:00:00",
         "job-name" : "{rule}",
-        "output" : "logs/slurm/{rule}.out",
-        "error" : "logs/slurm/{rule}.err"
+        "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.case_barcode}.err"
     },
     "cov2db" :
     {
@@ -363,7 +376,7 @@
         "cpus-per-task" : 2,
         "mem" : "12g",
         "time" : "480:00:00",
-        "queu" : "long"
+        "qos" : "long"
     },
     "extractdiscordant" :
     {
@@ -696,8 +709,8 @@
     {
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "time" : "420:00:00",
-        "queu" : "long",
+        "time" : "336:00:00",
+        "qos" : "long",
         "job-name" : "{rule}.{wildcards.project}",
         "output" : "logs/slurm/{rule}.{wildcards.project}.out",
         "error" : "logs/slurm/{rule}.{wildcards.project}.err"
@@ -706,8 +719,8 @@
     {
         "cpus-per-task" : 2,
         "mem" : "96g",
-        "time" : "420:00:00",
-        "queu" : "long",
+        "time" : "336:00:00",
+        "qos" : "long",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.out",
         "error" : "logs/slurm/{rule}.err"
@@ -734,7 +747,7 @@
     {
         "cpus-per-task" : 8,
         "mem" : "48g",
-        "queu" : "batch",
+        "qos" : "batch",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
@@ -778,7 +791,7 @@
         "cpus-per-task" : 2,
         "mem" : "12g",
         "time" : "480:00:00",
-        "queu" : "long",
+        "qos" : "long",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.pair_barcode}.out",
         "error" : "logs/slurm/{rule}.{wildcards.pair_barcode}.err"
@@ -848,7 +861,7 @@
     {
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "queu" : "batch",
+        "qos" : "batch",
         "time" : "72:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -955,7 +968,7 @@
         "cpus-per-task" : 2,
         "mem" : "12g",
         "time" : "72:00:00",
-        "queu" : "batch",
+        "qos" : "batch",
         "job-name" : "{rule}.{wildcards.chr}",
         "output" : "logs/slurm/{rule}.{wildcards.chr}.out",
         "error" : "logs/slurm/{rule}.{wildcards.chr}.err"
@@ -1162,7 +1175,7 @@
     {
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "queu" : "long",        
+        "qos" : "long",        
         "time" : "120:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
@@ -1344,6 +1357,51 @@
         "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}",
         "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.out",
         "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.err"
+    },
+    "samtofastq" :
+    {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
+        "cpus-per-task" : 12,
+        "time" : "24:00:00",
+        "mem" : "72g",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
+    },
+    "star" :
+    {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
+        "cpus-per-task" : 12,
+        "time" : "24:00:00",
+        "mem" : "72g",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
+    },
+    "mergebamalignment" :
+    {
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
+        "cpus-per-task" : 12,
+        "time" : "24:00:00",
+        "mem" : "72g",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}.err"
+    },
+    "fingerprintsample_rna" :
+    {
+        "cpus-per-task" : 2,
+        "mem" : "12g",
+        "time" : "24:00:00",
+        "job-name" : "{rule}.{wildcards.aliquot_barcode}",
+        "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.err"
+    },
+    "fingerprintcase_all" :
+    {
+        "cpus-per-task" : 2,
+        "mem" : "12g",
+        "time" : "24:00:00",
+        "job-name" : "{rule}.{wildcards.case_barcode}",
+        "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
+        "error" : "logs/slurm/{rule}.{wildcards.case_barcode}.err"
     }
     
 }

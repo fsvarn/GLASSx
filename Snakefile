@@ -47,11 +47,12 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 #DNA modules
 #include: "snakemake/download.smk"
-include: "snakemake/align.smk"
+#include: "snakemake/align.smk"
 #include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
 #include: "snakemake/mutect2.smk"
+#include: "snakemake/mutect2-post.smk"
 #include: "snakemake/varscan2.smk"
 #include: "snakemake/cnvnator.smk"
 #include: "snakemake/lumpy.smk"
@@ -62,13 +63,14 @@ include: "snakemake/align.smk"
 #include: "snakemake/optitype.smk"
 #include: "snakemake/pvacseq.smk"
 #include: "snakemake/lohhla.smk"
-#include: "snakemake/cnv-post.smk"
+#include: "snakemake/cnv-post.smk"		(Deprecated)
 #include: "snakemake/titan.smk"
-#include: "snakemake/pyclone.smk"
+include: "snakemake/pyclone.smk"
 
 #RNA modules
-#include: "snakemake/kallisto.smk"
+include: "snakemake/kallisto.smk"
 #include: "snakemake/kallisto_nc.smk"
+#include: "snakemake/rna_fingerprinting.smk"
 #include: "snakemake/mixcr.smk"
 #include: "snakemake/prada.smk"
 
@@ -121,7 +123,7 @@ rule align:
 
 rule gencode:
     input:
-        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getAliquotsByBatch('GLSS-PD-WXS'))
+        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getAliquotsByBatch('GLSS-H2-WXS'))
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -264,8 +266,8 @@ rule telseq:
 
 rule pyclone:
     input:
-        lambda wildcards: expand("results/pyclone/run/{pyclone_short_name}/plots/loci/{plot_type}.pdf", pyclone_short_name = manifest.getPyCloneCases(), plot_type = ['density','parallel_coordinates','scatter','similarity_matrix','vaf_parallel_coordinates','vaf_scatter']),
-        lambda wildcards: expand("results/pyclone/run/{pyclone_short_name}/plots/clusters/{plot_type}.pdf", pyclone_short_name = manifest.getPyCloneCases(), plot_type = ['density','parallel_coordinates','scatter']),
+        #lambda wildcards: expand("results/pyclone/run/{pyclone_short_name}/plots/loci/{plot_type}.pdf", pyclone_short_name = manifest.getPyCloneCases(), plot_type = ['density','parallel_coordinates','scatter','similarity_matrix','vaf_parallel_coordinates','vaf_scatter']),
+        #lambda wildcards: expand("results/pyclone/run/{pyclone_short_name}/plots/clusters/{plot_type}.pdf", pyclone_short_name = manifest.getPyCloneCases(), plot_type = ['density','parallel_coordinates','scatter']),
         lambda wildcards: expand("results/pyclone/run/{pyclone_short_name}/tables/{table_type}.tsv", pyclone_short_name = manifest.getPyCloneCases(), table_type = ['cluster','loci'])
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -276,9 +278,25 @@ rule pyclone:
 rule fingerprint:
    input:
        expand("results/fingerprinting/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots()),
-       expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases())
-       #"results/fingerprinting/GLASS.crosscheck_metrics",
- 
+       expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()),
+       "results/fingerprinting/GLASS_HF.crosscheck_metrics"
+
+# Fingerprint DNA and RNA samples together
+rule full_fingerprint:
+    input:
+       lambda wildcards: ["results/rnafingerprint/star/{sample}/{sample}.{rg}.ReadsPerGene.out.tab".format(sample = aliquot_barcode, rg = readgroup)
+       	for aliquot_barcode, readgroups in manifest.getSelectedReadgroupsByAliquot(analyte='R').items()
+       	for readgroup in readgroups],
+       #expand("results/rnafingerprint/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots(analyte='R')),
+       expand("results/rnafingerprint/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()),
+       expand("results/rnafingerprint/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getSelectedAliquots(analyte='R'))
+
+#         expand("results/rnafingerprint/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
+#         expand("results/rnafingerprint/validatebam/{aliquot_barcode}.ValidateSamFile.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
+#         lambda wildcards: ["results/rnafingerprint/fastqc/{sample}/{sample}.{rg}.unaligned_fastqc.html".format(sample = aliquot_barcode, rg = readgroup)
+#           for aliquot_barcode, readgroups in manifest.getSelectedReadgroupsByAliquot().items()
+#           for readgroup in readgroups]
+       
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Run kallisto pipeline
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -306,7 +324,7 @@ rule prada:
         expand("results/prada/{aliquot_barcode}/fusion/prada.fus.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
         expand("results/prada/{aliquot_barcode}/fusion/prada.fus.summary.taf.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R')),
         expand("results/prada/{aliquot_barcode}/guess-if/{gene}/{gene}.GUESS-IF.summary.txt", aliquot_barcode = manifest.getSelectedAliquots(analyte = 'R'), gene=['EGFR'])
-
+		
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## Run MiXCR
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 

@@ -23,6 +23,7 @@ class PostgreSQLManifestHandler(ManifestHandler):
         self.initPairs()
         self.initFilesReadgroups()
         self.initPyCloneAliquots()
+        self.initRNALibraryPrep()
             
         ManifestHandler.__init__(self, source_file_basepath, aligned_file_basepath, from_source, by_cohort) #here is where manifest handler is brought in
 
@@ -118,6 +119,13 @@ class PostgreSQLManifestHandler(ManifestHandler):
         res = self.query(q, cursor_factory = psycopg2.extras.RealDictCursor)
         
         self.pyclone_aliquots = res
+
+    def initRNALibraryPrep(self):
+        q = "SELECT * FROM analysis.rna_library_prep"
+
+        res = self.query(q, cursor_factory = psycopg2.extras.RealDictCursor)
+        
+        self.rna_library_prep = res
 
 ## END ##
 

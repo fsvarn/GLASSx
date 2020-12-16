@@ -47,6 +47,6 @@ for(i in 1:length(genes))
 cat("\nWriting output...\n")
 res <- cbind(genes, res)
 colnames(res)[1] <- "Gene_symbol"
-write.table(res,output,,sep="\t",quote=FALSE,row.names=FALSE)
+write.table(res,output,sep="\t",quote=FALSE,row.names=FALSE)
 #dbWriteTable(con, Id(schema="analysis", table="gene_tpm"), res, overwrite=TRUE)
 

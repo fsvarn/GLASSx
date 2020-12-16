@@ -7,8 +7,8 @@ t1 AS (
               ad_ref AS ref_counts,
               ad_alt AS var_counts,
               (CASE WHEN case_sex = 'male' AND gt.chrom = 23 THEN 1 ELSE 2 END) AS normal_cn,
-              minor_cn,
-              major_cn,
+              ts.minor_cn,
+              ts.major_cn,
               (COUNT(*) OVER (PARTITION BY gt.case_barcode, gt.variant_id)) AS num_aliquots_variants
       FROM variants.passgeno gt
       INNER JOIN biospecimen.aliquots al ON al.aliquot_barcode = gt.aliquot_barcode
@@ -20,10 +20,10 @@ t1 AS (
       WHERE
               gt.case_barcode = ? AND 
               (case_sex IS NOT NULL OR gt.chrom <> 23) AND
-              major_cn > 0 AND
+              ts.major_cn > 0 AND
               ad_ref + ad_alt >= 30 AND
-              minor_cn IS NOT NULL AND 
-              major_cn IS NOT NULL AND
+              ts.minor_cn IS NOT NULL AND 
+              ts.major_cn IS NOT NULL AND
               bl.fingerprint_exclusion = 'allow' AND
               bl.coverage_exclusion = 'allow' AND
               sa.sample_type NOT IN ('NB','NM')

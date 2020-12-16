@@ -14,8 +14,11 @@ if(exists("snakemake")) {
   files = list.files("results/align/wgsmetrics", recursive = T, pattern = "WgsMetrics.txt", full.names = T) # list("results/align/wgsmetrics/GLSS-DK-0012-NB-01D-WXS-ABCB18.WgsMetrics.txt", "results/align/wgsmetrics/GLSS-DK-0003-TP-01D-WXS-E43D26.WgsMetrics.txt")
 }
 
-outfn <- "results/align/GLSS-PD_wgsmetrics.merged.tsv"
-files <- files[grep("GLSS-CU-P",files)]
+outfn <- "results/align/GLSS-H2_wgsmetrics.merged.tsv"
+files <- files[grep("GLSS-HF-", files)]
+files <- files[-grep("GLSS-HF-2", files)]
+files <- files[-grep("GLSS-HF-3", files)]
+
 
 # Necessary packages:
 library(parallel)

@@ -28,5 +28,5 @@ tfus <- tfus[,c(1:7,9,8)]
 tfus <- tfus[order(tfus[,"totalcount"],decreasing=TRUE),]
 colnames(tfus) <- c("aliquot_barcode","gene_symbol_a","ensembl_gene_id_a","gene_symbol_b","ensembl_gene_id_b","paircount","splitcount","totalcount","ensembl_transcript_list")
 
-dbWriteTable(con, Id(schema="analysis", table="pizzly_fusions"), tfus, overwrite=TRUE)
+#dbWriteTable(con, Id(schema="analysis", table="pizzly_fusions"), tfus, overwrite=TRUE)
 

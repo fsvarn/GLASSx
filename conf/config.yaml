@@ -20,6 +20,10 @@ cluster_json:     "conf/cluster.json"
 ## Working directory
 #workdir:          "/fastscratch/verhaak-lab/TCGA-WG"
 
+## Module and conda directories
+module_dir:        "/projects/verhaak-lab/varnf/software/modules"
+conda_dir:        "/projects/verhaak-lab/varnf/anaconda3/bin"
+
 gnomad_vcf:       "/projects/verhaak-lab/verhaak_ref/gatk-legacy-bundles/Mutect2/af-only-gnomad.raw.sites.b37.vcf.gz"
 funcotator_dir:   "/projects/verhaak-lab/verhaak_ref/funcotator/funcotator_dataSources.v1.6.20190124s"
 
@@ -91,9 +95,9 @@ gdc_token:        "/home/barthf/gdc-user-token.2018-05-23T11_13_25-04_00.txt"
 tempdir:          "/fastscratch/verhaak-lab/temp"
 
 ## SV mask
-svmask_lumpy:     "/projects/barthf/GLASS-WG/data/ref/human_g1k_v37_decoy_svmask_lumpy.bed"
-svmask_delly:     "/projects/barthf/GLASS-WG/data/ref/human.hg19.excl.tsv"
-svinclude_manta:  "/projects/barthf/GLASS-WG/data/ref/human_g1k_v37_decoy_svinclude_manta.bed.gz"
+svmask_lumpy:     "/projects/verhaak-lab/USERS/barthf/GLASS-WG/data/ref/human_g1k_v37_decoy_svmask_lumpy.bed"
+svmask_delly:     "/projects/verhaak-lab/USERS/barthf/GLASS-WG/data/ref/human.hg19.excl.tsv"
+svinclude_manta:  "/projects/verhaak-lab/USERS/barthf/GLASS-WG/data/ref/human_g1k_v37_decoy_svinclude_manta.bed.gz"
 
 ## Exome capture common regions
 common_exome_capture_bed: "/projects/verhaak-lab/verhaak_ref/exome-capture/Intersect_Exome_hg19.filtered.bed"
@@ -121,37 +125,37 @@ hla_ref:   "/projects/verhaak-lab/verhaak_ref/hla_ref/optitype/hla_reference_dna
 vcf2maf:          "/projects/verhaak-lab/mskcc-vcf2maf-747a1bb/vcf2maf.pl"
 
 ## VEP installation
-veppath:          "/projects/varnf/SofWar/ensembl-vep"        #"/projects/barthf/opt/ensembl-vep"
+veppath:          "/projects/verhaak-lab/USERS/varnf/SofWar/ensembl-vep"        #"/projects/verhaak-lab/USERS/barthf/opt/ensembl-vep"
 
 ## VEP cache directory
-#vepdata:          "/projects/verhaak-lab/verhaak_ref/vep" #"/projects/barthf/opt/.vep"
-vepdata:    "/projects/varnf/SofWar/ensembl-vep/reference/"   #need to reconcile
+#vepdata:          "/projects/verhaak-lab/verhaak_ref/vep" #"/projects/verhaak-lab/USERS/barthf/opt/.vep"
+vepdata:    "/projects/verhaak-lab/USERS/varnf/SofWar/ensembl-vep/reference/"   #need to reconcile
 
 ## VEP plugin directory
-vepplugins:       "/projects/varnf/SofWar/VEP_plugins/"
+vepplugins:       "/projects/verhaak-lab/USERS/varnf/SofWar/VEP_plugins/"
 
 ## pVACseq iedb install directory 
-iedb:             "/projects/varnf/SofWar/pvactools/IEDB/"
+iedb:             "/projects/verhaak-lab/USERS/varnf/SofWar/pvactools/IEDB/"
 
 ## LOHHLA HLA reference files
-lohhla_rscript:     "/projects/varnf/SofWar/lohhla/LOHHLAscript_grch37.R"
-hla_all_fasta:      "/projects/varnf/SofWar/lohhla/data/hla_all.fasta"
-hla_exon_loc:       "/projects/varnf/SofWar/lohhla/data/hla.dat"
+lohhla_rscript:     "/projects/verhaak-lab/USERS/varnf/SofWar/lohhla/LOHHLAscript_grch37.R"
+hla_all_fasta:      "/projects/verhaak-lab/USERS/varnf/SofWar/lohhla/data/hla_all.fasta"
+hla_exon_loc:       "/projects/verhaak-lab/USERS/varnf/SofWar/lohhla/data/hla.dat"
 lohhla_workdir:     "/fastscratch/varnf/lohhla/"
 
 ## Kallisto index
-kallisto_idx:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcriptome.idx"
-kallisto_gtf:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.gtf"
-kallisto_ref:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.cdna.all.fa"
-kallisto_nc_idx:  "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/nc_transcriptome.idx"
+kallisto_idx:  "/projects/verhaak-lab/USERS/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcriptome.idx"
+kallisto_gtf:  "/projects/verhaak-lab/USERS/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.gtf"
+kallisto_ref:  "/projects/verhaak-lab/USERS/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/Homo_sapiens.GRCh37.75.cdna.all.fa"
+kallisto_nc_idx:  "/projects/verhaak-lab/USERS/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/nc_transcriptome.idx"
 
 ## Kallisto mapping
-ensembl_transcript_mapping: "/projects/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcripts_to_genes.txt"
+ensembl_transcript_mapping: "/projects/verhaak-lab/USERS/varnf/SofWar/kallisto/Ensembl_v75_homo_sapiens/homo_sapiens/transcripts_to_genes.txt"
 
 ## PRADA directory
-prada_dir:      "/projects/varnf/SofWar/pyPRADA_1.2"
-prada_conf:     "/projects/varnf/SofWar/pyPRADA_1.2/conf.txt"
-prada_gtf:      "/projects/varnf/SofWar/pyPRADA_1.2/ref/PRADA-reference-hg19/Homo_sapiens.GRCh37.64.gtf"
+prada_dir:      "/projects/verhaak-lab/USERS/varnf/SofWar/pyPRADA_1.2"
+prada_conf:     "/projects/verhaak-lab/USERS/varnf/SofWar/pyPRADA_1.2/conf.txt"
+prada_gtf:      "/projects/verhaak-lab/USERS/varnf/SofWar/pyPRADA_1.2/ref/PRADA-reference-hg19/Homo_sapiens.GRCh37.64.gtf"
 
 seconds_between_progress_updates: 900
 
@@ -161,7 +165,7 @@ csx_username:   "Frederick.S.Varn.Jr.GR@dartmouth.edu"
 csx_token:      "ef745da3ebf38e86c4b115ea37df2362"             
 
 ## Path to Java 1.7
-java_1.7:   "/projects/varnf/SofWar/java/jre1.7.0_80/bin"
+java_1.7:   "/projects/verhaak-lab/USERS/varnf/SofWar/java/jre1.7.0_80/bin"
 
 ## JAVA options
 samtofastq_java_opt: "'-Dsamjdk.buffer_size=131072 -Dsamjdk.compression_level=1 -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xmx128m'"
@@ -175,9 +179,9 @@ revertsam_extra_args: "--MAX_DISCARD_FRACTION=0.02 "
 ## The output file (`file`) can then be used for fingerprinting
 
 haplotype_map:
-  file: "/projects/barthf/GLASS-WG/data/ref/haplotype.filtered.map"
-  ld_script: "/projects/barthf/GLASS-WG/sandbox/ldsc/ldsc.py"
-  header: "/projects/barthf/GLASS-WG/data/ref/haplotype_map_header.txt"
+  file: "/projects/verhaak-lab/USERS/barthf/GLASS-WG/data/ref/haplotype.filtered.map"
+  ld_script: "/projects/verhaak-lab/USERS/barthf/GLASS-WG/sandbox/ldsc/ldsc.py"
+  header: "/projects/verhaak-lab/USERS/barthf/GLASS-WG/data/ref/haplotype_map_header.txt"
   similarity: 0.10
   min_maf: 0.10
   ld_score_window_autosome: 1.0

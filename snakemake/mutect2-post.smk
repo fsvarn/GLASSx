@@ -21,7 +21,7 @@ rule selectvariants:
     params:
         mem = CLUSTER_META["selectvariants"]["mem"]
     threads:
-        CLUSTER_META["selectvariants"]["ppn"]
+        CLUSTER_META["selectvariants"]["cpus-per-task"]
     conda:
         "../envs/bcftools.yaml"
     log:
@@ -73,7 +73,7 @@ rule ssselectvariants:
     params:
         mem = CLUSTER_META["ssselectvariants"]["mem"]
     threads:
-        CLUSTER_META["ssselectvariants"]["ppn"]
+        CLUSTER_META["ssselectvariants"]["cpus-per-task"]
     conda:
         "../envs/bcftools.yaml"
     log:
@@ -123,7 +123,7 @@ rule consensusvcf:
     params:
         mem = CLUSTER_META["consensusvcf"]["mem"]
     threads:
-        CLUSTER_META["consensusvcf"]["ppn"]
+        CLUSTER_META["consensusvcf"]["cpus-per-task"]
     conda:
         "../envs/bcftools.yaml"
     log:
@@ -175,7 +175,7 @@ rule annoconsensusvcf:
     params:
         mem = CLUSTER_META["annoconsensusvcf"]["mem"]
     threads:
-        CLUSTER_META["annoconsensusvcf"]["ppn"]
+        CLUSTER_META["annoconsensusvcf"]["cpus-per-task"]
     conda:
         "../envs/funcotate.yaml"
     log:
@@ -217,7 +217,7 @@ rule maf2db:
     params:
         mem = CLUSTER_META["maf2db"]["mem"]
     threads:
-        CLUSTER_META["maf2db"]["ppn"]
+        CLUSTER_META["maf2db"]["cpus-per-task"]
     conda:
         "../envs/variantannotation_r.yaml"
     log:
@@ -243,7 +243,7 @@ rule annotate_vep:
     params:
         mem = CLUSTER_META["annoconsensusvcf"]["mem"]
     threads:
-        CLUSTER_META["annoconsensusvcf"]["ppn"]
+        CLUSTER_META["annoconsensusvcf"]["cpus-per-task"]
     conda:
         "../envs/vcf2maf.yaml"
     log:
@@ -289,7 +289,7 @@ rule annotate_vep:
 #    params:
 #        mem = CLUSTER_META["vep2db"]["mem"]
 #    threads:
-#        CLUSTER_META["vep2db"]["ppn"]
+#        CLUSTER_META["vep2db"]["cpus-per-task"]
 #    conda:
 #        "../envs/vep2db.yaml"
 #    log:
@@ -316,7 +316,7 @@ rule geno2db:
     params:
         mem = CLUSTER_META["geno2db"]["mem"]
     threads:
-        CLUSTER_META["geno2db"]["ppn"]
+        CLUSTER_META["geno2db"]["cpus-per-task"]
     conda:
         "../envs/variantannotation_r.yaml"
     log:
@@ -327,8 +327,6 @@ rule geno2db:
         "Copy M2 calls to TSV for uploading to database\n"
         "Aliquot: {wildcards.case_barcode}"
     script:
-        """
-        ../R/snakemake/geno2db.R
-        """
+        "../R/snakemake/geno2db.R"
      
 # ## END ##

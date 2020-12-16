@@ -6,7 +6,7 @@ rule preparetitan:
         hets    = "results/cnv/titan/{pair_barcode}/{pair_barcode}.hets.tsv",
         seg     = "results/cnv/titan/{pair_barcode}/{pair_barcode}.seg"
     threads:
-        CLUSTER_META["preparetitan"]["ppn"]
+        CLUSTER_META["preparetitan"]["cpus-per-task"]
     log:
         "logs/cnv/preparetitan/{pair_barcode}.log"
     benchmark:
@@ -40,7 +40,7 @@ rule titan:
         alphaKHigh =    lambda wildcards: 2500 if manifest.isExome(manifest.getTumor(wildcards.pair_barcode)) else 10000,
         gender = 		lambda wildcards: manifest.getSex(manifest.getTumor(wildcards.pair_barcode)) if manifest.getSex(manifest.getTumor(wildcards.pair_barcode)) is not None else "NA"
     threads:
-        CLUSTER_META["titan"]["ppn"]
+        CLUSTER_META["titan"]["cpus-per-task"]
     log:
         "logs/cnv/titan/{pair_barcode}_ploidy{ploidy}_cluster{cluster}.log"
     benchmark:
@@ -53,7 +53,7 @@ rule titan:
     shell:
     	"""
     	set +u
-        source activate r_3.4.1
+        source {config[conda_dir]}/activate r_3.4.1
         set -u
     	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
 			--genomeBuild hg19 \
@@ -84,7 +84,7 @@ rule selecttitan:
     output:
         txt     = "results/cnv/titan/{pair_barcode}/{pair_barcode}.optimalClusters.txt"
     threads:
-        CLUSTER_META["selecttitan"]["ppn"]
+        CLUSTER_META["selecttitan"]["cpus-per-task"]
     log:
         "logs/cnv/selecttitan/{pair_barcode}.log"
     benchmark:
@@ -95,7 +95,7 @@ rule selecttitan:
     shell:
     	"""
     	set +u
-        source activate r_3.4.1
+        source {config[conda_dir]}/activate r_3.4.1
         set -u
     	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
 			--ploidyRun2=results/cnv/titan/{wildcards.pair_barcode}/ploidy2 \
@@ -115,7 +115,7 @@ rule finaltitan:
         pdf     = "results/cnv/titanfinal/pdf/{pair_barcode}.pdf",
         igv		= "results/cnv/titanfinal/igv/{pair_barcode}.igv.seg"
     threads:
-        CLUSTER_META["finaltitan"]["ppn"]
+        CLUSTER_META["finaltitan"]["cpus-per-task"]
     log:
         "logs/cnv/finaltitan/{pair_barcode}.log"
     benchmark:
@@ -129,7 +129,8 @@ rule finaltitan:
 		cp "${{TITANDIR}}.segs.txt" {output.segs}
 		cp "${{TITANDIR}}.seg" {output.igv}
 		cp "${{TITANDIR}}.params.txt" {output.params}
-		/opt/software/helix/ImageMagick/7.0.7-26/bin/montage $TITANDIR/*_CNA.pdf $TITANDIR/*_LOH.pdf $TITANDIR/*_CF.pdf -tile 1x3 -geometry +0+0 {output.pdf}
+        module load singularity
+        singularity exec docker://dpokidov/imagemagick montage $TITANDIR/*_CNA.pdf $TITANDIR/*_LOH.pdf $TITANDIR/*_CF.pdf -tile 1x3 -geometry +0+0 {output.pdf}
     	"""
 
 ## END ##

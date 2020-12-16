@@ -45,7 +45,8 @@ rule kallisto:
         json = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/run_info.json",
         fusion = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/fusion.txt"
     params:
-    	output_dir = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/"
+    	output_dir = "results/kallisto/kallisto/aliquot/{aliquot_barcode}/",
+    	stranded = lambda wildcards: '' if manifest.getStranded(wildcards.aliquot_barcode, manifest.getRGIDs(wildcards.aliquot_barcode)[0])[0] == 'unstranded' else '--' + manifest.getStranded(wildcards.aliquot_barcode, manifest.getRGIDs(wildcards.aliquot_barcode)[0])[0]
     conda:
         "../envs/kallisto.yaml"
     log:
@@ -57,6 +58,7 @@ rule kallisto:
     	"(kallisto quant \
 		-i {config[kallisto_idx]} \
 		--fusion \
+		{params.stranded} \
 		-o {params.output_dir} \
 		{input}) 2>{log}"
 		

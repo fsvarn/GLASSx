@@ -17,6 +17,10 @@ if (length(args) < 1) {
 gct_path <- args[1]
 class_out <- args[2]
 
+# Manual run
+#gct_path <- "results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.gct"
+#class_out <- "results/kallisto/kallisto/final/p_result_gene_tpm_matrix_all_samples.gct.txt"
+
 #Install Qianghu's classifier
 
 #Run Qianghu's transcriptional classifier

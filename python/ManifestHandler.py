@@ -26,6 +26,8 @@ class ManifestHandler:
 
     pyclone_aliquots = [] ## List of pyclone aliquots
 
+    rna_library_prep = [] ## List of RNA files and their library prep methods
+
     selected_aliquots = set()
     selected_pairs = set()
     
@@ -92,6 +94,13 @@ class ManifestHandler:
         selected_aliquots_by_analyte = [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_analyte_type"] == analyte]
         return list(set(selected_aliquots_by_analyte).intersection(self.selected_aliquots))
 
+    def getAllAliquots(self):
+        """
+        Return a list of selected aliquots of a given analyte, default is DNA
+        """
+        selected_aliquots_by_analyte = [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items()]
+        return list(set(selected_aliquots_by_analyte).intersection(self.selected_aliquots))
+
     def getSelectedCases(self):
         """
         Return a list of selected cases
@@ -104,11 +113,11 @@ class ManifestHandler:
         """
         return list(self.selected_pairs)
 
-    def getSelectedReadgroupsByAliquot(self):
+    def getSelectedReadgroupsByAliquot(self, analyte='D'):
         """
         Return a dictionary of readgroup_idtag (keys = aliquot_barcode) limited to selected aliquots
         """
-        return {aliquot_barcode: self.getRGIDs(aliquot_barcode) for aliquot_barcode in self.getSelectedAliquots()}
+        return {aliquot_barcode: self.getRGIDs(aliquot_barcode) for aliquot_barcode in self.getSelectedAliquots(analyte)}
     
     def locateFiles(self, source_file_basepath, aligned_file_basepath):
         """
@@ -164,10 +173,16 @@ class ManifestHandler:
 
     def getAliquotsByCase(self, case_barcode, analyte = 'D'):
         """
-        Returns a list of aliquots given a case barcode
+        Returns a list of aliquots given a case barcode and analyte
         """
         return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["case_barcode"] == case_barcode and al["aliquot_analyte_type"] == analyte]
-    
+ 
+    def getAllAliquotsByCase(self, case_barcode):
+        """
+        Returns a list of all aliquots regardless of analyte given a case barcode
+        """
+        return [aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["case_barcode"] == case_barcode]
+       
     def getAliquotsByProject(self, case_project):
         """
         Returns a list of aliquots given a project name
@@ -192,7 +207,7 @@ class ManifestHandler:
         Returns a list of all aliquots with sample_type = 'NB'
         Subset by selected aliquots only
         """
-        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["sample_type"] in ["NB","NM"] ]) & set(self.getSelectedAliquots()))
+        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["sample_type"] in ["NB","NM","NT"] ]) & set(self.getSelectedAliquots()))
 
     def getPONAliquotsByBatch(self, aliquot_batch):
         """
@@ -200,11 +215,11 @@ class ManifestHandler:
         """
         return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch and al["sample_type"] in ["NB","NM"]]) & set(self.getSelectedAliquots()))
     
-    def getAliquotsByBatch(self, aliquot_batch, analyte = 'D'):
+    def getAliquotsByBatch(self, aliquot_batch):
         """
         Returns a list of aliquots given a batch
         """
-        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch]) & set(self.getSelectedAliquots(analyte)))
+        return list(set([aliquot_barcode for (aliquot_barcode, al) in self.aliquots.items() if al["aliquot_batch"] is not None and al["aliquot_batch"] in aliquot_batch]) & set(self.getSelectedAliquots()))
 
     def parseBatch(self, batch_str):
         parser = batch_str.split('-')
@@ -364,5 +379,11 @@ class ManifestHandler:
         Returns a list of FASTQ filenames given an aliquot barcode and RGID tag
         """
         return [fr["file_path"] for fr in self.files_readgroups if fr["aliquot_barcode"] == aliquot_barcode and fr["readgroup_idtag"] == readgroup_idtag]
+
+    def getStranded(self, aliquot_barcode, readgroup_idtag):
+        """
+        Returns a list of RNAseq library prep methods (strandedness) given an aliquot barcode and RGID tag
+        """
+        return [lp["library_prep"] for lp in self.rna_library_prep if lp["aliquot_barcode"] == aliquot_barcode and lp["readgroup_idtag"] == readgroup_idtag]
 
 ## END ##

@@ -18,6 +18,7 @@ if (length(args) < 1) {
   stop("Please provide an input", call.=FALSE)}
 
 transcript_tpm <- args[1]
+#transcript_tpm <- "results/kallisto/kallisto/final/transcript_tpms_all_samples.tsv"
 
 cat("Reading in inputs...")
 ttpm <- read.delim(transcript_tpm,stringsAsFactors=FALSE)

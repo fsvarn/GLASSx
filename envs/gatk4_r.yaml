@@ -1,0 +1,52 @@
+name: gatk_4.1.0_r
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - _r-mutex=1.0.1=anacondar_1
+  - bzip2=1.0.8=h516909a_3
+  - ca-certificates=2020.6.20=hecda079_0
+  - cairo=1.14.6=4
+  - curl=7.54.1=0
+  - fontconfig=2.12.1=5
+  - freetype=2.7=1
+  - gettext=0.19.8.1=hc5be6a0_1002
+  - glib=2.51.4=0
+  - graphite2=1.3.13=he1b5a44_1001
+  - gsl=2.6=h294904e_0
+  - harfbuzz=1.4.3=0
+  - icu=58.2=hf484d3e_1000
+  - jpeg=9d=h516909a_0
+  - krb5=1.14.6=0
+  - libblas=3.8.0=17_openblas
+  - libcblas=3.8.0=17_openblas
+  - libffi=3.2.1=he1b5a44_1007
+  - libgcc=7.2.0=h69d50b8_2
+  - libgcc-ng=9.3.0=h24d8f2e_16
+  - libgfortran-ng=7.5.0=hdf63c60_16
+  - libgomp=9.3.0=h24d8f2e_16
+  - libiconv=1.16=h516909a_0
+  - libopenblas=0.3.10=pthreads_hb3c22a3_4
+  - libpng=1.6.28=1
+  - libssh2=1.8.0=h9cfc8f7_4
+  - libstdcxx-ng=9.3.0=hdf63c60_16
+  - libtiff=4.0.7=0
+  - libxml2=2.9.5=0
+  - ncurses=5.9=10
+  - openssl=1.0.2u=h516909a_0
+  - pango=1.40.4=0
+  - pcre=8.44=he1b5a44_0
+  - pixman=0.34.0=h14c3975_1003
+  - r-base=3.3.2=5
+  - r-data.table=1.10.4=r3.3.2_0
+  - r-getopt=1.20.2=r3.3.2_0
+  - r-optparse=1.3.2=r3.3.2_0
+  - readline=6.2=0
+  - tk=8.5.19=2
+  - xz=5.2.5=h516909a_1
+  - zlib=1.2.8=3
+prefix: /projects/verhaak-lab/varnf/anaconda3/envs/gatk_4.1.0_r
+

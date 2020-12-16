@@ -30,7 +30,7 @@ WITH subtype_label AS
 	FROM analysis.rna_silver_set ss
 	JOIN analysis.transcriptional_subtype ts1 ON ts1.aliquot_barcode = ss.tumor_barcode_a
 	JOIN analysis.transcriptional_subtype ts2 ON ts2.aliquot_barcode = ss.tumor_barcode_b AND ts1.signature_name = ts2.signature_name
-	WHERE ts1.p_value < 0.05 OR ts2.p_value < 0.05
+	--WHERE ts1.p_value < 0.05 OR ts2.p_value < 0.05
 ),
 subtype_switch AS
 (
@@ -361,12 +361,12 @@ g$heights[panels[11*3]] <- unit(n1/2,"null")
 grid.newpage()
 
 #Plot
-pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_v3.pdf",width=7,height=5)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_v4.pdf",width=7,height=5)
 grid.draw(g)
 dev.off()
 
 #Legends
-pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/transcriptional_subtype_change_legends_v3.pdf",width=7,height=7)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_legends_v4.pdf",width=7,height=7)
 grid.arrange(gg_legend(gg_simplicity_score),
 	gg_legend(gg_transcript_subtype_pro),
 	gg_legend(gg_transcript_subtype_cla),
@@ -374,6 +374,55 @@ grid.arrange(gg_legend(gg_simplicity_score),
 	gg_legend(gg_cell_state_rec),
 	gg_legend(gg_tmz),ncol=5)
 dev.off()
+
+
+# Initial versus recurrence
+
+barplot_res <- plot_res %>% 
+			   group_by(cell_state, status, idh_codel_subtype) %>% 
+			   summarise(proportion = mean(proportion)) %>%
+			   mutate(status = as_factor(status)) %>%
+		       mutate(status = fct_relevel(status, "Initial","Recurrent"))
+			   
+
+mysubtype <- unique(plot_res[,"idh_codel_subtype"])   
+mycellstate <- unique(plot_res[,"cell_state"])
+p.val <- matrix(0, nrow=length(mycellstate), ncol=length(mysubtype))
+rownames(p.val) <- mycellstate
+colnames(p.val) <- mysubtype
+for(i in 1:length(mycellstate))
+{
+	for(j in 1:length(mysubtype))
+	{
+		dat1 <- plot_res %>% filter(cell_state == mycellstate[i] & idh_codel_subtype == mysubtype[j] & status == "Initial")
+		dat2 <- plot_res %>% filter(cell_state == mycellstate[i] & idh_codel_subtype == mysubtype[j] & status == "Recurrent")
+		p.val[i,j] <- wilcox.test(dat1[,"proportion"], dat2[,"proportion"], paired=TRUE)$p.value
+	}
+}
+			   
+pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/cibersortx_stacked_barplot_timepoint_subtype.pdf",width=5,height=3.5)  
+ggplot(barplot_res, aes(fill=cell_state, y=proportion, x=status)) + 
+geom_bar(position="stack", stat="identity") +
+  scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
+						 "Oligodendrocyte" = "#2ca25f",
+						 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
+						 "Fibroblast" = "#feb24c",
+						 "Stem cell tumor" = "#fb6a4a", "Differentiated tumor" = "#fcbba1", "Proliferating stem cell tumor" = "#a50f15")) +
+labs(y = "Proportion") +
+facet_grid(~idh_codel_subtype) +
+theme_bw() +
+theme(axis.title.x=element_blank(),
+axis.title.y=element_text(size=7),
+axis.text.x=element_text(size=7,angle=45,hjust=1),
+axis.text.y=element_text(size=7),
+strip.text = element_text(size=7, hjust=0.5),
+strip.background = element_blank(),
+legend.title = element_blank(),
+legend.text = element_text(size=7),
+legend.position = "right")
+dev.off()
+
+
 
 #P-values vs subtype switch
 test_dat <- plot_res %>% filter(status=="Recurrent",signature_name=="Proneural")

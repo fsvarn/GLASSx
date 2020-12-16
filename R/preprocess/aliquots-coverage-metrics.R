@@ -1,11 +1,10 @@
 #######################################################
 # Enumerate cumulative coverage per aliquot for WGS/WXS
 # Date: 2018.11.06 
-# Author: Kevin J.
+# Author: Kevin J., modified by Fred V on 10/14/2020 for GLASSv3 
 #######################################################
 
 # Directory for GLASS analysis.
-mybasedir = '/Volumes/verhaak-lab/GLASS-analysis/'
 datadir  = 'results/align/wgsmetrics/'
 pattern   = '.WgsMetrics.txt$'
 
@@ -19,7 +18,7 @@ library(DBI)
 
 #######################################################
 # Establish connection with the database.
-con <- DBI::dbConnect(odbc::odbc(), "VerhaakDB")
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 ## Read in an example "*.WgsMetrics.txt" file to test the calling.
 files = list.files(datadir, full.names = T, pattern = pattern, recursive=T)
@@ -57,8 +56,14 @@ glass_samples_cumulative_cov = glass_cov %>%
 # Total number should be 1166 (2019.03.08).
 n_distinct(glass_samples_cumulative_cov$aliquot_barcode)
 
+# Pull out H2 (2020.10.14)
+hf_cumulative_cov <- glass_samples_cumulative_cov %>%
+					 filter(grepl("GLSS-HF-", aliquot_barcode)) %>%
+					 filter(!grepl("GLSS-HF-2", aliquot_barcode)) %>%
+					 filter(!grepl("GLSS-HF-3", aliquot_barcode)) 
+
 # Write output as one table or a table for each file:
 # write.table(glass_samples_cumulative_cov, file = "/Users/johnsk/Documents/Life-History/GLASS-WG/data/ref/glass-cumulative-coverage.txt", sep="\t", row.names = F, col.names = T, quote = F)
 
 # Write to cumulative coverage files to database.
-dbWriteTable(con, Id(schema="analysis",table="coverage"), glass_samples_cumulative_cov, append=T)
+dbWriteTable(con, Id(schema="analysis",table="coverage"), hf_cumulative_cov, append=T)

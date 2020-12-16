@@ -600,7 +600,7 @@ rule gencode_coverage:
     params:
         mem = CLUSTER_META["gencode_coverage"]["mem"]
     conda:
-        "../envs/align.yaml"
+        "../envs/bedsam.yaml"
     threads:
         CLUSTER_META["gencode_coverage"]["cpus-per-task"]
     log:
@@ -611,9 +611,7 @@ rule gencode_coverage:
         "Computing coverage using flattened gencode GTF\n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:"""
-    	set +o pipefail;
-        module load samtools;
-        #module load bedtools;
+        set +o pipefail;
         samtools view -q 10 -b {input} | 
             bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d -sorted -g {config[bedtools_genome]} | 
             bedtools groupby -i stdin -g 1,2,3,4,5 -c 7 -o sum | 

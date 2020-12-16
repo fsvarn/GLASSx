@@ -15,7 +15,7 @@ rule fingerprintsample:
     params:
         mem = CLUSTER_META["fingerprintsample"]["mem"]
     threads:
-        CLUSTER_META["fingerprintsample"]["ppn"]
+        CLUSTER_META["fingerprintsample"]["cpus-per-task"]
     log:
         "logs/fingerprinting/{aliquot_barcode}.fingerprintsample.log"
     benchmark:
@@ -24,7 +24,7 @@ rule fingerprintsample:
         "Running Picard CrosscheckFingerprints to check that all readgroups in a sample come from the same individual\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CrosscheckFingerprints \
+        "gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
             --HAPLOTYPE_MAP {config[haplotype_map][file]} \
             --INPUT {input} \
             --OUTPUT {output} \
@@ -49,7 +49,7 @@ rule fingerprintcase:
         mem = CLUSTER_META["fingerprintcase"]["mem"],
         samples = lambda _, input: " ".join(["--INPUT " + s for s in input])
     threads:
-        CLUSTER_META["fingerprintcase"]["ppn"]
+        CLUSTER_META["fingerprintcase"]["cpus-per-task"]
     log:
         "logs/fingerprinting/{case_barcode}.fingerprintcase.log"
     benchmark:
@@ -58,7 +58,7 @@ rule fingerprintcase:
         "Running Picard CrosscheckFingerprints across multiple samples from the sample individual to check for mismatches\n"
         "Case: {wildcards.case_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CrosscheckFingerprints \
+        "gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
             --HAPLOTYPE_MAP {config[haplotype_map][file]} \
             --CROSSCHECK_BY SAMPLE \
             {params.samples} \
@@ -83,7 +83,7 @@ rule fingerprintcase:
 #     params:
 #         mem = CLUSTER_META["fingerprintproject"]["mem"]
 #     threads:
-#         CLUSTER_META["fingerprintproject"]["ppn"]
+#         CLUSTER_META["fingerprintproject"]["cpus-per-task"]
 #     log:
 #         "logs/fingerprinting/{project}.fingerprintproject.log"
 #     benchmark:
@@ -93,7 +93,7 @@ rule fingerprintcase:
 #         "Project: {wildcards.project}"
 #     run:
 #         input_samples = " ".join(["--INPUT " + s for s in input])
-#         shell("gatk --java-options -Xmx{params.mem}g CrosscheckFingerprints \
+#         shell("gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
 #             --HAPLOTYPE_MAP {config[haplotype_map]} \
 #             --LOD_THRESHOLD -5 \
 #             --CROSSCHECK_BY SAMPLE \
@@ -114,12 +114,13 @@ rule fingerprintall:
     input:
         lambda wildcards: expand("results/align/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam", aliquot_barcode = manifest.getSelectedAliquots())
     output:
-        "results/fingerprinting/GLASS.crosscheck_metrics"
+        #"results/fingerprinting/GLASS.crosscheck_metrics"
+        "results/fingerprinting/GLASS_HF.crosscheck_metrics"
     params:
         mem = CLUSTER_META["fingerprintall"]["mem"],
         samples = lambda _, input: " ".join(["--INPUT " + s for s in input])
     threads:
-        CLUSTER_META["fingerprintall"]["ppn"]
+        CLUSTER_META["fingerprintall"]["cpus-per-task"]
     log:
         "logs/fingerprinting/GLASS.fingerprintall.log"
     benchmark:
@@ -127,7 +128,7 @@ rule fingerprintall:
     message:
         "Running Picard CrosscheckFingerprints across entire cohort"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CrosscheckFingerprints \
+        "gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
             --HAPLOTYPE_MAP {config[haplotype_map][file]} \
             --LOD_THRESHOLD -5 \
             --CROSSCHECK_BY SAMPLE \
@@ -152,7 +153,7 @@ rule fingerprintall:
 #     params:
 #         mem = CLUSTER_META["clusterfingerprintproject"]["mem"]
 #     threads:
-#         CLUSTER_META["clusterfingerprintproject"]["ppn"]
+#         CLUSTER_META["clusterfingerprintproject"]["cpus-per-task"]
 #     log:
 #         "logs/fingerprinting/{project}.clusterfingerprintproject.log"
 #     benchmark:
@@ -161,7 +162,7 @@ rule fingerprintall:
 #         "Running Picard ClusterCrosscheckMetrics on project\n"
 #         "Project: {wildcards.project}"
 #     shell:
-#         "gatk --java-options -Xmx{params.mem}g ClusterCrosscheckMetrics \
+#         "gatk --java-options -Xmx{params.mem} ClusterCrosscheckMetrics \
 #             --INPUT {input} \
 #             --LOD_THRESHOLD 5 \
 #             --OUTPUT {output} \
@@ -183,7 +184,7 @@ rule fingerprintall:
 #     params:
 #         mem = CLUSTER_META["clusterfingerprintall"]["mem"]
 #     threads:
-#         CLUSTER_META["clusterfingerprintall"]["ppn"]
+#         CLUSTER_META["clusterfingerprintall"]["cpus-per-task"]
 #     log:
 #         "logs/fingerprinting/GLASS-WG.clusterfingerprintall.log"
 #     benchmark:
@@ -191,7 +192,7 @@ rule fingerprintall:
 #     message:
 #         "Running Picard ClusterCrosscheckMetrics on entire GLASS-WG cohort"
 #     shell:
-#         "gatk --java-options -Xmx{params.mem}g ClusterCrosscheckMetrics \
+#         "gatk --java-options -Xmx{params.mem} ClusterCrosscheckMetrics \
 #             --INPUT {input} \
 #             --LOD_THRESHOLD 5 \
 #             --OUTPUT {output} \

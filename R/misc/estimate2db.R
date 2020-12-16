@@ -8,10 +8,10 @@ rm(list=ls())
 
 #Load and prepare gene expression matrix
 
-filterCommonGenes("/projects/varnf/GLASS-III/GLASS-III/results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv", "/projects/varnf/GLASS-III/GLASS-III/data/sigs/gene_tpm_matrix_all_samples_estimate_filtered.tsv",id="GeneSymbol")
-estimateScore("/projects/varnf/GLASS-III/GLASS-III/data/sigs/gene_tpm_matrix_all_samples_estimate_filtered.tsv","/projects/varnf/GLASS-III/GLASS-III/data/sigs/gene_tpm_matrix_all_samples_estimate_scores.txt","affymetrix")
+filterCommonGenes("results/kallisto/kallisto/final/gene_tpm_matrix_all_samples.tsv", "data/sigs/gene_tpm_matrix_all_samples_estimate_filtered.tsv",id="GeneSymbol")
+estimateScore("data/sigs/gene_tpm_matrix_all_samples_estimate_filtered.tsv","data/sigs/gene_tpm_matrix_all_samples_estimate_scores.txt","affymetrix")
 
-estimate <- t(read.delim("/projects/varnf/GLASS-III/GLASS-III/data/sigs/gene_tpm_matrix_all_samples_estimate_scores.txt"))
+estimate <- t(read.delim("data/sigs/gene_tpm_matrix_all_samples_estimate_scores.txt"))
 colnames(estimate) <- estimate[2,]
 estimate <- estimate[-c(1,2),]
 aliquot_barcode <- gsub("\\.","-",estimate[,2])
@@ -27,4 +27,4 @@ colnames(estimate) <- c("aliquot_barcode","stromal_score","immune_score","estima
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 # Write ESTIMATE results to db
-dbWriteTable(con, Id(schema="analysis",table="estimate"), estimate)
+dbWriteTable(con, Id(schema="analysis",table="estimate"), estimate, overwrite = TRUE)

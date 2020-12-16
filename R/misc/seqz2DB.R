@@ -3,7 +3,7 @@
 library(tidyverse)
 library(DBI)
 library(odbc)
-con <- DBI::dbConnect(odbc::odbc(), "GLASSv2")
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
 seg <- read.delim("results/sequenza/glass_seqz_segments.tsv", as.is = TRUE)
 pp <- read.delim("results/sequenza/glass_seqz_purity_ploidy.tsv", as.is = TRUE)
@@ -22,6 +22,10 @@ seg <- seg %>% transmute(pair_barcode,
                          major_cn = A,
                          minor_cn = B,
                          log_posterior_proba = LPP)
+
+seg <- seg[grep("GLSS-HF-",seg[,"pair_barcode"]),]
+seg <- seg[-grep("GLSS-HF-2",seg[,"pair_barcode"]),]
+seg <- seg[-grep("GLSS-HF-3",seg[,"pair_barcode"]),]
 
 dbWriteTable(con, Id(schema="variants",table="seqz_seg"), seg, append=T)
 dbWriteTable(con, Id(schema="variants",table="seqz_params"), pp, append=T)

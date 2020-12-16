@@ -68,7 +68,10 @@ for(i in 1:ncol(prop))
 	mycor[i] <- round(cor(prop[,i], truth[,i], method="p"),2)
 }
 
-colors <- brewer.pal(12,"Paired")
+#colors <- brewer.pal(12,"Paired")
+colors <- c("stemcell_tumor" = "#fb6a4a", "myeloid" = "#08519c", "differentiated_tumor" = "#fcbba1", "prolif_stemcell_tumor" = "#a50f15",
+			"oligodendrocyte" = "#2ca25f", "t_cell" = "#6baed6", "granulocyte" = "#bdd7e7", "pericyte" = "#fee391", "endothelial" = "#ffffd4", 
+			"dendritic_cell" = "#3182bd", "fibroblast" = "#feb24c", "b_cell" = "#eff3ff")
 
 # Create scatterplots
 se <- list()
@@ -107,6 +110,10 @@ for(i in 1:ncol(prop))
 
 pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/10x_scgp_cibersortx_bulk_mix_validation.pdf",width=6.5,height=5.2)
 grid.arrange(se[[1]],se[[2]],se[[3]],se[[4]],se[[5]],se[[6]],se[[7]],se[[8]],se[[9]],se[[10]],se[[11]],se[[12]],nrow=3)
+dev.off()
+
+pdf("/projects/varnf/GLASS-III/GLASS-III/figures/analysis/10x_scgp_cibersortx_bulk_mix_tumor_validation.pdf",width=4.2,height=1.5)
+grid.arrange(se[[3]],se[[1]],se[[4]],nrow=1)
 dev.off()
 
 

@@ -24,7 +24,7 @@ rule collectreadcounts:
         mem = CLUSTER_META["collectreadcounts"]["mem"],
         intervals = lambda wildcards: selectIntervals(manifest.isExome(wildcards.aliquot_barcode), wildcards["chromosomes"])
     threads:
-        CLUSTER_META["collectreadcounts"]["ppn"]
+        CLUSTER_META["collectreadcounts"]["cpus-per-task"]
     log:
         "logs/cnv/readcounts/{aliquot_barcode}.{chromosomes}.log"
     conda:
@@ -36,7 +36,7 @@ rule collectreadcounts:
         "Sample: {wildcards.aliquot_barcode}\n"
         "Chromosomes: {wildcards.chromosomes}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CollectReadCounts \
+        "gatk --java-options -Xmx{params.mem} CollectReadCounts \
             -I {input.bam} \
             -L {params.intervals} \
             --interval-merging-rule OVERLAPPING_ONLY \
@@ -57,7 +57,7 @@ rule collecthets:
     params:
         mem = CLUSTER_META["collecthets"]["mem"]
     threads:
-        CLUSTER_META["collecthets"]["ppn"]
+        CLUSTER_META["collecthets"]["cpus-per-task"]
     log:
         "logs/cnv/hets/{aliquot_barcode}.log"
     conda:
@@ -68,7 +68,7 @@ rule collecthets:
         "Collect allelic counts\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CollectAllelicCounts \
+        "gatk --java-options -Xmx{params.mem} CollectAllelicCounts \
             -I {input} \
             -L {config[cnv][hetsites]} \
             -R {config[reference_fasta]} \
@@ -102,7 +102,7 @@ rule createcnvpon:
         input_files = lambda _, input: " ".join(["-I " + s for s in input]),
         gcanno = lambda wildcards: selectGCAnnotation(wildcards.aliquot_batch.endswith("WXS"), wildcards["chromosomes"])
     threads:
-        CLUSTER_META["createcnvpon"]["ppn"]
+        CLUSTER_META["createcnvpon"]["cpus-per-task"]
     log:
         "logs/cnv/createcnvpon/{aliquot_batch}.{chromosomes}.{sex}.log"
     conda:
@@ -115,7 +115,7 @@ rule createcnvpon:
         "Chromosomes: {wildcards.chromosomes}\n"
         "Sex: {wildcards.sex}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CreateReadCountPanelOfNormals \
+        "gatk --java-options -Xmx{params.mem} CreateReadCountPanelOfNormals \
             {params.input_files} \
             --annotated-intervals {params.gcanno} \
             -O {output} \
@@ -143,7 +143,7 @@ rule denoisereadcounts:
     params:
         mem = CLUSTER_META["denoisereadcounts"]["mem"]
     threads:
-        CLUSTER_META["denoisereadcounts"]["ppn"]
+        CLUSTER_META["denoisereadcounts"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -155,7 +155,7 @@ rule denoisereadcounts:
         "Aliquot: {wildcards.aliquot_barcode}\n"
         "Chromosomes: {wildcards.chromosomes}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g DenoiseReadCounts \
+        "gatk --java-options -Xmx{params.mem} DenoiseReadCounts \
             -I {input.sample} \
             --count-panel-of-normals {input.pon} \
             --standardized-copy-ratios {output.standardized} \
@@ -175,7 +175,7 @@ rule mergedenoisedreadcounts:
     params:
         mem = CLUSTER_META["mergedenoisedreadcounts"]["mem"]
     threads:
-        CLUSTER_META["mergedenoisedreadcounts"]["ppn"]
+        CLUSTER_META["mergedenoisedreadcounts"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -217,11 +217,11 @@ rule plotcr:
         outputdir = "results/cnv/plotcr/{aliquot_barcode}",
         outputprefix = "{aliquot_barcode}"
     threads:
-        CLUSTER_META["plotcr"]["ppn"]
+        CLUSTER_META["plotcr"]["cpus-per-task"]
     log:
         "logs/cnv/plotcr/{aliquot_barcode}.log"
     conda:
-        "../envs/gatk4.yaml"
+        "../envs/gatk4_r.yaml"
     benchmark:
         "benchmarks/cnv/plotcr/{aliquot_barcode}.txt"
     message:
@@ -229,8 +229,10 @@ rule plotcr:
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
         """
-        module load R/3.3.2 #R and the gatk4.1.0 packages in conda are no longer compatible 
-        gatk --java-options -Xmx{params.mem}g PlotDenoisedCopyRatios \
+        #module load R/3.3.2
+		module use --append "{config[module_dir]}"
+        module load fvgatk4/4.1.0.0
+        gatk --java-options -Xmx{params.mem} PlotDenoisedCopyRatios \
             --standardized-copy-ratios {input.standardized} \
             --denoised-copy-ratios {input.denoised} \
             --sequence-dictionary {config[reference_dict]} \
@@ -265,7 +267,7 @@ rule modelsegments:
         outputprefix = "{aliquot_barcode}",
         normal_counts_cmd = lambda wildcards: "--normal-allelic-counts results/cnv/hets/{}.allelicCounts.tsv".format(manifest.getMatchedNormal(wildcards.aliquot_barcode)) if manifest.getMatchedNormal(wildcards.aliquot_barcode) is not None else ""
     threads:
-        CLUSTER_META["modelsegments"]["ppn"]
+        CLUSTER_META["modelsegments"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -276,7 +278,7 @@ rule modelsegments:
         "Model segments\n"
         "Aliquot barcode: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g ModelSegments \
+        "gatk --java-options -Xmx{params.mem} ModelSegments \
             --denoised-copy-ratios {input.denoised} \
             --allelic-counts {input.counts} \
             {params.normal_counts_cmd} \
@@ -298,7 +300,7 @@ rule callsegments:
     params:
         mem = CLUSTER_META["callsegments"]["mem"]
     threads:
-        CLUSTER_META["callsegments"]["ppn"]
+        CLUSTER_META["callsegments"]["cpus-per-task"]
     conda:
         "../envs/gatk4.yaml"
     log:
@@ -309,7 +311,7 @@ rule callsegments:
         "Call segments\n"
         "Aliquot barcode: {wildcards.aliquot_barcode}"
     shell:
-        "gatk --java-options -Xmx{params.mem}g CallCopyRatioSegments \
+        "gatk --java-options -Xmx{params.mem} CallCopyRatioSegments \
             --input {input} \
             --output {output} \
             > {log} 2>&1"
@@ -323,7 +325,7 @@ rule seg2db:
     params:
         mem = CLUSTER_META["seg2db"]["mem"]
     threads:
-        CLUSTER_META["seg2db"]["ppn"]
+        CLUSTER_META["seg2db"]["cpus-per-task"]
     log:
         "logs/cnv/seg2db/seg2db.log"
     benchmark:
@@ -351,11 +353,11 @@ rule plotmodeledsegments:
         outputdir = "results/cnv/plotmodeledsegments",
         outputprefix = "{aliquot_barcode}"
     threads:
-        CLUSTER_META["plotmodeledsegments"]["ppn"]
-    conda:
-        "../envs/gatk4.yaml"
+        CLUSTER_META["plotmodeledsegments"]["cpus-per-task"]
     log:
         "logs/cnv/plotmodeledsegments/{aliquot_barcode}.log"
+    conda:
+        "../envs/gatk4_r.yaml"
     benchmark:
         "benchmarks/cnv/plotmodeledsegments/{aliquot_barcode}.txt"
     message:
@@ -363,8 +365,9 @@ rule plotmodeledsegments:
         "Aliquot barcode: {wildcards.aliquot_barcode}"
     shell:
         """
-        module load R/3.3.2 #R and the gatk4.1.0 packages in conda are no longer compatible 
-        gatk --java-options -Xmx{params.mem}g PlotModeledSegments \
+		module use --append "{config[module_dir]}"
+        module load fvgatk4/4.1.0.0
+        gatk --java-options -Xmx{params.mem} PlotModeledSegments \
             --denoised-copy-ratios {input.denoisedCR} \
             --allelic-counts {input.hets} \
             --segments {input.segments} \
@@ -382,7 +385,7 @@ rule combinecnvplots:
     output:
         "results/cnv/plots/{aliquot_barcode}.pdf"
     threads:
-        CLUSTER_META["combinecnvplots"]["ppn"]
+        CLUSTER_META["combinecnvplots"]["cpus-per-task"]
     log:
         "logs/cnv/combinecnvplots/{aliquot_barcode}.log"
     benchmark:
@@ -391,6 +394,9 @@ rule combinecnvplots:
         "Plot GATK CNV results\n"
         "Aliquot: {wildcards.aliquot_barcode}"
     shell:
-        "/opt/software/helix/ImageMagick/7.0.7-26/bin/montage {input.cr} {input.ms} -tile 1x2 -geometry +0+0 {output}"
+        """
+        module load singularity
+        singularity exec docker://dpokidov/imagemagick montage {input.cr} {input.ms} -tile 1x2 -geometry +0+0 {output}
+        """
 
 ## END ##
