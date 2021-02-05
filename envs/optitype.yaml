@@ -70,7 +70,8 @@ dependencies:
   - nss=3.47=he751ad9_0
   - numexpr=2.7.1=py27hb3f55d8_0
   - numpy=1.15.4=py27h8b7e671_1002
-  - openjdk=8.0.192=h516909a_1004
+#  - openjdk=8.0.192=h516909a_1004
+  - openjdk=8.0.152=h7b6447c_3
   - openssl=1.1.1d=h516909a_0
   - optitype=1.3.2=py27_3
   - pandas=0.24.2=py27hb3f55d8_0

@@ -172,7 +172,7 @@ rule optitype_long:
         "Calling HLA type (extended) \n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-        "(/projects/varnf/SofWar/OptiType/OptiTypePipeline_mod.py \
+        "(/projects/verhaak-lab/USERS/varnf/SofWar/OptiType/OptiTypePipeline_mod.py \
         -i {input.F} \
         {input.F2} \
         --config conf/optitype_config.ini \

@@ -16,29 +16,25 @@ con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 q <- "SELECT ps.case_barcode, 
 ps.tumor_barcode_a, 
 ps.tumor_barcode_b, 
-bs1.sample_type AS sample_type_a,
-bs2.sample_type AS sample_type_b,
 im1.aaseqcdr3 AS tcr_amino_acid,
 im1.clonecount AS clonecount_a, 
 im2.clonecount AS clonecount_b, 
 im1.clonefraction AS clonefraction_a, 
 im2.clonefraction AS clonefraction_b, 
-cs1.grade AS grade_a,
-cs2.grade AS grade_b, 
-cs1.idh_codel_subtype AS subtype_a, 
-cs2.idh_codel_subtype AS subtype_b,
-cs1.idh_status AS idh_status,
-cs2.surgical_interval_mo AS surgical_interval_mo
+sc1.fraction AS t_cell_a,
+sc2.fraction AS t_cell_b,
+cs.idh_codel_subtype,
+ts1.signature_name AS subtype_a,
+ts2.signature_name AS subtype_b
 FROM analysis.rna_silver_set ps
 JOIN analysis.mixcr_tcr im1 ON im1.aliquot_barcode = ps.tumor_barcode_a
 JOIN analysis.mixcr_tcr im2 ON im2.aliquot_barcode = ps.tumor_barcode_b AND im1.aaseqcdr3 = im2.aaseqcdr3
-JOIN biospecimen.aliquots al1 ON al1.aliquot_barcode = im1.aliquot_barcode
-JOIN biospecimen.aliquots al2 ON al2.aliquot_barcode = im2.aliquot_barcode
-JOIN clinical.surgeries cs1 ON cs1.sample_barcode = al1.sample_barcode
-JOIN clinical.surgeries cs2 ON cs2.sample_barcode = al2.sample_barcode
-JOIN biospecimen.samples bs1 ON bs1.sample_barcode = al1.sample_barcode
-JOIN biospecimen.samples bs2 ON bs2.sample_barcode = al2.sample_barcode
-ORDER BY 1, 2"
+JOIN analysis.cibersortx_scgp sc1 ON sc1.aliquot_barcode = ps.tumor_barcode_a
+JOIN analysis.cibersortx_scgp sc2 ON sc2.aliquot_barcode = ps.tumor_barcode_b AND sc2.cell_state = sc1.cell_state
+JOIN clinical.subtypes cs ON cs.case_barcode = ps.case_barcode
+JOIN analysis.top_transcriptional_subtype ts1 ON ts1.aliquot_barcode = ps.tumor_barcode_a
+JOIN analysis.top_transcriptional_subtype ts2 ON ts2.aliquot_barcode = ps.tumor_barcode_b
+WHERE sc1.cell_state = 't_cell'"
 
 dat <- dbGetQuery(con, q)
 

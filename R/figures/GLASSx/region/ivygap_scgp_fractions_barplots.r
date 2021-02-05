@@ -22,18 +22,19 @@ samps <- read.csv(myinf2,stringsAsFactor=FALSE)
 samp_struct <- samps$structure_name
 names(samp_struct) <- samps$rna_well_id
 
-tumor_id <- samps$tumor_id
-names(tumor_id) <- samps$rna_well_id
+tumor_name <- samps$tumor_name
+names(tumor_name) <- samps$rna_well_id
 
 dat[,"structure"] <- samp_struct[as.character(dat[,"Mixture"])]
-dat[,"tumor_id"] <- tumor_id[as.character(dat[,"Mixture"])]
+dat[,"tumor_name"] <- tumor_name[as.character(dat[,"Mixture"])]
 dat <- dat[grep("reference histology", dat[,"structure"]),]
 
 dat[,"structure"] <- gsub(" sampled by reference histology","",dat[,"structure"])
 
+
 dat <- dat %>% 
 		select(-c("P.value", "Correlation", "RMSE")) %>%
-		pivot_longer(cols=-c("Mixture","structure","tumor_id"), names_to = "cell_state", values_to = "fraction") %>%
+		pivot_longer(cols=-c("Mixture","structure","tumor_name"), names_to = "cell_state", values_to = "fraction") %>%
 		mutate(cell_state = recode(cell_state, "b_cell" = "B cell", "dendritic_cell" = "Dendritic cell",
 		"differentiated_tumor" = "Diff.-like", "endothelial" = "Endothelial",
 		"fibroblast" = "Fibroblast", "granulocyte" = "Granulocyte",
@@ -42,11 +43,19 @@ dat <- dat %>%
 		"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
 		mutate(structure = recode(structure, 
 		"Cellular Tumor" = "Cellular tumor", "Infiltrating Tumor" = "Infiltrating tumor", "Leading Edge" = "Leading edge")) %>%
-		as.data.frame()
+		mutate(Mixture = as.character(Mixture), tumor_name = as.character(tumor_name))
 		
-res <- dat %>%
+# Create average profile for plotting
+		
+dat <- dat %>%
 	   group_by(structure, cell_state) %>%
-	   summarise(avg = mean(fraction)*100) %>%
+	   summarise(fraction = mean(fraction)) %>%
+	   mutate(tumor_name = "Mean", Mixture = paste("Mean",structure,sep=" ")) %>%
+	   ungroup() %>%
+	   select(Mixture, structure, tumor_name, cell_state, fraction) %>%
+	   bind_rows(dat) %>%
+	   mutate(Mixture = as_factor(Mixture)) %>%
+	   mutate(structure = fct_relevel(structure, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
 	   mutate(cell_state = as_factor(cell_state)) %>%
 	   mutate(cell_state = fct_relevel(cell_state, "B cell", "Granulocyte", "T cell", "Dendritic cell", "Myeloid", 
 									"Oligodendrocyte", 
@@ -55,26 +64,26 @@ res <- dat %>%
 									"Diff.-like", "Stem-like", "Prolif. stem-like"))
 
    
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions.pdf", width=2, height = 3) #,width=2.7,height=3)
-ggplot(res, aes(x=structure, y = avg, fill = factor(cell_state))) +
-geom_bar(position="stack", stat="identity") +
-theme_classic() +
-scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
-					 "Oligodendrocyte" = "#2ca25f",
-					 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
-					 "Fibroblast" = "#feb24c",
-					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15")) +
-labs(y = "Proportion (%)") +
-theme(axis.text.x = element_text(size=7,angle=45,hjust=1),
-	axis.text.y = element_text(size=7),
-	axis.title.x = element_blank(),
-	axis.title.y= element_text(size=7),
-	panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
-	strip.text = element_blank(),
-	strip.background = element_blank(),
-	legend.position = "none") +
-    coord_cartesian(ylim=c(0,100))
-dev.off()
+# pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions.pdf", width=2, height = 3) #,width=2.7,height=3)
+# ggplot(res, aes(x=structure, y = avg, fill = factor(cell_state))) +
+# geom_bar(position="stack", stat="identity") +
+# theme_classic() +
+# scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
+# 					 "Oligodendrocyte" = "#2ca25f",
+# 					 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
+# 					 "Fibroblast" = "#feb24c",
+# 					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15")) +
+# labs(y = "Proportion (%)") +
+# theme(axis.text.x = element_text(size=7,angle=45,hjust=1),
+# 	axis.text.y = element_text(size=7),
+# 	axis.title.x = element_blank(),
+# 	axis.title.y= element_text(size=7),
+# 	panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+# 	strip.text = element_blank(),
+# 	strip.background = element_blank(),
+# 	legend.position = "none") +
+#     coord_cartesian(ylim=c(0,100))
+# dev.off()
 
 # Group by sample
 
@@ -87,14 +96,17 @@ samp_res <- dat %>%
 									"Fibroblast", 
 									"Diff.-like", "Stem-like", "Prolif. stem-like")) %>%
 	   mutate(Mixture = as_factor(Mixture)) %>%
-	   mutate(tumor_id = as_factor(tumor_id)) %>%
+	   mutate(tumor_name = as_factor(tumor_name)) %>%
 	   mutate(structure = as_factor(structure)) %>%
 	   mutate(structure = fct_relevel(structure, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
-	   arrange(tumor_id, structure)
+	   arrange(tumor_name, structure)
 
 mixture_order <- as.character(unique(samp_res$Mixture))
+tumor_order <- as.character(unique(samp_res$tumor_name))
+tumor_order <- tumor_order[c(2:length(tumor_order),1)]
+
 samp_res <- samp_res %>%
-	   mutate(Mixture = fct_relevel(Mixture, mixture_order)) 	   
+	   mutate(Mixture = fct_relevel(Mixture, mixture_order), tumor_name = fct_relevel(tumor_name, tumor_order))
 	   
 
 p1 <- ggplot(samp_res, aes(x=Mixture, y = fraction, fill = factor(cell_state))) +
@@ -106,7 +118,7 @@ scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T c
 					 "Fibroblast" = "#feb24c",
 					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15")) +
 labs(y = "Proportion (%)") +
-facet_grid(.~tumor_id, scales="free_x",space = "free_x") +
+facet_grid(.~tumor_name, scales="free_x",space = "free_x") +
 theme(axis.text.x = element_blank(),
 	axis.text.y = element_text(size=7),
 	axis.title.x = element_blank(),
@@ -124,7 +136,7 @@ geom_tile() +
 theme_classic() +
 scale_fill_manual(values=c("Leading edge" = "#009999", "Infiltrating tumor"= "#ad4597","Cellular tumor" = "#01b050", "Pseudopalisading cells around necrosis"="#02ffcc", "Microvascular proliferation"="#c00000")) +
 labs(y = "%") +
-facet_grid(.~tumor_id, scales="free_x",space = "free_x") +
+facet_grid(.~tumor_name, scales="free_x",space = "free_x") +
 theme(axis.text.x = element_blank(),
 	axis.text.y = element_text(size=7),
 	axis.title.x = element_blank(),
@@ -140,7 +152,7 @@ geom_tile() +
 theme_classic() +
 scale_fill_manual(values=c("Leading edge" = "#009999", "Infiltrating tumor"= "#ad4597","Cellular tumor" = "#01b050", "Pseudopalisading cells around necrosis"="#02ffcc", "Microvascular proliferation"="#c00000")) +
 labs(y = "%") +
-facet_grid(.~tumor_id, scales="free_x",space = "free_x") 
+facet_grid(.~tumor_name, scales="free_x",space = "free_x") 
 
 
 ########################
@@ -208,11 +220,11 @@ g$heights[panels[2*2]] <- unit(n1*5, "null")
 grid.newpage()
 
 #Plot
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_samp.pdf", width=5.5, height = 2) #,width=2.7,height=3)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_samp.pdf", width=6.6, height = 1.6) #,width=2.7,height=3)
 grid.draw(g)
 dev.off()
 					
-					#Legends
+#Legends
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_samp_legends.pdf",width=7,height=7)
 p2_legend
 dev.off()

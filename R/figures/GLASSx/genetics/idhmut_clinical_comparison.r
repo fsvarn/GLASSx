@@ -297,7 +297,10 @@ sub_dat <- dat %>% filter(cell_state == "prolif_stemcell_tumor")
 sub_dat$diff <- sub_dat[,"fraction_b"] - sub_dat[,"fraction_a"]
 sub_dat$event <- 1
 
-summary(lm(diff ~ received_rt + hm + new_cell_cycle + idh_status, data=sub_dat))
+summary(lm(diff ~ received_rt + hm + new_cell_cycle + idh_codel_subtype, data=sub_dat))
+
+mut_test <- sub_dat %>% filter(idh_status != "IDHwt")
+summary(lm(diff ~  hm + new_cell_cycle + idh_codel_subtype, data=mut_test))
 
 # sub_dat <- dat %>% filter(cell_state == "prolif_stemcell_tumor", idh_status == "IDHmut", received_rt == 1)
 # summary(lm(fraction_b ~ fraction_a + hm + new_cell_cycle, data=sub_dat))

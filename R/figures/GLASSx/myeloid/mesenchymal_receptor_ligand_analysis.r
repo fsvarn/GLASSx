@@ -5,6 +5,7 @@ library(DBI)
 library(grid)
 library(ssgsea.GBM.classification)
 library(umap)
+library(topGO)
 
 #######################################################
 rm(list=ls())
@@ -57,7 +58,8 @@ sig_sub[which(sig_sub[,"signature_name"] == "Proneural,Classical,Mesenchymal"),"
 
 sig_sub[,"case_barcode"] <- sapply(strsplit(as.character(sig_sub[,"aliquot_barcode"]),"-"),function(x)paste(x[1:3],collapse="-"))
 sig_sub <- sig_sub %>%
-		   inner_join(info[,c("Case", "IDH.codel.subtype", "IDH.status")], by = c("case_barcode"="Case"))
+		   inner_join(info[,c("Case", "IDH.codel.subtype", "IDH.status")], by = c("case_barcode"="Case")) %>%
+		   inner_join((transcriptional_subtype %>% filter(signature_name=="Mesenchymal"))[,c("aliquot_barcode","enrichment_score")], by = "aliquot_barcode")
 
 ##################################################
 # Step 2: UMAP of each CIBERSORTx GEP
@@ -90,8 +92,8 @@ for(i in 1:length(myinf1))
 	embedding[[i]] <- umap(t(geps))$layout
 
 
-	g1 <- geps[,sig_sub[which(sig_sub[,"signature_name"]=="Mesenchymal"),"aliquot_barcode"]]
-	g2 <- geps[,sig_sub[which(!grepl("Mesenchymal",sig_sub[,"signature_name"])),"aliquot_barcode"]]
+	g1 <- geps[,sig_sub[which(sig_sub[,"signature_name"]=="Mesenchymal" & sig_sub[,"IDH.codel.subtype"]=="IDHwt"),"aliquot_barcode"]]
+	g2 <- geps[,sig_sub[which(!grepl("Mesenchymal",sig_sub[,"signature_name"]) & sig_sub[,"IDH.codel.subtype"]=="IDHwt"),"aliquot_barcode"]]
 
 	p.val <- eff <- rep(0, nrow(geps))
 	names(p.val) <- names(eff) <- rownames(geps)
@@ -101,7 +103,7 @@ for(i in 1:length(myinf1))
 		group2 <- as.numeric(g2[j,])
 	
 		p.val[j] <- wilcox.test(group1,group2)$p.value
-		eff[j] <- log2(median(group2)/median(group1))
+		eff[j] <- log2(median(group1)/median(group2))
 		#eff[i] <- median(group2) - median(group1)
 	}
 	q.val <- p.adjust(p.val,"BH")
@@ -127,14 +129,216 @@ plot_res <- plot_res %>%
 	inner_join(sig_sub, by = "aliquot_barcode")
 rownames(plot_res) <- paste(plot_res[,"cell_state"], plot_res[,"aliquot_barcode"], sep = "__")
 
-# Save the myeloid signature to apply to GLASS
+# Save the myeloid results to apply to GLASS
 mes_myel_gene_sig <- diff_list[[2]]
-write.table(mes_myel_gene_sig, "data/res/CIBERSORTx/analysis/TCGA_myeloid_ts_result.txt",sep="\t",quote=FALSE,row.names=TRUE)
+#write.table(mes_myel_gene_sig, "data/res/CIBERSORTx/analysis/TCGA_myeloid_ts_result_v3.txt",sep="\t",quote=FALSE,row.names=TRUE) 
+#v2 is with the directionality so that mes is the "change" and non-mes is the reference
+#v3 is the signature developed from IDHwt only
 
+##################################################
+# Step 3: Define the myeloid signature and plot a heatmap
+##################################################
+
+# Make a TCGA heatmap of mesenchymal
+mes_geps <- gep_list[[2]]
+mes_genes <- rownames(mes_myel_gene_sig[which(mes_myel_gene_sig[,"sig"] & mes_myel_gene_sig[,"eff"] > log2(1.1)),])
+
+# Normalize the profile
+mes_sig_prof <- mes_geps[,mes_genes]
+#mes_sig_norm <- apply(mes_sig_prof, 2, function(x) ((x - mean(x)))/sd(x))
+
+heatmap_res <- mes_sig_prof %>% 
+			   as.data.frame() %>%
+			   rownames_to_column(var="aliquot_barcode") %>%
+			   mutate(aliquot_barcode=gsub("myeloid__","",aliquot_barcode)) %>%
+			   pivot_longer(!aliquot_barcode,names_to= "gene" ,values_to= "z") %>%
+			   inner_join(sig_sub, by = "aliquot_barcode") %>%
+			   filter(IDH.codel.subtype == "IDHwt") %>%
+			   mutate(enrichment_score = (enrichment_score + abs(min(enrichment_score)))/1000) %>%
+			   group_by(gene) %>%
+			   summarise(aliquot_barcode, z = (z-mean(z))/sd(z),signature_name, IDH.codel.subtype,enrichment_score)
+heatmap_res[,"logp"] <- mes_myel_gene_sig[heatmap_res$gene, "logp"]
+			   
+level <- heatmap_res %>% filter(gene == "TREM1") %>% arrange(desc(enrichment_score)) %>% .$aliquot_barcode
+heatmap_res <- heatmap_res %>%
+			   mutate(aliquot_barcode = as_factor(aliquot_barcode)) %>%
+			   mutate(aliquot_barcode = fct_relevel(aliquot_barcode, level)) %>%
+			   mutate(gene = as_factor(gene)) %>%
+			   mutate(gene = fct_relevel(gene, rev(mes_genes)))
+
+colmax <- quantile(heatmap_res$z,.99)
+colmin <- -1 * colmax
+	   
+# Barplot of mesenchymal score
+p1 <- ggplot(data = heatmap_res %>% filter(gene == "TMEM150B"), aes(x = aliquot_barcode, y = enrichment_score)) +
+  geom_bar(stat="identity") +
+  scale_y_continuous(breaks=c(0, 9)) +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+	axis.text.y = element_text(size=7),
+	axis.title= element_blank(),
+	axis.ticks.x = element_blank(),
+	panel.grid.major=element_blank(),
+	panel.grid.minor=element_blank(),
+	legend.title = element_blank(),
+	plot.margin = unit(c(-1.2, -1.2, -1.5, 5.5), "pt"),
+	legend.position = "none") 
+
+# Heatmap
+p2 <- ggplot(data = heatmap_res, aes(x = aliquot_barcode, y = gene)) +
+  geom_tile(aes(fill=z)) +
+  scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0,  limits = c(colmin, colmax),
+  	  space = "Lab", na.value = "grey50", guide = "colourbar",
+	  aesthetics = "fill") + 
+  theme_void() +
+  theme(axis.text = element_blank(),
+	axis.title= element_blank(),
+	axis.ticks = element_blank(),
+	panel.grid.major=element_blank(),
+	panel.grid.minor=element_blank(),
+	legend.title = element_blank(),
+	plot.margin = unit(c(-1.2, -1.2, -1.5, 5.5), "pt"),
+	legend.position = "none")
+# 	legend.key.size = unit(0.25, "cm"))
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_heatmap_legend.pdf",width=0.2907,height=2)
+ggplot(data = heatmap_res, aes(x = aliquot_barcode, y = gene)) +
+geom_tile(aes(fill=z)) +
+scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0,  limits = c(colmin, colmax),
+space = "Lab", na.value = "grey50", guide = "colourbar",
+aesthetics = "fill") + 
+theme_void() +
+theme(axis.text = element_blank(),
+axis.title= element_blank(),
+axis.ticks = element_blank(),
+panel.grid.major=element_blank(),
+panel.grid.minor=element_blank(),
+legend.title = element_blank())
+dev.off()
+
+# Subtype classification tile
+p3 <- ggplot(data = heatmap_res %>% filter(gene == "TMEM150B"), aes(x = aliquot_barcode, y = gene)) +
+  geom_tile(aes(fill=signature_name)) +
+  scale_fill_manual(values=c("#008A22", "#4B3F0F", "#8A0000", "#D3D3D3", "#00458A", "#00645B", "#3F264B")) +
+  theme_void() +
+  theme(axis.text = element_blank(),
+	axis.title= element_blank(),
+	axis.ticks = element_blank(),
+	panel.grid.major=element_blank(),
+	panel.grid.minor=element_blank(),
+	legend.title = element_blank(),
+	plot.margin = unit(c(-1.2, -1.2, -1.5, 5.5), "pt"),
+	legend.position = "none")
+# 	legend.key.size = unit(0.25, "cm"))
+
+# Barplot of log pval
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_sig_logp_test.pdf",width=0.2907,height=2)
+ggplot(data = heatmap_res %>% filter(aliquot_barcode=="TCGA-02-0047-01A-01R-1849-01"), aes(x = logp, y = gene)) +
+geom_bar(stat="identity") +
+geom_vline(xintercept=1) + 
+theme_bw() +
+theme(axis.text.x = element_text(size=7),
+axis.text.y = element_blank(),
+axis.ticks.y = element_blank(),
+axis.title = element_blank(),
+panel.grid.major=element_blank(),
+panel.grid.minor=element_blank(),
+legend.title = element_blank(),
+plot.margin = unit(c(-1.2, -1.2, -1.5, -1.5), "pt"),
+legend.position = "none") 
+dev.off()
+
+#Align figures for printing
+gb1 <- ggplot_build(p1)
+gb2 <- ggplot_build(p2)
+gb3 <- ggplot_build(p3)
+
+n1 <- length(gb1$layout$panel_scales_y[[1]]$range$range)
+n2 <- length(gb2$layout$panel_scales_y[[1]]$range$range)
+n3 <- length(gb3$layout$panel_scales_y[[1]]$range$range)
+
+gA <- ggplot_gtable(gb1)
+gB <- ggplot_gtable(gb2)
+gC <- ggplot_gtable(gb3)
+
+g <- gtable:::rbind_gtable(gA, gB, "last")
+g <- gtable:::rbind_gtable(g, gC, "last")
+
+panels <- g$layout$t[grep("panel", g$layout$name)]
+g$heights[panels[1]] <- unit(n2/6, "null")
+g$heights[panels[2]] <- unit(n2, "null")
+g$heights[panels[3]] <- unit(n2/15, "null")
+
+grid.newpage()
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_sig_heatmap.pdf",width=2,height=2.2)
+grid.draw(g)
+dev.off()
+
+
+##################################################
+# Step 4: Perform functional enrichment analysis on the signature
+##################################################
+
+all_genes <- rownames(diff_list[[2]])
+bg_genes <- as.numeric(all_genes %in% mes_genes)
+names(bg_genes) <- all_genes
+
+diffGenes <- function(bg_genes) {
+	return(bg_genes == 1)}
+
+# Functional enrichment of signature
+sampleGOdata <- new("topGOdata",
+				description = "Simple session", 
+				ontology = "BP",
+			    allGenes = bg_genes,
+			    geneSelectionFun = diffGenes, 
+			    nodeSize = 10,
+			    annot = annFUN.org, mapping="org.Hs.eg.db", ID="symbol")
+
+# Fishers test
+resultFisher <- runTest(sampleGOdata, algorithm = "classic", statistic = "fisher",)
+fishRes <- GenTable(sampleGOdata, raw.p.value = resultFisher, topNodes = length(resultFisher@score), numChar=120)
+fishRes[,"q.value"] <- p.adjust(fishRes[,"raw.p.value"],"BH")
+
+#Parentchild
+resultPC <- runTest(sampleGOdata, algorithm = "parentchild", statistic = "fisher")
+pcRes <- GenTable(sampleGOdata, raw.p.value = resultPC, topNodes = length(resultPC@score), numChar = 120)
+pcRes[,"q.value"] <- p.adjust(pcRes[,"raw.p.value"],"BH")
+pcRes[which(pcRes$q.value < 0.05 & pcRes$Significant > pcRes$Expected),]
+
+# Use this one: elim algorithm with fisher statistic. elim algorithm removes false positives by getting adjusting for co-dependent GO terms 
+resultElim <- runTest(sampleGOdata, algorithm = "elim", statistic = "fisher")
+elimRes <- GenTable(sampleGOdata, raw.p.value = resultElim, topNodes = length(resultElim@score), numChar = 120)
+elimRes[,"q.value"] <- p.adjust(elimRes[,"raw.p.value"],"BH")
+elimRes[which(elimRes$q.value < 0.05 & elimRes$Significant > elimRes$Expected),]
+elimRes[,"logp"] <- -log10(as.numeric(elimRes$raw.p.value))
+
+term_level <- rev(as.character(elimRes$Term))
+plotRes <- elimRes %>% 
+		   mutate(Term = as_factor(Term)) %>%
+		   mutate(Term = fct_relevel(Term, term_level)) %>%
+		   filter(q.value < 0.05 & elimRes$Significant > elimRes$Expected)
+
+		   
+# Plot the results
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_mes_sig_functional_enrichment.pdf",width=4,height=2.5)
+ggplot(data = plotRes, aes(x = logp, y = Term)) +
+geom_bar(stat="identity") +
+geom_vline(xintercept=-log10(0.05),linetype=2) +
+labs(x="-log10(P)") +
+theme_classic() +
+theme(axis.text = element_text(size=7),
+axis.title.x= element_text(size=7),
+axis.title.y= element_blank(),
+panel.grid.major=element_blank(),
+panel.grid.minor=element_blank(),
+legend.title = element_blank(),
+legend.position = "none") 
+dev.off()
 
 # Create a boxplot showing the signature's difference across transcriptional subtypes
-mes_geps <- gep_list[[2]]
-mes_genes <- rownames(mes_myel_gene_sig[which(mes_myel_gene_sig[,"sig"] & mes_myel_gene_sig[,"eff"] < 0),])
+mes_genes <- rownames(mes_myel_gene_sig[which(mes_myel_gene_sig[,"sig"] & mes_myel_gene_sig[,"eff"] > 0),])
 mes_score <- apply(mes_geps[,mes_genes], 1, mean)
 names(mes_score) <- sapply(strsplit(names(mes_score), "__"), function(x)x[2])
 mes_score <- mes_score[sig_sub[,"aliquot_barcode"]]
@@ -176,21 +380,163 @@ scale_colour_manual(values=c("#008A22", "#8A0000", "#00458A"))
 dev.off()
 
 ##################################################
-# Step 3: Ligand-receptor pairs in CIBERSORTx
+# Step 5: Identify ligand-receptor pairs
 ##################################################
 
-
-full_geps <- do.call(rbind, gep_list)
+mygeps <- read.delim(myinf1[2],row.names=1)
 
 lig_rec <- read.delim("/projects/verhaak-lab/GLASS-III/data/dataset/ramilowski_2015/receptor_ligand_pairs_fantom5_ramilowski_ncomms_2015.txt",stringsAsFactor=FALSE)
 lig_rec <- lig_rec %>%
 filter(lig_rec[,"Pair.Evidence"] == "literature supported")
 lig_rec <- lig_rec[,c("Ligand.ApprovedSymbol", "Receptor.ApprovedSymbol")]
 
-lig_rec <- lig_rec[which(lig_rec[,"Ligand.ApprovedSymbol"] %in% colnames(full_geps) & 
-						 lig_rec[,"Receptor.ApprovedSymbol"] %in% colnames(full_geps)),]
+lig_rec <- lig_rec[which(lig_rec[,"Ligand.ApprovedSymbol"] %in% rownames(mygeps) & 
+						 lig_rec[,"Receptor.ApprovedSymbol"] %in% rownames(mygeps)),]
+
+# Select the mesenchymal myeloid-specific ligands and receptors
+cand_lig_pairs <- lig_rec[which(lig_rec[,"Ligand.ApprovedSymbol"] %in% mes_genes),]
+cand_rec_pairs <- lig_rec[which(lig_rec[,"Receptor.ApprovedSymbol"] %in% mes_genes),]
+
+# Identify where the complementary receptors are expressed
+log2fc <- function(expr, mes_status){
+	log2(median(expr[which(mes_status == "Mes")])/median(expr[which(mes_status == "Non-mes")]))}
+
+nonmyelinf <- myinf1[-2]
+rec_list <- lig_list <- list()
+for(i in 1:length(nonmyelinf))
+{
+	geps <- read.delim(nonmyelinf[i],row.names=1)
+	colnames(geps) <- gsub("\\.","-",colnames(geps))
+	geps <- log10(geps+1)
+	
+	rem <- apply(geps,1,function(x)sum(is.na(x)))
+	geps <- geps[-which(rem==ncol(geps)),]
+	vars <- apply(geps,1,function(x)var(x,na.rm=TRUE))
+	geps <- geps[which(vars > 0),]
+
+	# IDHwt only
+# 	barcodes <- sig_sub %>% filter(IDH.codel.subtype=="IDHwt") %>% .$aliquot_barcode
+# 	geps <- geps[,barcodes]
+	
+	# Compare receptor expression between Mes and non-mes IDHwt samples
+	recs <- intersect(cand_lig_pairs[,"Receptor.ApprovedSymbol"], rownames(geps))
+	rec_geps <- geps[recs,]
+	
+	rec_res <- rec_geps %>% 
+	rownames_to_column("receptor") %>%
+	pivot_longer(!receptor, names_to = "aliquot_barcode", values_to = "expr") %>%
+	inner_join(sig_sub, by = "aliquot_barcode") %>%
+	filter(IDH.codel.subtype == "IDHwt") %>%
+	filter(signature_name == "Mesenchymal" | !grepl("Mesenchymal", signature_name)) %>%
+	mutate(mes_status = ifelse(grepl("Mesenchymal",signature_name), "Mes", "Non-mes")) %>%
+	mutate(mes_status = as_factor(mes_status)) %>%
+	mutate(mes_status = fct_relevel(mes_status, "Non-mes", "Mes")) %>%
+	group_by(receptor) %>%
+	summarise(p.val = wilcox.test(expr ~ mes_status)$p.value, eff = log2fc(expr, mes_status)) %>%
+	as.data.frame()
+
+	# Compare ligand expression between Mes and non-mes IDHwt samples	
+	ligs <- intersect(cand_rec_pairs[,"Ligand.ApprovedSymbol"], rownames(geps))
+	lig_geps <- geps[ligs,]
+	
+	lig_res <- lig_geps %>% 
+	rownames_to_column("ligand") %>%
+	pivot_longer(!ligand, names_to = "aliquot_barcode", values_to = "expr") %>%
+	inner_join(sig_sub, by = "aliquot_barcode") %>%
+	filter(IDH.codel.subtype == "IDHwt") %>%
+	filter(signature_name == "Mesenchymal" | !grepl("Mesenchymal", signature_name)) %>%
+	mutate(mes_status = ifelse(grepl("Mesenchymal",signature_name), "Mes", "Non-mes")) %>%
+	mutate(mes_status = as_factor(mes_status)) %>%
+	mutate(mes_status = fct_relevel(mes_status, "Non-mes", "Mes")) %>%
+	group_by(ligand) %>%
+	summarise(p.val = wilcox.test(expr ~ mes_status)$p.value, eff = log2fc(expr, mes_status)) %>%
+	as.data.frame()
+	
+	mytag <- gsub("/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/tcga//CIBERSORTxHiRes_TCGA_","",nonmyelinf[i])
+	mytag <- gsub("_Window48.txt","",mytag)
+	rec_res[,"cell_state"] <- mytag
+	lig_res[,"cell_state"] <- mytag
+	
+	rec_list[[i]] <- rec_res
+	lig_list[[i]] <- lig_res
+}
+
+rec_plot <- do.call(rbind,rec_list)
+lig_plot <- do.call(rbind,lig_list)
+
+# Fix the myeloid signature table
+mes_myel_gene_sig <- mes_myel_gene_sig %>%
+rownames_to_column("gene_symbol")
+
+# Integrate with the myeloid ligand results
+rec_plot <- rec_plot %>%
+inner_join(cand_lig_pairs, by = c("receptor" = "Receptor.ApprovedSymbol")) %>%
+inner_join(mes_myel_gene_sig, by = c("Ligand.ApprovedSymbol" = "gene_symbol")) %>%
+mutate(pair = paste(receptor, Ligand.ApprovedSymbol, sep = "_")) %>%
+dplyr::select(pair = pair, receptor = receptor, ligand = Ligand.ApprovedSymbol, rec_pval = p.val.x, rec_eff = eff.x, lig_pval = p.val.y, lig_eff = eff.y,  rec_cell_state = cell_state) %>%
+add_column(lig_cell_state = "Myeloid") %>%
+mutate(rec_cell_state = recode(rec_cell_state, 
+		"differentiated_tumor" = "Diff.-like", "oligodendrocyte" = "Oligodendrocyte",
+		"prolif_stemcell_tumor" = "Prolif. stem-like",
+		"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
+mutate(sig = ifelse(rec_pval < 0.05 & lig_pval < 0.05, rec_cell_state, "nonsig"))
+		
+rec_plot[which(rec_plot$rec_eff > log2(1.1) & rec_plot$lig_eff > log2(1.1)),]
+
+lig_plot <- lig_plot %>%
+inner_join(cand_rec_pairs, by = c("ligand" = "Ligand.ApprovedSymbol")) %>%
+inner_join(mes_myel_gene_sig, by = c("Receptor.ApprovedSymbol" = "gene_symbol")) %>%
+mutate(pair = paste(Receptor.ApprovedSymbol, ligand, sep = "_")) %>%
+dplyr::select(pair = pair, receptor = Receptor.ApprovedSymbol, ligand = ligand, rec_pval = p.val.y, rec_eff = eff.y, lig_pval = p.val.x, lig_eff = eff.x, lig_cell_state = cell_state) %>%
+add_column(rec_cell_state = "Myeloid")  %>%
+mutate(lig_cell_state = recode(lig_cell_state, 
+		"differentiated_tumor" = "Diff.-like", "oligodendrocyte" = "Oligodendrocyte",
+		"prolif_stemcell_tumor" = "Prolif. stem-like",
+		"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
+mutate(sig = ifelse(rec_pval < 0.05 & lig_pval < 0.05, lig_cell_state, "nonsig"))
+
+lig_plot[which(lig_plot$rec_eff > log2(1.1) & lig_plot$lig_eff > log2(1.1)),]
+
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/CIBERSORTx_myel_lig_environ_rec.pdf",width=2.5,height=2)
+ggplot(rec_plot %>% filter(rec_eff >= 0 & lig_eff >= 0), aes(lig_eff, rec_eff, colour = sig)) + 
+geom_point()  +
+scale_colour_manual(values=c("T cell" = "#6baed6", "Oligodendrocyte" = "#2ca25f", 
+					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15",
+					 "nonsig" = "gray")) +
+labs(x="Myeloid ligand log2(FC)", y = "Non-myeloid receptor log2(FC)") +
+theme_bw() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+axis.text = element_text(size=7),
+axis.title = element_text(size=7),
+plot.title = element_text(size=7, hjust=0.5),
+legend.position="none") +
+geom_vline(xintercept=log2(1.1),linetype=2) +
+geom_hline(yintercept=log2(1.1),linetype=2)
+dev.off()
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/CIBERSORTx_myel_rec_environ_lig.pdf",width=2.5,height=2)
+ggplot(lig_plot %>% filter(rec_eff >= 0 & lig_eff >= 0), aes(rec_eff, lig_eff, colour = sig)) + 
+geom_point()  +
+scale_colour_manual(values=c("T cell" = "#6baed6", "Oligodendrocyte" = "#2ca25f", 
+					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15",
+					 "nonsig" = "gray")) +
+labs(x="Myeloid receptor log2(FC)", y = "Non-myeloid ligand log2(FC)") +
+theme_bw() +
+theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(),
+axis.text = element_text(size=7),
+axis.title = element_text(size=7),
+plot.title = element_text(size=7, hjust=0.5),
+legend.position="none") +
+geom_vline(xintercept=log2(1.1),linetype=2) +
+geom_hline(yintercept=log2(1.1),linetype=2)
+dev.off()
+
 
 #mypair <- full_geps[rownames(plot_res),c("OSM","OSMR")]
+full_geps <- do.call(rbind, gep_list)
 
 dl_pval <- dl_eff <- dr_pval <- dr_eff <- ml_pval <- ml_eff <- mr_pval <- mr_eff <- rep(NA, nrow(lig_rec))
 for(i in 1:nrow(lig_rec))

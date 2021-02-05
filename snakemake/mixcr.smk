@@ -76,7 +76,7 @@ rule mixcr_align:
         "Aligning reads for MiXCR \n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-    	"(mixcr align \
+    	"({config[mixcr]} align \
     	-p rna-seq \
     	-s hsa \
     	-OallowPartialAlignments=true \
@@ -103,11 +103,11 @@ rule assemblePartial:
         "Sample: {wildcards.aliquot_barcode}"
     shell:
     	"""
-    	mixcr assemblePartial \
+    	{config[mixcr]} assemblePartial \
 		{input} \
 		{output.r1}
 		
-		mixcr assemblePartial \
+		{config[mixcr]} assemblePartial \
 		{output.r1} \
 		{output.r2}
 		2>{log}
@@ -130,7 +130,7 @@ rule extend:
         "Extending incomplete TCR CDR3s \n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-    	"(mixcr extend \
+    	"({config[mixcr]} extend \
     	{input} \
     	{output}) 2>{log}"
 		
@@ -151,7 +151,7 @@ rule assemble:
         "Assembling clonotypes \n"
         "Sample: {wildcards.aliquot_barcode}"
     shell:
-    	"(mixcr assemble \
+    	"({config[mixcr]} assemble \
     	{input} \
     	{output}) 2>{log}"
 		
@@ -175,7 +175,7 @@ rule exportClones:
         "Sample: {wildcards.aliquot_barcode}\n"
         "Receptor: {wildcards.xcr}"
     shell:
-    	"(mixcr exportClones \
+    	"({config[mixcr]} exportClones \
     	-c {params.chains}\
     	{input} \
     	{output}) 2>{log}"

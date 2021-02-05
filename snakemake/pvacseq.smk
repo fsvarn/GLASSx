@@ -13,7 +13,7 @@ LENGTHS = [8,9,10,11]
 
 rule vcf_pass:
     input:
-        "results/mutect2/dropgt/{case_barcode}.filtered.normalized.sorted.vcf.gz"
+        ancient("results/mutect2/dropgt/{case_barcode}.filtered.normalized.sorted.vcf.gz")
     output:
         temp("results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.passed.vcf")
     params:
@@ -26,14 +26,14 @@ rule vcf_pass:
         "Filtering VCF for PASSed calls \n"
         "Sample: {wildcards.case_barcode}"
     shell:
-    	"(gatk --java-options -Xmx{params.mem}g SelectVariants \
+    	"(gatk --java-options -Xmx{params.mem} SelectVariants \
     	--exclude-filtered TRUE \
     	-V {input} \
     	-O {output}) 2>{log}"
 
 rule vcf_hotspot:
     input:
-        "results/mutect2/dropgt/{case_barcode}.filtered.normalized.sorted.vcf.gz"
+        ancient("results/mutect2/dropgt/{case_barcode}.filtered.normalized.sorted.vcf.gz")
     output:
         temp("results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.hotspot.vcf")
     conda:
@@ -59,8 +59,8 @@ rule vcf_hotspot:
 
 rule vcf_merge:
     input:
-        I1 = "results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.passed.vcf",
-        I2 = "results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.hotspot.vcf"
+        I1 = ancient("results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.passed.vcf"),
+        I2 = ancient("results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.hotspot.vcf")
     output:
         "results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.select.vcf"
     conda:
@@ -82,7 +82,7 @@ rule vcf_merge:
 
 rule vep_plugins:
     input:
-        "results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.select.vcf"
+        ancient("results/pvacseq/passed/{case_barcode}.filtered.normalized.sorted.select.vcf")
     output:
         "results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.vcf"
     params:
@@ -101,7 +101,7 @@ rule vep_plugins:
 		--cache \
 		--offline \
 		--assembly GRCh37 \
-		--dir_cache {config[vepplugindata]} \
+		--dir_cache {config[vepdata]} \
 		--format vcf \
 		--vcf \
 		--symbol \
@@ -118,7 +118,7 @@ rule vep_plugins:
 
 rule vcf_extract:
     input:
-        "results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.vcf"
+        ancient("results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.vcf")
     output:
         "results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.onesamp.vcf"
     params:
@@ -139,7 +139,7 @@ rule vcf_extract:
 
 rule pvacseq:
     input:
-        vcf = "results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.onesamp.vcf",
+        vcf = ancient("results/pvacseq/vep/{case_barcode}.filtered.normalized.sorted.select.vep.onesamp.vcf"),
         hla = lambda wildcards: expand("results/optitype/HLA_calls/{normals}/{normals}_result.tsv", normals = manifest.getNormalByCase(wildcards.case_barcode))
     output:
         "results/pvacseq/neoag_frag/{case_barcode}_{epitope_lengths}/MHC_Class_I/{case_barcode}_{epitope_lengths}.final.tsv"
@@ -160,7 +160,7 @@ rule pvacseq:
         "Epitope length: {wildcards.epitope_lengths}"
     shell:
     	"""
-    	module load python/2.7.13
+    	#module load python/2.7.13
     	allele=`tail -n+2 -q {input.hla} | cat | rev | sort -k2r | cut -f3- | rev | cut -f2- | head -1 | awk '{{for(i=1;i<=NF;i++)sub("^", "HLA-", $i)}}; 1' | sed 'y/ /,/'`
 		(pvacseq run \
 		{input.vcf} \
@@ -181,7 +181,7 @@ rule pvacseq:
 
 rule mergepvac:
     input:
-        expand("results/pvacseq/neoag_frag/{{case_barcode}}_{epitope_lengths}/MHC_Class_I/{{case_barcode}}_{epitope_lengths}.final.tsv", epitope_lengths = LENGTHS)
+        ancient(expand("results/pvacseq/neoag_frag/{{case_barcode}}_{epitope_lengths}/MHC_Class_I/{{case_barcode}}_{epitope_lengths}.final.tsv", epitope_lengths = LENGTHS))
     output:
         protected("results/pvacseq/neoantigens/{case_barcode}/MHC_Class_I/{case_barcode}.final.tsv")
     log:

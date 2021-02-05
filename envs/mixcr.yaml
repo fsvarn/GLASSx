@@ -21,7 +21,7 @@ dependencies:
   - libxcb=1.13=h14c3975_1002
   - libxml2=2.9.10=hee79883_0
   - lz4-c=1.8.3=he1b5a44_1001
-  - mixcr=3.0.11=0
+#  - mixcr=3.0.11=0
   - openjdk=11.0.1=h46a85a0_1017
   - pthread-stubs=0.4=h14c3975_1001
   - xorg-fixesproto=5.0=h14c3975_1002

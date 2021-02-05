@@ -159,8 +159,8 @@ ss_res <- dat %>%
 			  pval < 0.05 & eff < 0 ~ "dn",
 			  pval > 0.05 ~ "none")) %>%
 		  mutate(logp = case_when(
-		  	  pval < 0.05 & eff < 0 ~ logp * -1,
-		  	  pval < 0.05 & eff >= 0 ~ logp * 1,
+		  	  pval < 0.05 & eff < 0 ~ logp * 1,
+		  	  pval < 0.05 & eff >= 0 ~ logp * -1,
 		  	  pval > 0.05 ~ logp * 0)) %>%
 		  mutate(region = recode(region, 
 		  "CT" = "Cellular tumor", "CTmvp" = "Microvascular proliferation", "CTpan" = "Pseudopalisading cells around necrosis", "LE" = "Leading edge")) %>%
@@ -168,7 +168,7 @@ ss_res <- dat %>%
 		  mutate(region = fct_relevel(region, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
 		  as.data.frame()
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_subtype_switch.pdf",width=3,height=1.45)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_subtype_switch.pdf",width=3.4,height=1.5)
 ggplot(ss_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=logp)) +
 geom_tile() +
 scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0) +
@@ -216,6 +216,7 @@ dat <- dbGetQuery(con, q)
 res <- dat %>% 
 	group_by(cell_state, region, idh_status) %>% 
 	summarise(cor = cor(fraction_change, ivy_change, method="p"), pval = cor.test(fraction_change, ivy_change, method="p")$p.value) %>%
+	ungroup() %>%
 	mutate(idh_status = fct_relevel(idh_status, "IDHwt","IDHmut")) %>%
 	mutate(cell_state = recode(cell_state, "b_cell" = "B cell", "dendritic_cell" = "Dendritic cell",
 		"differentiated_tumor" = "Diff.-like", "endothelial" = "Endothelial",
@@ -223,15 +224,16 @@ res <- dat %>%
 		"myeloid" = "Myeloid", "oligodendrocyte" = "Oligo.",
 		"pericyte" = "Pericyte", "prolif_stemcell_tumor" = "Prolif. stem-like",
 		"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
-	mutate(cell_state = fct_relevel(cell_state, "Prolif. stem-like", "Stem-like","Diff.-like",
-								"Fibroblast", "Pericyte","Endothelial", "Oligo.",
-								"Myeloid", "Dendritic cell", "T cell", "Granulocyte","B cell")) %>%
+	mutate(cell_state = fct_relevel(cell_state, "B cell", "Granulocyte","T cell", "Dendritic cell","Myeloid",
+												"Oligo.", "Endothelial", "Pericyte", "Fibroblast",
+												"Diff.-like","Stem-like","Prolif. stem-like")) %>%
 	mutate(idh_status = fct_relevel(idh_status, "IDHwt","IDHmut")) %>%
 	mutate(region = recode(region, 
 	"CT" = "Cellular tumor", "CTmvp" = "Microvascular proliferation", "CTpan" = "Pseudopalisading cells around necrosis", "LE" = "Leading edge")) %>%
+	mutate(region = fct_relevel(region, "Microvascular proliferation", "Pseudopalisading cells around necrosis", "Cellular tumor","Leading edge")) %>%
 	as.data.frame() 
 	
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scgp_ivygap_change_cor.pdf", width=6, height = 1.7) #,width=2.7,height=3)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scgp_ivygap_change_cor.pdf", width=6.49, height = 1.743) #,width=2.7,height=3)
 ggplot(res, aes(x = cell_state, y = region, fill=cor)) +
 geom_tile() +
 scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0, limits = c(-1,1)) +

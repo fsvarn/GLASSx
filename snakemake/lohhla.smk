@@ -104,8 +104,8 @@ rule lohhla_run:
         --minCoverageFilter {wildcards.minCoverageFilter} \
         --fishingStep {params.fishingStep} \
         --cleanUp {params.cleanUp} \
-        --gatkDir /projects/varnf/SofWar/anaconda3/envs/lohhla/bin/ \
-        --novoDir /projects/varnf/SofWar/anaconda3/envs/lohhla/bin/
+        --gatkDir /projects/verhaak-lab/USERS/varnf/SofWar/anaconda3/envs/lohhla/bin/ \
+        --novoDir /projects/verhaak-lab/USERS/varnf/SofWar/anaconda3/envs/lohhla/bin/
                         
         2>{log}
         """

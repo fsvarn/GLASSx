@@ -1175,8 +1175,7 @@
     {
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "qos" : "long",        
-        "time" : "120:00:00",
+        "time" : "72:00:00",
         "job-name" : "{rule}.{wildcards.case_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
         "error" : "logs/slurm/{rule}.{wildcards.case_barcode}.err"
@@ -1358,7 +1357,7 @@
         "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.out",
         "error" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.{wildcards.gene}.err"
     },
-    "samtofastq" :
+    "samtofastq_prada" :
     {
         "job-name" : "{rule}.{wildcards.aliquot_barcode}.{wildcards.readgroup}",
         "cpus-per-task" : 12,

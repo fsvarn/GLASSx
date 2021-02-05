@@ -44,5 +44,5 @@ colnames(mxcr) <- tolower(colnames(mxcr))
 
 table_out <- paste("mixcr_",receptor,sep="")
 
-dbWriteTable(con, Id(schema="analysis", table=table_out), mxcr, overwrite=TRUE)
+#dbWriteTable(con, Id(schema="analysis", table=table_out), mxcr, overwrite=TRUE)
 

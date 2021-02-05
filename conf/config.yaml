@@ -162,7 +162,10 @@ seconds_between_progress_updates: 900
 ## CIBERSORTx parameters
 cibersortx_dir: "/projects/verhaak-lab/varnf/docker/CIBERSORTx"
 csx_username:   "Frederick.S.Varn.Jr.GR@dartmouth.edu"
-csx_token:      "ef745da3ebf38e86c4b115ea37df2362"             
+csx_token:      "ef745da3ebf38e86c4b115ea37df2362"    
+         
+## Path to MiXCR
+mixcr:  "/projects/verhaak-lab/USERS/varnf/SofWar/anaconda3/envs/mixcr/bin/mixcr"
 
 ## Path to Java 1.7
 java_1.7:   "/projects/verhaak-lab/USERS/varnf/SofWar/java/jre1.7.0_80/bin"
