@@ -39,6 +39,52 @@ GROUP BY subtype_a, subtype_b, idh_status
 dat <- dbGetQuery(con,q)
 dat[,"count"] <- as.numeric(dat[,"count"])
 
+# Fisher's exact tests
+
+c1 <- sum(dat %>% filter(subtype_b == "Classical") %>% .$count)
+c2 <- sum(dat %>% filter(subtype_b != "Classical") %>% .$count)
+c3 <- sum(dat %>% filter(subtype_a == "Classical") %>% .$count)
+c4 <- sum(dat %>% filter(subtype_a != "Classical") %>% .$count)
+
+fisher.test(matrix(c(c1,c2,c3,c4),nrow=2))
+
+
+wtdat <- dat %>% filter(idh_status == "IDHwt")
+mutdat <- dat %>% filter(idh_status == "IDHmut")
+
+c1 <- sum(wtdat %>% filter(subtype_b == "Mesenchymal") %>% .$count)
+c2 <- sum(wtdat %>% filter(subtype_b != "Mesenchymal") %>% .$count)
+c3 <- sum(wtdat %>% filter(subtype_a == "Mesenchymal") %>% .$count)
+c4 <- sum(wtdat %>% filter(subtype_a != "Mesenchymal") %>% .$count)
+
+fisher.test(matrix(c(c1,c2,c3,c4),nrow=2))
+
+c1 <- sum(wtdat %>% filter(subtype_b == "Classical") %>% .$count)
+c2 <- sum(wtdat %>% filter(subtype_b != "Classical") %>% .$count)
+c3 <- sum(wtdat %>% filter(subtype_a == "Classical") %>% .$count)
+c4 <- sum(wtdat %>% filter(subtype_a != "Classical") %>% .$count)
+
+fisher.test(matrix(c(c1,c2,c3,c4),nrow=2))
+
+c1 <- sum(wtdat %>% filter(subtype_a != "Mesenchymal" & subtype_a == subtype_b) %>% .$count)
+c2 <- sum(wtdat %>% filter(subtype_a != "Mesenchymal" & subtype_a != subtype_b) %>% .$count)
+c3 <- sum(wtdat %>% filter(subtype_a == "Mesenchymal" & subtype_a == subtype_b) %>% .$count)
+c4 <- sum(wtdat %>% filter(subtype_a == "Mesenchymal" & subtype_a != subtype_b) %>% .$count)
+
+fisher.test(matrix(c(c1,c2,c3,c4),nrow=2))
+
+c1 <- sum(wtdat %>% filter(subtype_a != "Classical" & subtype_a == subtype_b) %>% .$count)
+c2 <- sum(wtdat %>% filter(subtype_a != "Classical" & subtype_a != subtype_b) %>% .$count)
+c3 <- sum(wtdat %>% filter(subtype_a == "Classical" & subtype_a == subtype_b) %>% .$count)
+c4 <- sum(wtdat %>% filter(subtype_a == "Classical" & subtype_a != subtype_b) %>% .$count)
+
+fisher.test(matrix(c(c1,c2,c3,c4),nrow=2))
+
+# Check number switching
+sum(wtdat %>% filter(subtype_a != subtype_b) %>% .$count)/sum(wtdat$count)
+sum(mutdat %>% filter(subtype_a == "Proneural", subtype_b == "Proneural") %>% .$count)/sum(mutdat$count)
+
+
 dat <- dat %>% 
 	   mutate(subtype_a = recode(subtype_a, "Mesenchymal" = "Mes.", "Proneural" = "Pro.", "Classical" = "Class.")) %>%
 	   mutate(subtype_b = recode(subtype_b, "Mesenchymal" = "Mes.", "Proneural" = "Pro.", "Classical" = "Class."))

@@ -19,7 +19,7 @@ cell_state <- gsub("/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLA
 cell_state <- gsub("_Window48.txt", "", cell_state)
 
 #  Post-treatment signature
-myinf2 <- paste("data/res/CIBERSORTx/analysis/GLASS_", cell_state,"_postreatment_result.txt",sep="")
+myinf2 <- paste("data/res/CIBERSORTx/analysis/GLASS_idhwt_", cell_state,"_postreatment_result.txt",sep="")
 
 #Establish connection
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
@@ -87,8 +87,8 @@ res1 <- dat %>%
 group_by(region) %>%
 summarise(
 differentiated_tumor = cor(fraction_a, differentiated_tumor_a),
-prolif_stemcell_tumor = cor(fraction_a, prolif_stemcell_tumor_a),
-stemcell_tumor = cor(fraction_a, stemcell_tumor_a)) %>%
+stemcell_tumor = cor(fraction_a, stemcell_tumor_a),
+prolif_stemcell_tumor = cor(fraction_a, prolif_stemcell_tumor_a)) %>%
 data.frame()
 
 # Recurrent
@@ -96,8 +96,8 @@ res2 <- dat %>%
 group_by(region) %>%
 summarise(
 differentiated_tumor = cor(fraction_b, differentiated_tumor_b),
-prolif_stemcell_tumor = cor(fraction_b, prolif_stemcell_tumor_b),
-stemcell_tumor = cor(fraction_b, stemcell_tumor_b)) %>%
+stemcell_tumor = cor(fraction_b, stemcell_tumor_b),
+prolif_stemcell_tumor = cor(fraction_b, prolif_stemcell_tumor_b)) %>%
 data.frame()
 
 le_dat <- dat %>% filter(region == "LE")
@@ -106,7 +106,8 @@ cell_state <- rep(c(rep("Diff.-like", nrow(le_dat)), rep("Prolif. stem-like", nr
 fraction <- c(le_dat$fraction_a, le_dat$fraction_a, le_dat$fraction_a, le_dat$fraction_b, le_dat$fraction_b, le_dat$fraction_b)
 status <- c(rep("Initial", nrow(le_dat)*3), rep("Recurrent", nrow(le_dat)*3))
 case_barcode <- rep(le_dat$case_barcode, 6)
-plot_res <- data.frame(case_barcode, status, cell_state, fraction, score)
+plot_res <- data.frame(case_barcode, status, cell_state, fraction, score) %>%
+		    mutate(cell_state = fct_relevel(cell_state, "Diff.-like","Stem-like","Prolif. stem-like"))
 
 res1[,2:4] <- round(res1[,2:4],2)
 res2[,2:4] <- round(res2[,2:4],2)
@@ -119,12 +120,12 @@ pcor <- c(deparse((bquote(italic("R") ~" = " ~ .(as.character(res1[4,2]))))),
 		  deparse((bquote(italic("R") ~" = " ~ .(as.character(res2[4,4]))))))
 		   
 annotation_text <- data.frame(status = factor(rep(c("Initial","Recurrent"),each=3)),
-							  cell_state = rep(c("Diff.-like","Prolif. stem-like","Stem-like"), 2), 
+							  cell_state = rep(c("Diff.-like","Stem-like","Prolif. stem-like"), 2), 
 							  score = 0.8,
 							  fraction = .7,
 							  pcor)
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/idhwt_leading_edge_sig_cors.pdf", width=3.3,height=2.2)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/idhwt_leading_edge_sig_cors_v2.pdf", width=3.3,height=2.2)
 ggplot(plot_res, aes(x = fraction * 100, y = score)) + 
 	geom_point() +
 	geom_smooth(method = "lm", se=FALSE, aes(colour=cell_state)) +

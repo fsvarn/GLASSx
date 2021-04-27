@@ -347,7 +347,7 @@ g2 <- plot_score %>% filter(IDH.codel.subtype == "IDHmut-codel" & cell_type == "
 wilcox.test(g1,g2)
 
 g1 <- plot_score %>% filter(IDH.codel.subtype == "IDHwt" & cell_type == "Microglia") %>% .$myeloid_score
-g2 <- plot_score %>% filter(IDH.codel.subtype == "IDHmut-codel" & cell_type == "Microglia") %>% .$myeloid_score
+g2 <- plot_score %>% filter(IDH.codel.subtype == "IDHmut-non-codel" & cell_type == "Microglia") %>% .$myeloid_score
 wilcox.test(g1,g2)	# P = 0.08
 
 g1 <- plot_score %>% filter(IDH.codel.subtype == "IDHwt" & cell_type == "Macrophages") %>% .$myeloid_score

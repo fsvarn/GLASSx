@@ -107,8 +107,8 @@ for(i in 1:length(nonmyelinf))
 	geps <- geps[which(vars > 0),]
 
 	# IDHwt only
-# 	barcodes <- sig_sub %>% filter(IDH.codel.subtype=="IDHwt") %>% .$aliquot_barcode
-# 	geps <- geps[,barcodes]
+ 	barcodes <- sig_sub %>% filter(IDH.codel.subtype=="IDHwt") %>% .$aliquot_barcode
+ 	geps <- geps[,barcodes]
 	
 	# Compare receptor expression between Mes and non-mes IDHwt samples
 	recs <- intersect(cand_lig_pairs[,"Receptor.ApprovedSymbol"], rownames(geps))
@@ -294,10 +294,16 @@ bulk_mes <- bulk_res %>%
 
 # Test receptor-ligand associations
 
-# Filter for mesenchymal myeloid signature only
-sub_lig <- lig_plot %>% filter(rec_eff > log2(1.1), rec_qval < 0.1 &
+# Filter for mesenchymal myeloid signature only (old way)
+# sub_lig <- lig_plot %>% filter(rec_eff > log2(1.1), rec_qval < 0.1 &
+# 			lig_cell_state %in% c("Diff.-like", "Stem-like", "Prolif. stem-like")) # Tumor only
+# sub_rec <- rec_plot %>% filter(lig_eff > log2(1.1), lig_qval < 0.1 &
+# 			rec_cell_state %in% c("Diff.-like", "Stem-like", "Prolif. stem-like")) # Tumor only
+
+# Both components significant
+sub_lig <- lig_plot %>% filter(rec_eff > log2(1.1), rec_qval < 0.1, lig_eff > log2(1.1), lig_qval < 0.1,
 			lig_cell_state %in% c("Diff.-like", "Stem-like", "Prolif. stem-like")) # Tumor only
-sub_rec <- rec_plot %>% filter(lig_eff > log2(1.1), lig_qval < 0.1 &
+sub_rec <- rec_plot %>% filter(lig_eff > log2(1.1), lig_qval < 0.1, rec_eff > log2(1.1), rec_qval < 0.1,
 			rec_cell_state %in% c("Diff.-like", "Stem-like", "Prolif. stem-like")) # Tumor only
 
 myeloid_genes <- c(sub_lig$receptor, sub_rec$ligand) #c("CD44", "GALR2","ITGB1", "LTBR", "OSMR", "CCR10", "IL7", "TSLP")
@@ -306,7 +312,7 @@ tumor_class <- c(sub_lig$lig_cell_state, sub_rec$rec_cell_state)#c("differentiat
 rec_lig <- data.frame(myeloid_genes, tumor_genes, tumor_class, stringsAsFactors=FALSE)
 
 myeloid_cells <- annot %>% filter(cell_type == "Myeloid")
-myeloid_cor <- tumor_cor <- rep(NA, nrow(rec_lig))
+myeloid_cor <- myeloid_p <- tumor_cor <- tumor_p <- rep(NA, nrow(rec_lig))
 for(i in 1:nrow(rec_lig))
 {
 	cat("\r", i)
@@ -321,6 +327,12 @@ for(i in 1:nrow(rec_lig))
 	summarise(cor(mean_cpm, enrichment_score, method="p")) %>%
 	as.numeric()
 	
+	myeloid_p[i] <- myeloid_cpm %>%
+	group_by(sample_id) %>%
+	summarise(mean_cpm = mean(cpm)) %>%
+	inner_join(bulk_mes, c("sample_id" = "sample_id")) %>%	
+	summarise(cor.test(mean_cpm, enrichment_score, method="p")$p.value) %>%
+	as.numeric()
 	
 	tumor_cells <- annot %>% filter(cell_type == rec_lig[i,"tumor_class"])
 
@@ -335,8 +347,15 @@ for(i in 1:nrow(rec_lig))
 	inner_join(bulk_mes, c("sample_id" = "sample_id")) %>%	
 	summarise(cor(mean_cpm, enrichment_score, method="p")) %>%
 	as.numeric()
+	
+	tumor_p[i] <- tumor_cpm %>%
+	group_by(sample_id) %>%
+	summarise(mean_cpm = mean(cpm)) %>%
+	inner_join(bulk_mes, c("sample_id" = "sample_id")) %>%	
+	summarise(cor.test(mean_cpm, enrichment_score, method="p")$p.value) %>%
+	as.numeric()
 }
-res <- data.frame(rec_lig, myeloid_cor, tumor_cor)
+res <- data.frame(rec_lig, myeloid_cor, myeloid_p, tumor_cor, tumor_p)
 test <- apply(data.frame(myeloid_cor, tumor_cor), 1, mean)
 res[order(test,decreasing=TRUE),]
 

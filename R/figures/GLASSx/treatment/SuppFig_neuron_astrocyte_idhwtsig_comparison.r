@@ -25,18 +25,15 @@ g3 <- rownames(info %>% filter(Selection == "Astrocytes(HEPACAM)"))
 #######################################################
 
 
-cell_state <- gsub("/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS-freeze//CIBERSORTxHiRes_GLASS_", "", myinf1)
-cell_state <- gsub("_Window48.txt", "", cell_state)
-
-
 #  Read in post-treatment stem cell signature
 myDir2 <- "data/res/CIBERSORTx/analysis/"
 myinf2 <- dir(myDir2)
 myinf2 <- myinf2[grep("_postreatment_result", myinf2)]
-myinf2 <- myinf2[grep("myeloid|stemcell|differentiated",myinf2)]		# These are the signatures we have some confidence in
+myinf2 <- myinf2[grep("stemcell|differentiated",myinf2)]		# These are the signatures we have some confidence in
+myinf2 <- myinf2[grep("idhwt",myinf2)]		# These are the signatures we have some confidence in
 myinf2 <- paste(myDir2, myinf2, sep = "/")
 
-sigtable <- read.delim(myinf2[4])	# 4 = stem cells
+sigtable <- read.delim(myinf2[3])	# 4 = stem cells
 mysig <- rownames(sigtable %>% filter(sig, eff > 0))
 
 
@@ -67,19 +64,19 @@ overlap2<- intersect(mysig, rownames(astrosig))
 astrores <- res[overlap2,]
 
 # Normal genes
-sum(neures$eff < 0)			#130
-sum(astrores$eff < 0)		#90
-length(intersect(rownames(astrores[which(astrores$eff<0),]), rownames(neures[which(neures$eff<0),]))) #73
+sum(neures$eff < 0)			#131
+sum(astrores$eff < 0)		#85
+length(intersect(rownames(astrores[which(astrores$eff<0),]), rownames(neures[which(neures$eff<0),]))) #71
 
 # Tumor genes
-sum(neures$eff > 0)			#7
-sum(astrores$eff > 0)		#50
-length(intersect(rownames(astrores[which(astrores$eff>0),]), rownames(neures[which(neures$eff>0),]))) #5
+sum(neures$eff > 0)			#8
+sum(astrores$eff > 0)		#44
+length(intersect(rownames(astrores[which(astrores$eff>0),]), rownames(neures[which(neures$eff>0),]))) #6
 
-# Within 404 gene stem cell signature:
-# 147 genes neuron/astro-specific
-# 52 genes tumor-specific
-# 205 genes unknown
+# Within 355 up-regulated stem cell signature:
+# 145 genes neuron/astro-specific (40.8%)
+# 46 genes tumor-specific
+# 164 genes unknown
 
 newsig <-  mysig[-which(mysig %in% rownames(astrores) | mysig %in% rownames(neures))] 
 all_genes <- rownames(sigtable)
@@ -138,19 +135,19 @@ overlap <- intersect(mysig, rownames(astrosig))
 astrores <- res[overlap,]
 
 # Normal genes
-sum(neures$eff < 0)			#55
-sum(astrores$eff < 0)		#48
-length(intersect(rownames(astrores[which(astrores$eff<0),]), rownames(neures[which(neures$eff<0),]))) #31
+sum(neures$eff < 0)			#48
+sum(astrores$eff < 0)		#38
+length(intersect(rownames(astrores[which(astrores$eff<0),]), rownames(neures[which(neures$eff<0),]))) #24
 
 # Tumor genes
-sum(neures$eff > 0)			#8
-sum(astrores$eff > 0)		#42
-length(intersect(rownames(astrores[which(astrores$eff>0),]), rownames(neures[which(neures$eff>0),]))) #6
+sum(neures$eff > 0)			#7
+sum(astrores$eff > 0)		#35
+length(intersect(rownames(astrores[which(astrores$eff>0),]), rownames(neures[which(neures$eff>0),]))) #5
 
-# Within 232 gene differentiated cell signature:
-# 72 genes neuron/astro-specific
-# 44 genes tumor-specific
-# 116 genes unknown
+# Within 200 up-regulated differentiated cell signature:
+# 62 genes neuron/astro-specific
+# 37 genes tumor-specific
+# 101 genes unknown
 
 # Overlap in unknown between each signature?
 

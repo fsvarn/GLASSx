@@ -126,8 +126,8 @@ colnames(synth_mixtures) <- colnames(proportions) <- mix_names
 myoutf1 <- "/projects/verhaak-lab/GLASS-III/data/dataset/scgp/10x_scgp_synthetic_mix_gep_06092020.txt"
 myoutf2 <- "/projects/verhaak-lab/GLASS-III/data/dataset/scgp/10x_scgp_synthetic_mix_prop_06092020.txt"
 
-write.table(synth_mixtures, myoutf1, sep = "\t", quote=FALSE, col.names=TRUE, row.names=TRUE)
-write.table(proportions, myoutf2, sep = "\t", quote=FALSE, col.names=TRUE, row.names=TRUE)
+#write.table(synth_mixtures, myoutf1, sep = "\t", quote=FALSE, col.names=TRUE, row.names=TRUE)
+#write.table(proportions, myoutf2, sep = "\t", quote=FALSE, col.names=TRUE, row.names=TRUE)
 
 #mix md5sum: d509fa7dc09aeaabc54a160d2a420b49
 #prop md5sum: b0d0a6d649e2fc41fbec0a5958258d32

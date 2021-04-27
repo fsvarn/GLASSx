@@ -70,7 +70,8 @@ ci1.cell_state,
 ci1.fraction AS fraction_a,
 ci2.fraction AS fraction_b,
 su1.idh_codel_subtype,
-CASE WHEN su1.idh_codel_subtype = 'IDHwt' THEN 'IDHwt' ELSE 'IDHmut' END AS idh_status
+CASE WHEN su1.idh_codel_subtype = 'IDHwt' THEN 'IDHwt' ELSE 'IDHmut' END AS idh_status,
+CASE WHEN ps.case_barcode IS NOT NULL THEN 'DNA' ELSE 'No' END AS dna
 FROM analysis.rna_silver_set ss
 JOIN analysis.transcriptional_subtype ts1 ON ts1.aliquot_barcode = ss.tumor_barcode_a
 JOIN analysis.transcriptional_subtype ts2 ON ts2.aliquot_barcode = ss.tumor_barcode_b AND ts1.signature_name = ts2.signature_name
@@ -85,50 +86,25 @@ JOIN roman_to_int r2 ON r2.grade = su2.grade::text
 JOIN analysis.simplicity_score si1 ON ss.tumor_barcode_a = si1.aliquot_barcode
 JOIN analysis.simplicity_score si2 ON ss.tumor_barcode_b = si2.aliquot_barcode
 JOIN subtype_switch sw ON ss.tumor_pair_barcode = sw.tumor_pair_barcode
+LEFT JOIN analysis.platinum_set ps ON ps.case_barcode = ss.case_barcode
 WHERE su1.idh_codel_subtype IS NOT NULL -- ts1.p_value < 0.05 OR ts2.p_value < 0.05
 ORDER BY 1, 2 
 "
 dat <- dbGetQuery(con, q)
 
-# Simplicity score in subtype switching IDHwt/IDHmut samples
-comp_dat <- dat %>%
-filter(cell_state == "b_cell", signature_name == "Mesenchymal")
+# Arrange samples from proneural to mesenchymal initial (make PM score)
+cases <-  dat %>% filter(signature_name == "Proneural") %>% .$case_barcode
+pscore <- dat %>% filter(signature_name == "Proneural") %>% .$es_a
+mscore <- dat %>% filter(signature_name == "Mesenchymal") %>% .$es_a
+pmscore <- pscore * -1 + mscore
+names(pmscore) <- cases
 
-comp_dat1 <- comp_dat %>% filter(idh_status == "IDHwt")
-comp_dat2 <- comp_dat %>% filter(idh_status == "IDHmut")
-wilcox.test(comp_dat1 %>% filter(switch == "Switch") %>% .$ss_a, comp_dat1 %>% filter(switch != "Switch") %>% .$ss_a)$p.value	#0.07
-wilcox.test(comp_dat2 %>% filter(switch == "Switch") %>% .$ss_a, comp_dat2 %>% filter(switch != "Switch") %>% .$ss_a)$p.value	#1e-3
-wilcox.test(comp_dat %>% filter(switch == "Switch") %>% .$ss_a, comp_dat %>% filter(switch != "Switch") %>% .$ss_a)$p.value		#5e-4
-median(comp_dat %>% filter(switch == "Switch") %>% .$ss_a) - median(comp_dat %>% filter(switch != "Switch") %>% .$ss_a)	#-0.19
+# Build CIBERSORTx scores with PM score (for visual purposes)
 
-# IDHwt vs IDHmut
-wilcox.test(comp_dat %>% filter(idh_status == "IDHwt") %>% .$ss_a, comp_dat %>% filter(idh_status == "IDHmut") %>% .$ss_a)$p.value		
-wilcox.test(comp_dat %>% filter(idh_status == "IDHwt") %>% .$ss_b, comp_dat %>% filter(idh_status == "IDHmut") %>% .$ss_b)$p.value		
-wilcox.test(c(comp_dat %>% filter(idh_status == "IDHwt") %>% .$ss_a, comp_dat %>% filter(idh_status == "IDHwt") %>% .$ss_b),
-			c(comp_dat %>% filter(idh_status == "IDHmut") %>% .$ss_a, comp_dat %>% filter(idh_status == "IDHmut") %>% .$ss_b))$p.value		#3e-3
-
-# Correlate CIBERSORTx scores with simplicity score (for visual purposes)
-
-cell_states <- unique(dat[,"cell_state"])
-init_cscor <- rec_cscor <- rep(0, length(cell_states))
-names(init_cscor) <- names(rec_cscor) <- cell_states
-for(i in 1:length(cell_states))
-{
-	mystate <- cell_states[i]
-	substate <- dat[which(dat[,"cell_state"] == mystate),c("tumor_pair_barcode","ss_a","ss_b","cell_state","fraction_a","fraction_b")]
-	substate <- distinct(substate)
-		
-	init_cscor[i] <- cor(substate[,"fraction_a"], substate[,"ss_a"],method="s")
-	rec_cscor[i] <- cor(substate[,"fraction_b"], substate[,"ss_b"],method="s")
-
-}
-
-# Build CIBERSORTx scores with simplicity score (for visual purposes)
-
-plot_res1 <- dat[,c("case_barcode","tumor_barcode_a","signature_name","pval_a","ss_a","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_status","idh_codel_subtype","cell_state","fraction_a")]
-plot_res2 <- dat[,c("case_barcode","tumor_barcode_b","signature_name","pval_b","ss_b","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_status","idh_codel_subtype","cell_state","fraction_b")]
+plot_res1 <- dat[,c("case_barcode","tumor_barcode_a","signature_name","pval_a","ss_a","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_status","idh_codel_subtype","dna","cell_state","fraction_a")]
+plot_res2 <- dat[,c("case_barcode","tumor_barcode_b","signature_name","pval_b","ss_b","switch","grade_change","treatment_tmz","treatment_radiotherapy","treatment_pd1","idh_status","idh_codel_subtype","dna","cell_state","fraction_b")]
 status <- c(rep("Initial",nrow(plot_res1)),rep("Recurrent",nrow(plot_res2)))
-colnames(plot_res1) <- colnames(plot_res2) <- c("case_barcode","aliquot_barcode","signature_name","pval","ss","switch","grade_change","tmz","rt","aPD1","idh_status","idh_codel_subtype","cell_state", "proportion")
+colnames(plot_res1) <- colnames(plot_res2) <- c("case_barcode","aliquot_barcode","signature_name","pval","ss","switch","grade_change","tmz","rt","aPD1","idh_status","idh_codel_subtype","dna","cell_state", "proportion")
 plot_res <- rbind(plot_res1,plot_res2)
 plot_res <- cbind(plot_res,status)
 
@@ -136,9 +112,8 @@ plot_res <- plot_res[which(!is.na(plot_res[,"idh_codel_subtype"])),]
 plot_res[,"pval"] <- -log(plot_res[,"pval"])
 
 #Set order for x-axis of plot (will be by initial tumor simplicity score high to low)
-myorder <- dat[,c("case_barcode","ss_a")]
-myorder <- myorder[-which(duplicated(myorder)),]
-myorder <- myorder[order(myorder[,"ss_a"],decreasing=TRUE),"case_barcode"]
+myorder <- pmscore[-which(duplicated(pmscore))]
+myorder <- names(myorder[order(myorder)])
 plot_res[,"case_barcode"] <- factor(plot_res[,"case_barcode"], levels = myorder)
 
 #Set order for transcript subtypes (should match IDH-codel subtypes)
@@ -322,6 +297,12 @@ gg_pd1 <-
   geom_tile(aes(y=signature_name, fill=aPD1)) +
   scale_fill_manual(values=c("white","black"),na.value="grey50") +
   theme(axis.title.y=element_blank())
+
+gg_dna <- 
+  ggplot(plot_res %>% filter(status=="Initial",signature_name=="Proneural", cell_state == "Stem-like"), aes(x=case_barcode)) +
+  geom_tile(aes(y=signature_name, fill=dna)) +
+  scale_fill_manual(values=c("black","white"),na.value="grey50") +
+  theme(axis.title.y=element_blank())
   
 #Align figures for printing
 gb1 <- ggplot_build(nolabels(gg_simplicity_score))
@@ -330,12 +311,12 @@ gb3 <- ggplot_build(nolabels(gg_transcript_subtype_cla))
 gb4 <- ggplot_build(nolabels(gg_transcript_subtype_mes))
 gb5 <- ggplot_build(nolabels(gg_cell_state_init))
 gb6 <- ggplot_build(nolabels(gg_cell_state_rec))
-gb7 <- ggplot_build(nolabels(gg_codel))
-gb8 <- ggplot_build(nolabels(gg_subtype_switch))
-gb9 <- ggplot_build(nolabels(gg_grade_change))
-gb10 <- ggplot_build(nolabels(gg_tmz))
-gb11 <- ggplot_build(nolabels(gg_rt))
-gb12 <- ggplot_build(nolabels(gg_pd1))
+gb7 <- ggplot_build(nolabels(gg_dna))
+gb8 <- ggplot_build(nolabels(gg_codel))
+gb9 <- ggplot_build(nolabels(gg_subtype_switch))
+gb10 <- ggplot_build(nolabels(gg_grade_change))
+gb11 <- ggplot_build(nolabels(gg_tmz))
+gb12 <- ggplot_build(nolabels(gg_rt))
 
 n1 <- length(gb1$layout$panel_scales_y[[1]]$range$range)
 n2 <- length(gb2$layout$panel_scales_y[[1]]$range$range)
@@ -392,12 +373,12 @@ g$heights[panels[12*2]] <- unit(n1/2,"null")
 grid.newpage()
 
 #Plot
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_v5.pdf",width=5.8,height=5.29)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_v6.pdf",width=5.8,height=5.29)
 grid.draw(g)
 dev.off()
 
 #Legends
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_legends_v4.pdf",width=7,height=7)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/transcriptional_subtype_change_legends_v5.pdf",width=7,height=7)
 grid.arrange(gg_legend(gg_simplicity_score),
 	gg_legend(gg_transcript_subtype_pro),
 	gg_legend(gg_transcript_subtype_cla),

@@ -96,9 +96,11 @@ res <- data.frame(mytag, p.val, eff)
 plot_res <- do.call(rbind, plotList)
 plot_res <- plot_res %>%
 			mutate(cell_state = recode(cell_state, "differentiated_tumor" = "Diff.-like", "prolif_stemcell_tumor" = "Prolif. stem-like", "stemcell_tumor" = "Stem-like")) %>%
-			mutate(status = fct_relevel(status, "Initial","Recurrent"))
+			mutate(status = fct_relevel(status, "Initial","Recurrent")) %>%
+			mutate(cell_state = as_factor(cell_state)) %>%
+			mutate(cell_state = fct_relevel(cell_state, "Diff.-like", "Stem-like", "Prolif. stem-like"))
 			
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scgp_idhwt_rec_sig_boxplot.pdf", width=2.8,height=1.8)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scgp_idhwt_rec_sig_boxplot_v2.pdf", width=2.8,height=1.8)
 ggplot(data = plot_res, aes(x = cell_state, y = score, fill = status)) +
 geom_boxplot(outlier.size=1,colour="black") +
 scale_fill_manual(values=c("#a6611a", "#018571")) +

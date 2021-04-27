@@ -36,32 +36,44 @@ resultFisher <- runTest(sampleGOdata, algorithm = "classic", statistic = "fisher
 fishRes <- GenTable(sampleGOdata, raw.p.value = resultFisher, topNodes = length(resultFisher@score), numChar=120)
 fishRes[,"q.value"] <- p.adjust(fishRes[,"raw.p.value"],"BH")
 
-#Parentchild
-resultPC <- runTest(sampleGOdata, algorithm = "parentchild", statistic = "fisher")
-pcRes <- GenTable(sampleGOdata, raw.p.value = resultPC, topNodes = length(resultPC@score), numChar = 120)
-pcRes[,"q.value"] <- p.adjust(pcRes[,"raw.p.value"],"BH")
-pcRes[which(pcRes$q.value < 0.05 & pcRes$Significant > pcRes$Expected),]
-
+# Parentchild
+# resultPC <- runTest(sampleGOdata, algorithm = "parentchild", statistic = "fisher")
+# pcRes <- GenTable(sampleGOdata, raw.p.value = resultPC, topNodes = length(resultPC@score), numChar = 120)
+# pcRes[,"q.value"] <- p.adjust(pcRes[,"raw.p.value"],"BH")
+# pcRes[which(pcRes$q.value < 0.05 & pcRes$Significant > pcRes$Expected),]
+# 
 # Use this one: elim algorithm with fisher statistic. elim algorithm removes false positives by getting adjusting for co-dependent GO terms 
-resultElim <- runTest(sampleGOdata, algorithm = "elim", statistic = "fisher")
-elimRes <- GenTable(sampleGOdata, raw.p.value = resultElim, topNodes = length(resultElim@score), numChar = 120)
-elimRes[,"q.value"] <- p.adjust(elimRes[,"raw.p.value"],"BH")
-elimRes[which(elimRes$q.value < 0.05 & elimRes$Significant > elimRes$Expected),]
-elimRes[,"logp"] <- -log10(as.numeric(elimRes$raw.p.value))
+# resultElim <- runTest(sampleGOdata, algorithm = "elim", statistic = "fisher")
+# elimRes <- GenTable(sampleGOdata, raw.p.value = resultElim, topNodes = length(resultElim@score), numChar = 120)
+# elimRes[,"q.value"] <- p.adjust(elimRes[,"raw.p.value"],"BH")
+# elimRes[which(elimRes$q.value < 0.05 & elimRes$Significant > elimRes$Expected),]
+# elimRes[,"logp"] <- -log10(as.numeric(elimRes$raw.p.value))
 
-term_level <- rev(as.character(elimRes$Term))
-plotRes <- elimRes %>% 
+
+goRes <- fishRes
+
+plotRes <- goRes %>%
+		filter(q.value < 0.01 &  Significant/Expected > 1) %>%
+		arrange(desc(Significant/Expected)) %>%
+		mutate(Term = recode(Term, "positive regulation of acute inflammatory response" = "pos. reg. of acute inflammatory response"))
+
+plotRes[,"logP"] <- -log10(as.numeric(plotRes$q.value))
+
+plotRes <- plotRes[1:15,]
+term_level <- plotRes$Term[order(as.numeric(plotRes$raw.p.value),decreasing=TRUE)]
+
+plotRes <- plotRes %>% 
+		   arrange(desc(Significant/Expected)) %>%
 		   mutate(Term = as_factor(Term)) %>%
-		   mutate(Term = fct_relevel(Term, term_level)) %>%
-		   filter(q.value < 0.05 & elimRes$Significant > elimRes$Expected)
-
+		   mutate(Term = fct_relevel(Term, term_level))
+		   
 		   
 # Plot the results
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_mes_sig_functional_enrichment.pdf",width=4,height=2.5)
-ggplot(data = plotRes, aes(x = logp, y = Term)) +
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/tcga_mes_sig_functional_enrichment.pdf",width=2.7,height=1.8)
+ggplot(data = plotRes, aes(x = logP, y = Term)) +
 geom_bar(stat="identity") +
 geom_vline(xintercept=-log10(0.05),linetype=2) +
-labs(x="-log10(P)") +
+labs(x="-log10(adj. P-value)") +
 theme_classic() +
 theme(axis.text = element_text(size=7),
 axis.title.x= element_text(size=7),

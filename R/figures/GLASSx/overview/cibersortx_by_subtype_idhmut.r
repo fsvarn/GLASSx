@@ -42,34 +42,24 @@ cells <- unique(dat[,"cell_state"])
 subtypes <- unique(dat[,"idh_status"])
 
 dat %>%
-group_by(cell_state, idh_status) %>%
+filter(idh_status != 'IDHwt') %>%
+group_by(cell_state, idh_codel_subtype) %>%
 summarise(pval = wilcox.test(fraction_a, fraction_b, paired=TRUE)$p.value,
 		  eff = median(fraction_b - fraction_a)) %>%
 data.frame()
 
 dat %>%
-group_by(cell_state, idh_status) %>%
+filter(idh_status != 'IDHwt') %>%
+group_by(cell_state, idh_codel_subtype) %>%
 summarise(pval = t.test(fraction_a, fraction_b, paired=TRUE)$p.value,
 		  eff = mean(fraction_b - fraction_a)) %>%
 data.frame()
 
-p.val <- matrix(0,nrow = length(cells), ncol = length(subtypes))
-colnames(p.val) <- subtypes
-rownames(p.val) <- cells
-for(i in 1:length(cells))
-{
-	for(j in 1:length(subtypes))
-	{
-		sub_dat <- dat %>%
-				filter(cell_state == cells[i] & idh_status == subtypes[j])
-		p.val[i,j] <- wilcox.test(sub_dat[,"fraction_a"], sub_dat[,"fraction_b"])$p.value
-	}
-}
-
 plot_fract <- dat %>% 
-			  group_by(idh_status, cell_state) %>%
+			  filter(idh_status != 'IDHwt') %>%
+			  group_by(idh_codel_subtype, cell_state) %>%
 			  summarise(fraction_a = mean(fraction_a), fraction_b = mean(fraction_b)) %>%
-			  pivot_longer(-c("idh_status","cell_state"), values_to = "fraction") %>%
+			  pivot_longer(-c("idh_codel_subtype","cell_state"), values_to = "fraction") %>%
 			  mutate(name = recode(name, "fraction_a" = "Initial", "fraction_b" = "Recurrent"),
 			  cell_state = recode(cell_state, "b_cell" = "B cell", "dendritic_cell" = "Dendritic cell",
 			  				"differentiated_tumor" = "Diff.-like", "endothelial" = "Endothelial",
@@ -85,19 +75,11 @@ plot_fract <- dat %>%
 			  											  "Diff.-like", "Stem-like", "Proliferating stem-like"))
 
 plot_fract <- plot_fract %>% mutate(fraction = fraction*100)
-
-g1 <- plot_fract %>% filter(idh_status == "IDHwt", name == "Initial") %>% .$fraction
-g2 <- plot_fract %>% filter(idh_status == "IDHwt", name == "Recurrent")	%>% .$fraction	
-g3 <- plot_fract %>% filter(idh_status == "IDHmut", name == "Initial") %>% .$fraction
-g4 <- plot_fract %>% filter(idh_status == "IDHmut", name == "Recurrent") %>% .$fraction		
-
-avg_matrix <- data.frame(g1,g2,g3,g4)
-cor(avg_matrix)
 			  							  
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_stacked_barplot_subtype_timepoint.pdf",width=1.286,height=1.9127)  #,width=1.287,height=1.9127) 
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_stacked_barplot_subtype_timepoint_idhmut.pdf",width=1.286,height=1.9127)  #,width=1.287,height=1.9127) 
 ggplot(plot_fract, aes(fill=cell_state, y=fraction, x=name)) + 
 geom_bar(position="stack", stat="identity") +
-facet_grid(.~idh_status) +
+facet_grid(.~idh_codel_subtype) +
 scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
 						 "Oligodendrocyte" = "#2ca25f",
 						 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",

@@ -58,7 +58,7 @@ myinf2 <- paste(myDir2, mytag, sep = "/")
 mytag <- gsub("_postreatment_result.txt","",mytag)
 mytag <- gsub("GLASS_idhmut_","",mytag)
 
-p.val <- eff <- rep(0, length(myinf2))
+p.val <- eff <- n1 <- n2 <- rep(0, length(myinf2))
 plotList <- upList <- dnList <- list()
 
 # Treatment (don't use this)
@@ -96,7 +96,6 @@ plotList <- upList <- dnList <- list()
 # 
 # res <- data.frame(mytag, p.val, eff)
 
-
 # Grade (use this)
 for(i in 1:length(myinf2))
 {
@@ -127,6 +126,9 @@ for(i in 1:length(myinf2))
 
 	p.val[i] <- wilcox.test(g1_mean, g2_mean)$p.value
 	eff [i] <- median(g1_mean) - median(g2_mean)
+	
+	n1[i] <- length(g1)
+	n2[i] <- length(g2)
 
 }
 
@@ -183,7 +185,7 @@ plot_res <- plot_res %>%
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scgp_idhmut_grade_boxplot.pdf", width=2.8,height=1.8)
 ggplot(data = plot_res, aes(x = cell_state, y = score, fill = status)) +
 geom_boxplot(outlier.size=1,colour="black") +
-scale_fill_manual(values=c("#a6611a", "#018571")) +
+scale_fill_manual(values=c("#27408B", "#CD4F39")) +
 facet_wrap(direction~.) +
 labs(y = "Signature score") +
 theme_classic() +

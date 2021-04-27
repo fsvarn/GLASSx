@@ -124,11 +124,11 @@ plot_res <- do.call(rbind, p)
 # Identify the 99th percentile globally
 #quantile(plot_res$expr,.99) #0.33
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/treatment_pre_post_csx_heatmaps_scale.pdf",width=7, height =3)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/treatment_pre_post_csx_heatmaps_scale_v2.pdf",width=7, height =3)
 grid.arrange(se[[1]],se[[2]],se[[3]],nrow=1)
 dev.off()
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/treatment_pre_post_csx_legends.pdf",width=7, height =3)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/treatment_pre_post_csx_legends_v2.pdf",width=7, height =3)
 ggplot(data = plot_hm, aes(x = timepoint, y = gene_symbol)) +
 	geom_tile(aes(fill=expr)) +
 	scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3",
@@ -210,14 +210,17 @@ plotRes <- goRes %>% filter(Term %in% names(myterms))
 
 plotRes[,"logP"] <- -log10(as.numeric(plotRes$q.value))
 
+termord <- plotRes %>% filter(cell_state == "stemcell_tumor")
+termord <- rev(as.character(termord[order(termord$logP, decreasing=TRUE),"Term"]))
+
 plotRes <- plotRes %>% 
 		   filter(cell_state %in% c("differentiated_tumor", "stemcell_tumor"))  %>%
-		   mutate(Term = recode(Term, "phospholipase C-activating G protein-coupled receptor signaling pathway" = "PLC-activating GPCR signaling pathway")) %>%
-		   mutate(Term = fct_relevel(Term, rev(unique(Term[order(logP, decreasing = TRUE)]))))
+		   #mutate(Term = recode(Term, "phospholipase C-activating G protein-coupled receptor signaling pathway" = "PLC-activating GPCR signaling pathway")) %>%
+		   mutate(Term = fct_relevel(Term, termord))
 
  
 # Plot the results
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/idhwt_rec_sig_functional_enrichment.pdf",width=3.3,height=2.2)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/idhwt_rec_sig_functional_enrichment_v2.pdf",width=3.3,height=2.2)
 ggplot(data = plotRes, aes(x = logP, y = Term, fill = cell_state)) +
 geom_bar(stat="identity",position=position_dodge()) +
 geom_vline(xintercept=-log10(0.05),linetype=2) +

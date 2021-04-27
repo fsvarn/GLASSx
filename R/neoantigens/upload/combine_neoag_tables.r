@@ -6,9 +6,9 @@ library(DBI)
 library(odbc)
 
 rm(list=ls())
-myDir1 <- "/projects/varnf/GLASS/GLASS/results/pvacseq/neoantigens/"
-myintDir <- "/projects/varnf/GLASS/GLASS/results/pvacseq/tabular_results/labelled/"
-myoutf <- "/projects/varnf/GLASS/GLASS/results/pvacseq/tabular_results/final/neoantigens_full.txt"
+myDir1 <- "results/pvacseq/neoantigens/"
+myintDir <- "results/pvacseq/tabular_results/labelled/"
+myoutf <- "results/pvacseq/tabular_results/final/neoantigens_full.txt"
 
 myrun <- dir(myDir1)
 mysample <- sapply(strsplit(myrun,"_"),function(x)x[1])
@@ -19,11 +19,18 @@ file.exist <- file.exists(myfile)
 mysample <- mysample[which(file.exist)]
 myfile <- myfile[which(file.exist)]
 
+# Cohort specific selection (as needed)
+# mysample <- mysample[grep("GLSS-CU-P|GLSS-HF-",mysample)]
+# mysample <- mysample[-grep("GLSS-HF-2|GLSS-HF-3",mysample)]
+# myfile <- myfile[grep("GLSS-CU-P|GLSS-HF-",myfile)]
+# myfile <- myfile[-grep("GLSS-HF-2|GLSS-HF-3",myfile)]
+
 myintfile <- paste(myintDir,mysample,".labelled.txt",sep="")
+
 
 for(i in 1:length(myfile))
 {
-	tumor_barcode <- sapply(strsplit(myfile[i],"/"),function(x)x[9])
+	tumor_barcode <- sapply(strsplit(myfile[i],"/"),function(x)x[4])
 
 	tmp.table <- read.delim(myfile[i],stringsAsFactor=FALSE,
 	colClasses=c(Chromosome="character", Start="numeric",Stop="numeric",
@@ -47,7 +54,7 @@ for(i in 1:length(myfile))
 	
 	tmp.table <- cbind(tmp.table,tumor_barcode)
 	
-	write.table(tmp.table, myintfile[i], sep="\t", quote=FALSE)
+ 	write.table(tmp.table, myintfile[i], sep="\t", quote=FALSE)
 }
 
 
@@ -88,7 +95,7 @@ colnames(big_table_edit) <- tolower(c("tumor_barcode","chrom","Start","Stop","re
 big_table_edit[which(big_table_edit[,"chrom"]=='X'),"chrom"] = 23
 big_table_edit[,"chrom"] = as.numeric(big_table_edit[,"chrom"])
 
-con <- DBI::dbConnect(odbc::odbc(), "VerhaakDB")
-dbWriteTable(con, Id(schema="analysis",table="neoantigens_by_patient"), big_table_edit, overwrite=TRUE, row.names=FALSE)
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
+#dbWriteTable(con, Id(schema="analysis",table="neoantigens_by_patient"), big_table_edit, append=TRUE, row.names=FALSE)
 
 write.table(big_table_edit, myoutf,sep="\t",quote=F,row.names=F)

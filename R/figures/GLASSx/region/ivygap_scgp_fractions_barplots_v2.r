@@ -54,13 +54,8 @@ summarise(struct_p = summary(aov(fraction~structure + tumor_name))[[1]]["structu
 plot_aov <- aov_res %>%
 			pivot_longer(-cell_state, names_to = "source", values_to = "p_value") %>%
 			mutate(source = recode(source, "struct_p" = "structure", "patient_p" = "patient")) %>%
-			mutate(log_p = -log10(p_value)) %>%
-	 	    mutate(cell_state = as_factor(cell_state)) %>%
-	  		mutate(cell_state = fct_relevel(cell_state, rev(c("B cell", "Granulocyte", "T cell", "Dendritic cell", "Myeloid", 
-									"Oligodendrocyte", 
-									"Endothelial", "Pericyte",
-									"Fibroblast", 
-									"Diff.-like", "Stem-like", "Prolif. stem-like"))))			
+			mutate(log_p = -log10(p_value))
+			
 		  
 # Plot log10 p-values in faceted barplot
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_anova_bar.pdf", width=4, height = 2)
@@ -137,13 +132,19 @@ samp_res <- dat %>%
 	   mutate(structure = fct_relevel(structure, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
 	   arrange(tumor_name, structure)
 
-mixture_order <- as.character(unique(samp_res$Mixture))
+mixture_mut <- as.character(unique(samp_res$Mixture[which(samp_res$tumor_name == "W31-1-1")]))
+mixture_mean <- as.character(unique(samp_res$Mixture[which(samp_res$tumor_name == "Mean")]))
+mixture_other <- as.character(unique(samp_res$Mixture[which(!(samp_res$Mixture %in% c(mixture_mut, mixture_mean)))]))
+mixture_order <- c(mixture_other, mixture_mut, mixture_mean)
 tumor_order <- as.character(unique(samp_res$tumor_name))
-tumor_order <- tumor_order[c(2:length(tumor_order),1)]
+tumor_order <- tumor_order[c(2:7, 9:length(tumor_order),8,1)]
 
+
+# Remove the mean from plotting and indicate IDH status
 samp_res <- samp_res %>%
-	   mutate(Mixture = fct_relevel(Mixture, mixture_order), tumor_name = fct_relevel(tumor_name, tumor_order))
-	   
+	   mutate(Mixture = fct_relevel(Mixture, mixture_order), tumor_name = fct_relevel(tumor_name, tumor_order)) %>%
+	   filter(tumor_name != "Mean") %>%
+	   mutate(idh_status = as.character(tumor_name == "W31-1-1"))	   
 
 p1 <- ggplot(samp_res, aes(x=Mixture, y = fraction, fill = factor(cell_state))) +
 geom_bar(position="stack", stat="identity") +
@@ -154,7 +155,7 @@ scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T c
 					 "Fibroblast" = "#feb24c",
 					 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15")) +
 labs(y = "Proportion (%)") +
-facet_grid(.~tumor_name, scales="free_x",space = "free_x") +
+facet_grid(.~structure, scales="free_x",space = "free_x") +
 theme(axis.text.x = element_blank(),
 	axis.text.y = element_text(size=7),
 	axis.title.x = element_blank(),
@@ -167,12 +168,28 @@ theme(axis.text.x = element_blank(),
     coord_cartesian(ylim=c(0,100))
 
 samp_res[,"placeholder"] <- "100"
-p2 <- ggplot(samp_res, aes(x=Mixture, y = placeholder, fill = structure)) +
+p2 <- ggplot(samp_res, aes(x=Mixture, y = placeholder, fill =idh_status)) +
 geom_tile() +
 theme_classic() +
-scale_fill_manual(values=c("Leading edge" = "#009999", "Infiltrating tumor"= "#ad4597","Cellular tumor" = "#01b050", "Pseudopalisading cells around necrosis"="#02ffcc", "Microvascular proliferation"="#c00000")) +
 labs(y = "%") +
-facet_grid(.~tumor_name, scales="free_x",space = "free_x") +
+scale_fill_manual(values = c("white","black")) +
+facet_grid(.~structure, scales="free_x",space = "free_x") +
+theme(axis.text.x = element_blank(),
+	axis.text.y = element_text(size=7),
+	axis.title.x = element_blank(),
+	axis.title.y= element_text(size=7),
+	axis.ticks.x = element_blank(),
+	panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+	strip.text = element_blank(),
+	strip.background = element_blank(),
+	legend.position = "none")
+	
+p3 <- ggplot(samp_res, aes(x=Mixture, y = placeholder, fill =tumor_name)) +
+geom_tile() +
+theme_classic() +
+labs(y = "%") +
+scale_fill_manual(values = brewer.pal(10,"Spectral")) +
+facet_grid(.~structure, scales="free_x",space = "free_x") +
 theme(axis.text.x = element_blank(),
 	axis.text.y = element_text(size=7),
 	axis.title.x = element_blank(),
@@ -240,28 +257,34 @@ gg_legend <- function(a.gplot){
 #Align figures for printing
 gb1 <- ggplot_build(p1)
 gb2 <- ggplot_build(p2)
+gb3 <- ggplot_build(p3)
 
 n1 <- length(gb1$layout$panel_scales_y[[1]]$range$range)
 n2 <- length(gb2$layout$panel_scales_y[[1]]$range$range)
+n3 <- length(gb3$layout$panel_scales_y[[1]]$range$range)
 
 gA <- ggplot_gtable(gb1)
 gB <- ggplot_gtable(gb2)
+gC <- ggplot_gtable(gb3)
 
 g <- gtable:::rbind_gtable(gA, gB, "last")
+g <- gtable:::rbind_gtable(g, gC, "last")
 
 panels <- g$layout$t[grep("panel", g$layout$name)]
-g$heights[panels[1*2]] <- unit(n1, "null")
-g$heights[panels[2*2]] <- unit(n1*5, "null")
+g$heights[panels]
+g$heights[panels[1*5]] <- unit(n1*10, "null")
+g$heights[panels[2*5]] <- unit(n1, "null")
+g$heights[panels[3*5]] <- unit(n1, "null")
 
 grid.newpage()
 
 #Plot
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_samp.pdf", width=6.6, height = 1.6) #,width=2.7,height=3)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_region_v2.pdf", width=6.6, height = 1.88) #,width=2.7,height=3)
 grid.draw(g)
 dev.off()
 					
 #Legends
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_samp_legends.pdf",width=7,height=7)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_scgp_fractions_by_region_legends.pdf",width=7,height=7)
 p2_legend
 dev.off()
 

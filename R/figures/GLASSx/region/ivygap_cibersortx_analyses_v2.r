@@ -160,9 +160,28 @@ legend.position = "none")
 dev.off()
 
 
+# ss_res_old <- dat %>%
+# 		  group_by(subtype_a, subtype_b, region, idh_status) %>%
+# 		  summarise(pval = wilcox.test(fraction_a, fraction_b, paired=TRUE)$p.value, eff = median(fraction_b - fraction_a)) %>%
+# 		  mutate(logp = log10(pval), status = case_when(
+# 			  pval < 0.05 & eff > 0 ~ "up",
+# 			  pval < 0.05 & eff < 0 ~ "dn",
+# 			  pval > 0.05 ~ "none")) %>%
+# 		  mutate(logp = case_when(
+# 		  	  pval < 0.05 & eff < 0 ~ logp * 1,
+# 		  	  pval < 0.05 & eff >= 0 ~ logp * -1,
+# 		  	  pval > 0.05 ~ logp * 0)) %>%
+# 		  mutate(region = recode(region, 
+# 		  "CT" = "Cellular tumor", "CTmvp" = "Microvascular proliferation", "CTpan" = "Pseudopalisading cells around necrosis", "LE" = "Leading edge")) %>%
+# 		  mutate(region = as_factor(region)) %>%
+# 		  mutate(region = fct_relevel(region, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
+# 		  as.data.frame()
+		  
+# Remove the proneural to classical transition (n of 1)
 ss_res <- dat %>%
-		  group_by(subtype_a, subtype_b, region, idh_status) %>%
-		  summarise(pval = wilcox.test(fraction_a, fraction_b, paired=TRUE)$p.value, eff = median(fraction_b - fraction_a)) %>%
+		  filter(idh_status == "IDHwt" & !(subtype_a == "Proneural" & subtype_b =="Classical")) %>%
+		  group_by(subtype_a, subtype_b, region) %>%
+		  summarise(pval = t.test(fraction_a, fraction_b, paired=TRUE)$p.value, eff = mean(fraction_b - fraction_a)) %>%
 		  mutate(logp = log10(pval), status = case_when(
 			  pval < 0.05 & eff > 0 ~ "up",
 			  pval < 0.05 & eff < 0 ~ "dn",
@@ -174,11 +193,11 @@ ss_res <- dat %>%
 		  mutate(region = recode(region, 
 		  "CT" = "Cellular tumor", "CTmvp" = "Microvascular proliferation", "CTpan" = "Pseudopalisading cells around necrosis", "LE" = "Leading edge")) %>%
 		  mutate(region = as_factor(region)) %>%
-		  mutate(region = fct_relevel(region, "Leading edge", "Infiltrating tumor", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
+		  mutate(region = fct_relevel(region, "Leading edge", "Cellular tumor", "Pseudopalisading cells around necrosis", "Microvascular proliferation")) %>%
 		  as.data.frame()
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_subtype_switch.pdf",width=3.4,height=1.5)
-ggplot(ss_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=logp)) +
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/ivygap_subtype_switch_v2.pdf",width=3.4,height=1.5)
+ggplot(ss_res, aes(x = subtype_a, y = subtype_b, fill=logp)) +
 geom_tile() +
 scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0) +
 facet_grid(. ~ region) +
@@ -233,9 +252,9 @@ res <- dat %>%
 		"myeloid" = "Myeloid", "oligodendrocyte" = "Oligo.",
 		"pericyte" = "Pericyte", "prolif_stemcell_tumor" = "Prolif. stem-like",
 		"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
-	mutate(cell_state = fct_relevel(cell_state, "B cell", "Granulocyte","T cell", "Dendritic cell","Myeloid",
+	mutate(cell_state = fct_relevel(cell_state, rev(c("B cell", "Granulocyte","T cell", "Dendritic cell","Myeloid",
 												"Oligo.", "Endothelial", "Pericyte", "Fibroblast",
-												"Diff.-like","Stem-like","Prolif. stem-like")) %>%
+												"Diff.-like","Stem-like","Prolif. stem-like")))) %>%
 	mutate(idh_status = fct_relevel(idh_status, "IDHwt","IDHmut")) %>%
 	mutate(region = recode(region, 
 	"CT" = "Cellular tumor", "CTmvp" = "Microvascular proliferation", "CTpan" = "Pseudopalisading cells around necrosis", "LE" = "Leading edge")) %>%

@@ -29,11 +29,12 @@ ci2.fraction AS fraction_b,
 cs.idh_codel_subtype,
 CASE WHEN cs.idh_codel_subtype = 'IDHwt' THEN 'IDHwt' ELSE 'IDHmut' END AS idh_status
 FROM analysis.rna_silver_set ss
-JOIN analysis.cibersortx_scgp ci1 ON ci1.aliquot_barcode = ss.tumor_barcode_a
-JOIN analysis.cibersortx_scgp ci2 ON ci2.aliquot_barcode = ss.tumor_barcode_b AND ci2.cell_state = ci1.cell_state
+JOIN analysis.cibersortx_neftel ci1 ON ci1.aliquot_barcode = ss.tumor_barcode_a
+JOIN analysis.cibersortx_neftel ci2 ON ci2.aliquot_barcode = ss.tumor_barcode_b AND ci2.cell_state = ci1.cell_state
 JOIN analysis.top_transcriptional_subtype ag1 ON ag1.aliquot_barcode = ss.tumor_barcode_a
 JOIN analysis.top_transcriptional_subtype ag2 ON ag2.aliquot_barcode = ss.tumor_barcode_b 
 JOIN clinical.subtypes cs ON cs.case_barcode = ss.case_barcode
+--WHERE idh_codel_subtype = 'IDHwt'
 "
 
 dat <- dbGetQuery(con,q)
@@ -53,56 +54,27 @@ summarise(pval = t.test(fraction_a, fraction_b, paired=TRUE)$p.value,
 		  eff = mean(fraction_b - fraction_a)) %>%
 data.frame()
 
-p.val <- matrix(0,nrow = length(cells), ncol = length(subtypes))
-colnames(p.val) <- subtypes
-rownames(p.val) <- cells
-for(i in 1:length(cells))
-{
-	for(j in 1:length(subtypes))
-	{
-		sub_dat <- dat %>%
-				filter(cell_state == cells[i] & idh_status == subtypes[j])
-		p.val[i,j] <- wilcox.test(sub_dat[,"fraction_a"], sub_dat[,"fraction_b"])$p.value
-	}
-}
-
 plot_fract <- dat %>% 
-			  group_by(idh_status, cell_state) %>%
+			  group_by(cell_state, idh_status) %>%
 			  summarise(fraction_a = mean(fraction_a), fraction_b = mean(fraction_b)) %>%
 			  pivot_longer(-c("idh_status","cell_state"), values_to = "fraction") %>%
 			  mutate(name = recode(name, "fraction_a" = "Initial", "fraction_b" = "Recurrent"),
-			  cell_state = recode(cell_state, "b_cell" = "B cell", "dendritic_cell" = "Dendritic cell",
-			  				"differentiated_tumor" = "Diff.-like", "endothelial" = "Endothelial",
-			  				"fibroblast" = "Fibroblast", "granulocyte" = "Granulocyte",
-			  				"myeloid" = "Myeloid", "oligodendrocyte" = "Oligodendrocyte",
-			  				"pericyte" = "Pericyte", "prolif_stemcell_tumor" = "Proliferating stem-like",
-			  				"stemcell_tumor" = "Stem-like","t_cell" = "T cell")) %>%
+			  cell_state = recode(cell_state, "AClike" = "AC-like", "Macrophage" = "Macrophage",
+			  				"Mesenchymal" = "MES-like", "NPClike" = "NPC-like",
+			  				"Oligodendrocyte" = "Oligodendrocyte", "OPClike" = "OPC-like",
+			  				"T" = "T cell")) %>%
 			  mutate(cell_state = as_factor(cell_state)) %>%
-			  mutate(cell_state = fct_relevel(cell_state, "B cell", "Granulocyte", "T cell", "Dendritic cell", "Myeloid", 
+			  mutate(cell_state = fct_relevel(cell_state, "T cell", "Macrophage", 
 			  											  "Oligodendrocyte", 
-			  											  "Endothelial", "Pericyte",
-			  											  "Fibroblast", 
-			  											  "Diff.-like", "Stem-like", "Proliferating stem-like"))
-
-plot_fract <- plot_fract %>% mutate(fraction = fraction*100)
-
-g1 <- plot_fract %>% filter(idh_status == "IDHwt", name == "Initial") %>% .$fraction
-g2 <- plot_fract %>% filter(idh_status == "IDHwt", name == "Recurrent")	%>% .$fraction	
-g3 <- plot_fract %>% filter(idh_status == "IDHmut", name == "Initial") %>% .$fraction
-g4 <- plot_fract %>% filter(idh_status == "IDHmut", name == "Recurrent") %>% .$fraction		
-
-avg_matrix <- data.frame(g1,g2,g3,g4)
-cor(avg_matrix)
-			  							  
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_stacked_barplot_subtype_timepoint.pdf",width=1.286,height=1.9127)  #,width=1.287,height=1.9127) 
+			  											  "MES-like", "AC-like", "OPC-like", "NPC-like"))
+			  							  							  
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_stacked_barplot_subtype_timepoint_neftel.pdf",width=1.286,height=1.9127)  #,width=1.287,height=1.9127) 
 ggplot(plot_fract, aes(fill=cell_state, y=fraction, x=name)) + 
 geom_bar(position="stack", stat="identity") +
 facet_grid(.~idh_status) +
-scale_fill_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",
+scale_fill_manual(values=c("T cell" = "#6baed6", "Macrophage" = "#08519c",
 						 "Oligodendrocyte" = "#2ca25f",
-						 "Endothelial" = "#ffffd4", "Pericyte" = "#fee391",
-						 "Fibroblast" = "#feb24c",
-						 "Stem-like" = "#fb6a4a", "Diff.-like" = "#fcbba1", "Proliferating stem-like" = "#a50f15")) +
+						 "AC-like" = "#fcbba1", "OPC-like" = "#fb6a4a", "MES-like" = "#fee391", "NPC-like" = "#a50f15")) +
 labs(y = "Proportion") +
 theme_bw() +
 theme(axis.title.x=element_blank(),
