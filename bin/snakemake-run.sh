@@ -17,7 +17,7 @@
 ## get dir where run_snakemake.sh is present
 ## https://stackoverflow.com/a/246128/1243763
 ## SMKDIR is being referenced in cluster profile under ~/.config/snakemake/
-SMKDIR="/projects/verhaak-lab/GLASS-III"
+SMKDIR="/projects/verhaak-lab/yeg/snakemake/GLASS-oligo"
 
 cd "${SMKDIR}" && \
 export SMKDIR

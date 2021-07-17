@@ -13,7 +13,7 @@ dependencies:
   - async-timeout=3.0.1=py_1000
   - attrs=19.3.0=py_0
   - bcrypt=3.1.7=py38h1e0a361_1
-  - binutils_impl_linux-64=2.31.1=h7fc9f1b_6
+  - binutils_impl_linux-64=2.31.1=h7fc9f1b_5
   - binutils_linux-64=2.31.1=h6176602_14
   - boto3=1.9.191=py_0
   - botocore=1.12.191=py_0
@@ -76,7 +76,7 @@ dependencies:
   - jsonschema=3.2.0=py38h32f6830_1
   - jupyter_core=4.6.3=py38h32f6830_1
   - krb5=1.16.4=h173b8e3_0
-  - ld_impl_linux-64=2.34=h53a641e_0
+  - ld_impl_linux-64=2.34=h53a641e_5
   - libblas=3.8.0=16_openblas
   - libcblas=3.8.0=16_openblas
   - libcurl=7.68.0=hda55be3_0

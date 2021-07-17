@@ -3,7 +3,7 @@
     {
         "job-name" : "{rule}.{wildcards.aliquot_barcode}",
         "mail-type" : "FAIL",
-        "mail-user" : "Frederick.Varn@jax.org",
+        "mail-user" : "Gordon.Ye@jax.org",
         "nodes" : 1,
         "cpus-per-task" : 2,
         "time" : "72:00:00",

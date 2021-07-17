@@ -6,23 +6,23 @@ from_source: 0
 
 ## Database settings
 db:
-  configfile: "/projects/verhaak-lab/GLASS-III/.odbc.ini"
-  configsection: "GLASSv3"
+  configfile: "/projects/verhaak-lab/yeg/snakemake/GLASS-oligo/.odbc.ini"
+  configsection: "oligo"
 
 ## Data paths
 data:
-  source_path: "/projects/verhaak-lab/GLASS-III/data"
-  realn_path: "/projects/verhaak-lab/GLASS-III/results/align/bqsr"
+  source_path: "/fastscratch/verhaak-lab/oligo/fastq/"
+  realn_path: "/projects/verhaak-lab/yeg/snakemake/GLASS-oligo/results/align/bqsr"
 
 ## Full path to cluster settings
 cluster_json:     "conf/cluster.json"
 
 ## Working directory
-#workdir:          "/fastscratch/verhaak-lab/TCGA-WG"
+#workdir:          "/fastscratch/yeg"
 
 ## Module and conda directories
 module_dir:        "/projects/verhaak-lab/varnf/software/modules"
-conda_dir:        "/projects/verhaak-lab/varnf/anaconda3/bin"
+conda_dir:         "/projects/verhaak-lab/yeg/GLASS-NF/miniconda3/condabin/conda"
 
 gnomad_vcf:       "/projects/verhaak-lab/verhaak_ref/gatk-legacy-bundles/Mutect2/af-only-gnomad.raw.sites.b37.vcf.gz"
 funcotator_dir:   "/projects/verhaak-lab/verhaak_ref/funcotator/funcotator_dataSources.v1.6.20190124s"
