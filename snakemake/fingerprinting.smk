@@ -110,32 +110,32 @@ rule fingerprintcase:
 ## https://software.broadinstitute.org/gatk/documentation/tooldocs/4.0.5.0/picard_fingerprint_CrosscheckFingerprints.php
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 
-rule fingerprintall:
-    input:
-        lambda wildcards: expand("results/align/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam", aliquot_barcode = manifest.getSelectedAliquots())
-    output:
-        #"results/fingerprinting/GLASS.crosscheck_metrics"
-        "results/fingerprinting/GLASS_HF.crosscheck_metrics"
-    params:
-        mem = CLUSTER_META["fingerprintall"]["mem"],
-        samples = lambda _, input: " ".join(["--INPUT " + s for s in input])
-    threads:
-        CLUSTER_META["fingerprintall"]["cpus-per-task"]
-    log:
-        "logs/fingerprinting/GLASS.fingerprintall.log"
-    benchmark:
-        "benchmarks/fingerprinting/GLASS.fingerprintall.txt"
-    message:
-        "Running Picard CrosscheckFingerprints across entire cohort"
-    shell:
-        "gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
-            --HAPLOTYPE_MAP {config[haplotype_map][file]} \
-            --LOD_THRESHOLD -5 \
-            --CROSSCHECK_BY SAMPLE \
-            {params.samples} \
-            --OUTPUT {output} \
-            > {log} 2>&1 \
-            || true"
+##rule fingerprintall:
+##    input:
+##        lambda wildcards: expand("results/align/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam", aliquot_barcode = manifest.getSelectedAliquots())
+##    output:
+##        #"results/fingerprinting/GLASS.crosscheck_metrics"
+##        "results/fingerprinting/GLASS_HF.crosscheck_metrics"
+##    params:
+##        mem = CLUSTER_META["fingerprintall"]["mem"],
+##        samples = lambda _, input: " ".join(["--INPUT " + s for s in input])
+##    threads:
+##        CLUSTER_META["fingerprintall"]["cpus-per-task"]
+##    log:
+##        "logs/fingerprinting/GLASS.fingerprintall.log"
+##    benchmark:
+##        "benchmarks/fingerprinting/GLASS.fingerprintall.txt"
+##    message:
+##        "Running Picard CrosscheckFingerprints across entire cohort"
+##    shell:
+##        "gatk --java-options -Xmx{params.mem} CrosscheckFingerprints \
+##            --HAPLOTYPE_MAP {config[haplotype_map][file]} \
+##            --LOD_THRESHOLD -5 \
+##            --CROSSCHECK_BY SAMPLE \
+##            {params.samples} \
+##            --OUTPUT {output} \
+##            > {log} 2>&1 \
+##           || true"
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ## ClusterFingerprintBatch
