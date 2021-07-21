@@ -26,5 +26,8 @@ segs = lapply(files, function(f){
   return(dat)
 })
 segs <- data.table::rbindlist(segs) %>% as.data.frame()
-
 write.table(segs, file = outfn, quote = F, sep = "\t", row.names = FALSE, col.names = FALSE)
+
+# manually added
+## IF USING THIS, COMMENT OUT THE ABOVE WRITE.TABLE() !!!
+write.table(segs, file = "/projects/verhaak-lab/yeg/snakemake/GLASS-oligo/seg2db_OUT.tsv", quote = F, sep = "\t", row.names = FALSE, col.names = FALSE)
