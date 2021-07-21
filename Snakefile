@@ -47,7 +47,7 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 #DNA modules
 #include: "snakemake/download.smk"
-include: "snakemake/align.smk"
+#include: "snakemake/align.smk"
 #include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
@@ -58,7 +58,7 @@ include: "snakemake/align.smk"
 #include: "snakemake/lumpy.smk"
 #include: "snakemake/delly.smk"
 #include: "snakemake/manta.smk"
-#include: "snakemake/cnv.smk"
+include: "snakemake/cnv.smk"
 #include: "snakemake/sequenza.smk"
 #include: "snakemake/optitype.smk"
 #include: "snakemake/pvacseq.smk"
@@ -278,8 +278,8 @@ rule pyclone:
 rule fingerprint:
    input:
        expand("results/fingerprinting/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots()),
-       expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()),
-       "results/fingerprinting/GLASS_HF.crosscheck_metrics"
+       expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()) ## ,
+##       "results/fingerprinting/GLASS_HF.crosscheck_metrics"
 
 # Fingerprint DNA and RNA samples together
 rule full_fingerprint:
