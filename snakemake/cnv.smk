@@ -326,6 +326,8 @@ rule seg2db:
         mem = CLUSTER_META["seg2db"]["mem"]
     threads:
         CLUSTER_META["seg2db"]["cpus-per-task"]
+    conda:
+        "../envs/variantannotation_r.yaml"
     log:
         "logs/cnv/seg2db/seg2db.log"
     benchmark:
