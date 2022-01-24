@@ -1,7 +1,9 @@
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Final pathologist vs CIBERSORT plots
-# Includes Leeds samples with features grouped based on periphery/core and recurrence
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################
+# Final pathologist vs CIBERSORT plots; includes Leeds samples with features grouped based on periphery/core and recurrence
+# Author: Frederick Varn
+# Date: 2021.12.30
+# Figures S2C, S2D- GLASS, S2E
+##################################################
 
 library(odbc)
 library(DBI)

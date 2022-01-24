@@ -1,7 +1,9 @@
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################
 # Final necrosis vs CIBERSORT plots for TCGA
-# Includes Leeds samples with features grouped based on periphery/core and recurrence
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Author: Frederick Varn
+# Date: 2022.01.19
+# Figures S2D- TCGA
+##################################################
 
 library(odbc)
 library(DBI)

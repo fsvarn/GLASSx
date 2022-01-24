@@ -1,7 +1,9 @@
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Final immunofluorescence versus CIBERSORTx analysis
-# Includes all samples (Leeds + IDH mutant) and creates plots in Fig S1 and Fig3 Ki67
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+###################################################
+# Final immunofluorescence versus CIBERSORTx analysis; includes all samples (Leeds + IDH mutant)
+# Author: Frederick Varn
+# Date: 2021.12.30
+# Figures S1C, 3B, 3D
+##################################################
 
 library(odbc)
 library(DBI)
