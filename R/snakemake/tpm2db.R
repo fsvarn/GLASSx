@@ -23,5 +23,4 @@ transcript_tpm <- args[1]
 cat("Reading in inputs...")
 ttpm <- read.delim(transcript_tpm,stringsAsFactors=FALSE)
 
-dbWriteTable(con, Id(schema="analysis", table="transcript_tpm"), ttpm, overwrite=TRUE)
-
+#dbWriteTable(con, Id(schema="analysis", table="transcript_tpm"), ttpm, overwrite=TRUE)

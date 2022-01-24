@@ -127,7 +127,7 @@ dev.off()
 
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/scrna_csx_proportions_tumor.pdf",width=3,height=1.3)  
 ggplot(tfull_plot, aes(x = true_fraction * 100, y = csx_fraction * 100)) +
-geom_point() +
+geom_point(colour="black",size=1) +
 geom_smooth(method = lm, se = FALSE, aes(colour = cell_state)) + 
 facet_wrap(.~cell_state, scales = "free") + 
 scale_colour_manual(values=c("B cell" = "#eff3ff", "Granulocyte" = "#bdd7e7", "T cell" = "#6baed6", "Dendritic cell" = "#3182bd", "Myeloid" = "#08519c",

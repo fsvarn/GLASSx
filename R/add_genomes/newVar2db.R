@@ -42,9 +42,10 @@ for(i in 1:nrow(dat))
 new_dat <- dat[myinds,]
 colnames(new_dat) <- c("chrom", "pos", "ref","alt","gene_symbol","variant_classification","secondary_variant_classification","variant_type","genome_change","transcript","transcript_strand","transcript_exon","transcript_position","cdna_change","cds_change","protein_change","gc_content","reference_context")
 
-myoutf <- "/projects/verhaak-lab/GLASS-III/results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.GLSS-H2.tsv"
+myoutf <- "/projects/verhaak-lab/GLASS-III/results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.GLSS-SN.tsv"
 write.table(new_dat,myoutf,sep="\t",quote=F,row.names=F)
 
+new_dat <- read.delim("/projects/verhaak-lab/GLASS-III/results/mutect2/consensusvcf/consensus.normalized.sorted.funcotated.GLSS-SN.tsv",stringsAsFactor=FALSE)
 dbWriteTable(con, Id(schema="variants", table="anno"), new_dat, append=TRUE)
 
 EOF

@@ -7,7 +7,7 @@ rm(list=ls())
 
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
-myDir1 <- "/projects/varnf/GLASS-III/GLASS-III/results/kallisto/kallisto/aliquot"
+myDir1 <- "/projects/verhaak-lab/GLASS-III/results/kallisto/kallisto/aliquot"
 myinf1 <- paste(myDir1,dir(myDir1),sep="/")
 myinf1 <- sapply(myinf1,function(x)paste(x,dir(x)[4],sep="/"),USE.NAMES=FALSE)
 

@@ -18,10 +18,10 @@ rm(list=ls())
 
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
-myDir1 <- "/projects/varnf/GLASS-III/GLASS-III/results/kallisto/fastp"
+myDir1 <- "/projects/verhaak-lab/GLASS-III/results/kallisto/fastp"
 myinf1 <- paste(myDir1,dir(myDir1),sep="/")
 myinf1 <- unlist(sapply(myinf1,function(x)paste(x,"/",dir(x)[grep(".json",dir(x))],sep="")))
-names(myinf1) <- gsub("/projects/varnf/GLASS-III/GLASS-III/results/kallisto/fastp/","",names(myinf1))
+names(myinf1) <- gsub("/projects/verhaak-lab/GLASS-III/results/kallisto/fastp/","",names(myinf1))
 
 beforelist <- afterlist <- list()
 duplication_rate <- rep(0,length(myinf1))

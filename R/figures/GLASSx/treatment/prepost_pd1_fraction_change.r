@@ -15,8 +15,8 @@ SELECT tc.*, CASE WHEN tc.idh_codel_subtype = 'IDHwt' THEN 'IDHwt' ELSE 'IDHmut'
 sc1.cell_state, sc1.fraction AS fraction_a, sc2.fraction AS fraction_b
 FROM analysis.tumor_rna_clinical_comparison tc
 JOIN analysis.rna_silver_set ss ON tc.tumor_pair_barcode = ss.tumor_pair_barcode
-JOIN analysis.cibersortx_ivygap sc1 ON sc1.aliquot_barcode = tc.tumor_barcode_a
-JOIN analysis.cibersortx_ivygap sc2 ON sc2.aliquot_barcode = tc.tumor_barcode_b AND sc1.cell_state = sc2.cell_state
+JOIN analysis.cibersortx_scgp sc1 ON sc1.aliquot_barcode = tc.tumor_barcode_a
+JOIN analysis.cibersortx_scgp sc2 ON sc2.aliquot_barcode = tc.tumor_barcode_b AND sc1.cell_state = sc2.cell_state
 WHERE received_pd1 AND idh_codel_subtype = 'IDHwt'
 ORDER BY 1
 "
@@ -49,6 +49,28 @@ group_by(cell_state) %>%
 summarise(p.val = t.test(fraction_a, fraction_b, paired=TRUE)$p.value,
 		  eff = median(fraction_b - fraction_a))
 
+sub_dat <- dat %>% filter(cell_state == "dendritic_cell")
+fraction <- c(sub_dat$fraction_a, sub_dat$fraction_b)
+timepoint <- c(rep("Initial",nrow(sub_dat)), rep("Recurrent", nrow(sub_dat)))
+patient <- rep(sub_dat$case_barcode, 2)
+plot_dat <- data.frame(patient, timepoint, fraction)
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/prepostpd1_dc.pdf",width=1.2,height=1.5)
+ggplot(data = plot_dat, aes(x = timepoint, y = fraction*100, colour= timepoint)) +
+#geom_boxplot(outlier.size=0,colour="black") +
+geom_line(size=0.8,alpha=0.4,aes(group=patient),colour= "black") +
+geom_point(size=1) +
+scale_colour_manual(values=c("#a6611a","#018571")) +
+labs(main = "Dendritic cell", y = "Proportion (%)") +
+theme_classic() +
+theme(axis.text = element_text(size=7),
+	axis.title.x= element_blank(),
+	axis.title.y= element_text(size=7),
+	panel.grid.major=element_blank(),panel.grid.minor=element_blank(),
+	strip.text = element_text(size=7),
+	strip.background = element_rect(colour="white",fill="white"),
+	legend.position = "none")
+dev.off()
 
 q <- "
 SELECT tc.*, CASE WHEN tc.idh_codel_subtype = 'IDHwt' THEN 'IDHwt' ELSE 'IDHmut' END AS idh_status

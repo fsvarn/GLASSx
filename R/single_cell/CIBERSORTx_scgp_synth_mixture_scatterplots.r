@@ -72,7 +72,7 @@ annotation_text <- data.frame(cell_state = cells,
 							  
 se <- ggplot(plot_data, aes(x=true_proportion*100,y=csx_proportion*100)) +
 	geom_point(colour="black",size=1) +
-	geom_smooth(method='lm',aes(colour = cell_state)) +
+	geom_smooth(method='lm',aes(colour = cell_state), se = FALSE) +
 	facet_wrap(cell_state~.,scales="free", nrow=3) +
 	scale_colour_manual(values = colors) + 
 	geom_text(data = annotation_text, label=myr, size=2.5, parse=TRUE) +

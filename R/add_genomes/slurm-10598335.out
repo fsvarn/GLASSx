@@ -1,0 +1,31 @@
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.3     ✔ purrr   0.3.4
+✔ tibble  3.1.1     ✔ dplyr   1.0.5
+✔ tidyr   1.1.3     ✔ stringr 1.4.0
+✔ readr   1.4.0     ✔ forcats 0.5.1
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Error: object 'EOF' not found
+Execution halted
+-------------------------------------------------------------
+SUMNER/WINTER EPILOGUE
+-------------------------------------------------------------
+Job ID: 10598335
+Cluster: slurm_cluster
+User/Group: root/jaxuser
+State: FAILED (exit code 1)
+Nodes: 1
+Cores per node: 2
+CPU Utilized: 08:16:27
+CPU Efficiency: 30.93% of 1-02:45:20 core-walltime
+Job Wall-clock time: 13:22:40
+Memory Utilized: 3.35 GB
+Memory Efficiency: 4.65% of 72.00 GB
+-------------------------------------------------------------
+       JobID  User   State    CPUTime Exit     MaxRSS        NodeList  Partition                   ReqTRES              Submit               Start                 End    Elapsed 
+------------ ----- ------- ---------- ---- ---------- --------------- ---------- ------------------------- ------------------- ------------------- ------------------- ---------- 
+10598335     varnf  FAILED 1-02:45:20  1:0                  sumner053    compute billing=2,cpu=2,mem=7372+ 2021-09-14T13:49:14 2021-09-14T13:49:25 2021-09-15T03:12:05   13:22:40 
+10598335.ba+        FAILED 1-02:45:20  1:0   3431.05M       sumner053                                      2021-09-14T13:49:25 2021-09-14T13:49:25 2021-09-15T03:12:05   13:22:40 
+10598335.ex+       COMPLE+ 1-02:45:22  0:0      1.75M       sumner053                                      2021-09-14T13:49:25 2021-09-14T13:49:25 2021-09-15T03:12:06   13:22:41 
+-------------------------------------------------------------

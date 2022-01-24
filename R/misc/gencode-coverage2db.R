@@ -15,9 +15,7 @@ myDir1 <- "results/align/gencode-coverage/"
 myinf1 <- dir(myDir1,)
 
 #Specify cohort of interest if adding one specific cohort
-myinf1 <- myinf1[grep("GLSS-HF-",myinf1)]
-myinf1 <- myinf1[-grep("GLSS-HF-2",myinf1)]
-myinf1 <- myinf1[-grep("GLSS-HF-3",myinf1)]
+#myinf1 <- myinf1[grep("GLSS-SN-",myinf1)]
 
 aliquot_barcode <- gsub(".gencode-coverage.tsv","",myinf1)
 myinf1 <- paste(myDir1,myinf1,sep="")

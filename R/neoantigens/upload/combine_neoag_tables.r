@@ -24,6 +24,10 @@ myfile <- myfile[which(file.exist)]
 # mysample <- mysample[-grep("GLSS-HF-2|GLSS-HF-3",mysample)]
 # myfile <- myfile[grep("GLSS-CU-P|GLSS-HF-",myfile)]
 # myfile <- myfile[-grep("GLSS-HF-2|GLSS-HF-3",myfile)]
+#
+# SN cohort
+# mysample <- mysample[grep("GLSS-SN",mysample)]
+# myfile <- myfile[grep("GLSS-SN",myfile)]
 
 myintfile <- paste(myintDir,mysample,".labelled.txt",sep="")
 

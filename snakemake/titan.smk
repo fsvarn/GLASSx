@@ -55,7 +55,7 @@ rule titan:
     	set +u
         source {config[conda_dir]}/activate r_3.4.1
         set -u
-    	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
+    	Rscript /projects/verhaak-lab/USERS/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
 			--genomeBuild hg19 \
 			--id {wildcards.pair_barcode} \
 			--hetFile {input.hets} \
@@ -71,7 +71,7 @@ rule titan:
 			--gender {params.gender} \
 			--estimatePloidy TRUE \
 			--outDir {params.outdir} \
-			--libdir /projects/barthf/opt/TitanCNA 
+			--libdir /projects/verhaak-lab/USERS/barthf/opt/TitanCNA 
 			> {log} 2>&1
     	"""
 
@@ -97,7 +97,7 @@ rule selecttitan:
     	set +u
         source {config[conda_dir]}/activate r_3.4.1
         set -u
-    	Rscript /projects/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
+    	Rscript /projects/verhaak-lab/USERS/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
 			--ploidyRun2=results/cnv/titan/{wildcards.pair_barcode}/ploidy2 \
 			--ploidyRun3=results/cnv/titan/{wildcards.pair_barcode}/ploidy3 \
 			--threshold=0.15 \

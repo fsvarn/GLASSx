@@ -94,13 +94,13 @@
     "baserecalibrator" :
     {
         "cpus-per-task" : 2,
-        "time" : "24:00:00",
+        "time" : "48:00:00",
         "mem" : "12g"
     },
     "applybqsr" :
     {
         "cpus-per-task" : 2,
-        "time" : "24:00:00",
+        "time" : "48:00:00",
         "mem" : "12g"
     },
     "wgsmetrics" :
@@ -845,7 +845,7 @@
     {
         "cpus-per-task" : 1,
         "mem" : "6g",
-        "time" : "2:00:00",
+        "time" : "8:00:00",
         "job-name" : "{rule}"
     },
     "pyclone_setup" :
@@ -861,8 +861,8 @@
     {
         "cpus-per-task" : 2,
         "mem" : "12g",
-        "qos" : "batch",
-        "time" : "72:00:00",
+        "qos" : "long",
+        "time" : "300:00:00",
         "job-name" : "{rule}",
         "output" : "logs/slurm/{rule}.{wildcards.case_barcode}.out",
         "error" : "logs/slurm/{rule}.{wildcards.case_barcode}.err"
@@ -1091,6 +1091,7 @@
     "samtofastq" :
     {
         "cpus-per-task" : 4,
+        "mem" : "12g",
         "time" : "12:00:00",
         "job-name" : "{rule}.{wildcards.aliquot_barcode}",
         "output" : "logs/slurm/{rule}.{wildcards.aliquot_barcode}.out",

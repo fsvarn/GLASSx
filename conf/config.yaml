@@ -171,7 +171,9 @@ mixcr:  "/projects/verhaak-lab/USERS/varnf/SofWar/anaconda3/envs/mixcr/bin/mixcr
 java_1.7:   "/projects/verhaak-lab/USERS/varnf/SofWar/java/jre1.7.0_80/bin"
 
 ## JAVA options
-samtofastq_java_opt: "'-Dsamjdk.buffer_size=131072 -Dsamjdk.compression_level=1 -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xmx128m'"
+## WXS samtofastq uses Xmx128m
+## WGS samtofastq uses Xmx32g
+samtofastq_java_opt: "'-Dsamjdk.buffer_size=131072 -Dsamjdk.compression_level=1 -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xmx128m'"    
 mergebamalignment_java_opt: "'-Dsamjdk.buffer_size=131072 -Dsamjdk.use_async_io=true -Dsamjdk.compression_level=1 -XX:+UseStringCache -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xmx5000m'"
 
 #### ACTUAL RUN

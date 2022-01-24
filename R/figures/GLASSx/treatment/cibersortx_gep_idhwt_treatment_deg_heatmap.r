@@ -31,7 +31,7 @@ con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 q <- "SELECT ps.*, cc.case_age_diagnosis_years, cc.case_overall_survival_mo, cc.case_vital_status
 FROM analysis.tumor_rna_clinical_comparison ps
 JOIN clinical.cases cc ON cc.case_barcode = ps.case_barcode
-WHERE idh_codel_subtype = 'IDHwt' AND subtype_a = subtype_b AND received_treatment"
+WHERE idh_codel_subtype = 'IDHwt' --AND subtype_a = subtype_b AND received_treatment"
 
 dat <- dbGetQuery(con,q)
 dat <- dat %>% mutate(case_vital_status = recode(case_vital_status, "alive" = 1, "dead" = 0)) %>%
@@ -43,7 +43,7 @@ for(i in 1:length(myinf1))
 {
 	cat("\r", i)
 	geps <- read.delim(myinf1[i], row.names=1)
-	geps <- log10(geps+1)
+	#geps <- log10(geps+1)		No need because we are taking log2 fold-change later
 	rem <- apply(geps,1,function(x)sum(is.na(x)))
 	geps <- geps[-which(rem==ncol(geps)),]	
 	vars <- apply(geps,1,function(x)var(x,na.rm=TRUE))
@@ -70,13 +70,13 @@ for(i in 1:length(myinf1))
 	idhwt_res <- idhwt_res[order(eff),]
 
 	idhwt_res[,"logp"] <- -log10(idhwt_res[,"p.val"])
-	idhwt_res[,"sig"] <- idhwt_res[,"q.val"] < 0.1
+	idhwt_res[,"sig"] <- idhwt_res[,"q.val"] < 0.05
 	
 	idhwt_res <- idhwt_res[order(idhwt_res$p.val),]
 
 	myoutf <- paste("data/res/CIBERSORTx/analysis/GLASS_idhwt_", cell_state[i],"_postreatment_result.txt",sep="")
 
-	write.table(idhwt_res, myoutf, sep="\t",quote=FALSE,row.names=TRUE) 
+	#write.table(idhwt_res, myoutf, sep="\t",quote=FALSE,row.names=TRUE) 
 	
 	sigs[[i]] <- idhwt_res
 
@@ -141,8 +141,6 @@ ggplot(data = plot_hm, aes(x = timepoint, y = gene_symbol)) +
 	panel.grid.minor=element_blank())	
 dev.off()
 
-
-
 # GO enrichment
 
 tumor_sigs <- sigs
@@ -157,7 +155,7 @@ for(i in 1:length(tumor_sigs))
 {
 	cat("\r", i)
 	mysig <- tumor_sigs[[i]]
-	up <- rownames(mysig %>% filter(sig, eff > 0))
+	up <- rownames(mysig %>% filter(q.val < 0.05, eff > 0))
 	
 	all_genes <- rownames(mysig)
 	bg_genes <- as.numeric(all_genes %in% up)
