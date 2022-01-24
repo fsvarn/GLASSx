@@ -5,13 +5,6 @@
 ### Overview
 The Glioma Longitudinal AnalySiS (GLASS) consortium consists of clinical, bioinformaticians, and basic science researchers from leading institutions across the world striving to better understand glioma tumor evolution and to expose its therapeutic vulnerabilities. For more information, please read our position paper: **The Glioma Longitudinal Analysis Consortium. Glioma Through the Looking GLASS: Molecular Evolution of Diffuse Gliomas and the Glioma Longitudinal AnalySiS Consortium.** *Neuro Oncol. 2018* PMID: 29432615. 
 
-#### Analytical contributors
-Floris Barthel*, Kevin Johnson*, Frederick Varn, Anzhela Moskalik, Georgette Tanner, Emre Kocakavuk, Hoon Kim, Roel Verhaak
-
-
-#### Data contributors
-*In no particular order*: Mustafa Khasraw (U Sydney), Joe Costello (UCSF), Tom Mikkelsen (Henry Ford Hospital), Dohyun Nam (Samsung Medical Center), Pieter Wesseling (VUMC), Antonio Iavarone (Columbia), Gaetano Finochiaro (Instituto Besta), Lucy Stead (Leeds U), Adelheid Wöhrer (Vienna), Hiromichi Suzuki (Kyoto U), Rameen Beroukhim (DFCI), Bernhard Radlwimmer (DKFZ), Jill S. Barnholtz-Sloan (CWRU), Priscilla Brastianos (MGH), Jason Huse (MD Anderson), John de Groot (MD Anderson), Kristin Alfaro-Munoz (MD Anderson), and NIH/NCI The Cancer Genome Atlas.
-
 ### The GLASS Data Model
 
 The GLASS data model was built to carefully take into the account the temporal nature of the dataset. The layers of the dataset is best explained using the diagram below. Here we see a single hypothetical patient (left-most column) from which we have obtained tumor samples at three different time points (second column), including a second tumor sub-sample (eg. multisector sample) from the primary tumor (third column). Moreover, a simultaneous DNA-RNA extraction was performed on 1st tumor recurrence and both were sequenced (fourth column). Lastly, some of the DNA aliquots were split off and separately sent off for whole genome and whole exome sequencing (fifth column).
