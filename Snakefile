@@ -123,7 +123,7 @@ rule align:
 
 rule gencode:
     input:
-        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getAliquotsByBatch('GLSS-H2-WXS'))
+        expand("results/align/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getAliquotsByBatch('GLSS-SN-WGS'))
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -279,7 +279,7 @@ rule fingerprint:
    input:
        expand("results/fingerprinting/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots()),
        expand("results/fingerprinting/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()),
-       "results/fingerprinting/GLASS_HF.crosscheck_metrics"
+       "results/fingerprinting/GLASS_SN.crosscheck_metrics"
 
 # Fingerprint DNA and RNA samples together
 rule full_fingerprint:
@@ -287,7 +287,7 @@ rule full_fingerprint:
        lambda wildcards: ["results/rnafingerprint/star/{sample}/{sample}.{rg}.ReadsPerGene.out.tab".format(sample = aliquot_barcode, rg = readgroup)
        	for aliquot_barcode, readgroups in manifest.getSelectedReadgroupsByAliquot(analyte='R').items()
        	for readgroup in readgroups],
-       #expand("results/rnafingerprint/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots(analyte='R')),
+       expand("results/rnafingerprint/sample/{aliquot_barcode}.crosscheck_metrics", aliquot_barcode = manifest.getSelectedAliquots(analyte='R')),
        expand("results/rnafingerprint/case/{case_barcode}.crosscheck_metrics", case_barcode = manifest.getSelectedCases()),
        expand("results/rnafingerprint/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv", aliquot_barcode = manifest.getSelectedAliquots(analyte='R'))
 

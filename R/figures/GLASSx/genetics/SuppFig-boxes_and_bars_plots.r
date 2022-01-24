@@ -461,6 +461,6 @@ theme(axis.text = element_text(size=7),
 	legend.position = "none") 
 
 #pdf("/projects/verhaak-lab/GLASS-III/cdkn2a_idhmut_cell_state_changes.pdf",width=1.9,height=1.5) Old file for CDKN2A
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cell_cycle_idhmut_cell_state_changes.pdf",width=1.9,height=1.5)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cell_cycle_idhmut_cell_state_changes_v2.pdf",width=1.9,height=1.5)
 grid.arrange(boxes, bars, nrow = 1, ncol = 2, widths = c(1.3, 1))
 dev.off()

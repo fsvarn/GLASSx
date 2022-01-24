@@ -510,35 +510,35 @@ rule fingerprintcase_all:
 ## Get genic coverage given a BAM file
 ## URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-# 
-# rule gencode_coverage:
-#     input:
-#         "results/rnafingerprint/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam"
-#     output:
-#         "results/rnafingerprint/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv"
-#     params:
-#         mem = CLUSTER_META["gencode_coverage"]["mem"]
-#     conda:
-#         "../envs/bedsam.yaml"
-#     threads:
-#         CLUSTER_META["gencode_coverage"]["cpus-per-task"]
-#     log:
-#         "logs/rnafingerprint/gencode-coverage/{aliquot_barcode}.log"
-#     benchmark:
-#         "benchmarks/rnafingerprint/gencode-coverage/{aliquot_barcode}.txt"
-#     message:
-#         "Computing coverage using flattened gencode GTF\n"
-#         "Sample: {wildcards.aliquot_barcode}"
-#     shell:"""
-#         set +o pipefail;
-#         samtools view -q 10 -b {input} | 
-#             bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d -sorted -g {config[bedtools_genome]} | 
-#             bedtools groupby -i stdin -g 1,2,3,4,5 -c 7 -o sum | 
-#             sort -k5,5 |
-#             bedtools groupby -i stdin -g 5 -c 4,6 -o sum,sum |
-#             awk -F\"[+\\t]\" 'BEGIN {{OFS=\"\\t\"}}{{for(i=1;i<(NF-1);i++){{split($i,g,\".\"); print g[1],$(NF-1),$NF}}}}' \
-#             > {output} 2> {log}
-#         """
+
+rule gencode_coverage:
+    input:
+        "results/rnafingerprint/bqsr/{aliquot_barcode}.realn.mdup.bqsr.bam"
+    output:
+        "results/rnafingerprint/gencode-coverage/{aliquot_barcode}.gencode-coverage.tsv"
+    params:
+        mem = CLUSTER_META["gencode_coverage"]["mem"]
+    conda:
+        "../envs/bedsam.yaml"
+    threads:
+        CLUSTER_META["gencode_coverage"]["cpus-per-task"]
+    log:
+        "logs/rnafingerprint/gencode-coverage/{aliquot_barcode}.log"
+    benchmark:
+        "benchmarks/rnafingerprint/gencode-coverage/{aliquot_barcode}.txt"
+    message:
+        "Computing coverage using flattened gencode GTF\n"
+        "Sample: {wildcards.aliquot_barcode}"
+    shell:"""
+        set +o pipefail;
+        samtools view -q 10 -b {input} | 
+            bedtools coverage -a {config[gencode_gtf_flat]} -b stdin -d -sorted -g {config[bedtools_genome]} | 
+            bedtools groupby -i stdin -g 1,2,3,4,5 -c 7 -o sum | 
+            sort -k5,5 |
+            bedtools groupby -i stdin -g 5 -c 4,6 -o sum,sum |
+            awk -F\"[+\\t]\" 'BEGIN {{OFS=\"\\t\"}}{{for(i=1;i<(NF-1);i++){{split($i,g,\".\"); print g[1],$(NF-1),$NF}}}}' \
+            > {output} 2> {log}
+        """
 
 
 ## END ##

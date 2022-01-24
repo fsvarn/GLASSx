@@ -11,6 +11,7 @@ sandbox/**
 archive/**
 documents/**
 tmp/
+R/add_genomes/slurm**
 .snakemake/**
 .Rhistory
 *.Rdata

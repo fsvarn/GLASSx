@@ -122,7 +122,7 @@ mutate(cell_state = fct_relevel(cell_state, "Diff.-like", "Stem-like", "Prolif. 
 as.data.frame()
 
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/malig_subtype_switch_unadj_v2.pdf",width=2.735,height=1.5)
-ggplot(unadj_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=logp)) +
+ggplot(unadj_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=eff)) +
 geom_tile() +
 scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0) +
 facet_grid(. ~ cell_state) +
@@ -215,7 +215,7 @@ adj_res %>% filter(subtype_a == "Proneural", subtype_b == "Mesenchymal")
 
 
 pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/malig_subtype_switch_adj_LE_v2.pdf",width=2.735,height=1.5)
-ggplot(adj_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=logp)) +
+ggplot(adj_res %>% filter(idh_status == "IDHwt"), aes(x = subtype_a, y = subtype_b, fill=eff)) +
 geom_tile() +
 scale_fill_gradient2(low ="royalblue4", mid = "white", high = "tomato3", midpoint = 0) +
 facet_grid(. ~ cell_state) +
@@ -483,36 +483,3 @@ pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/pmt_stacked_barplot_adj_no
 grid.arrange(boxes, bars, nrow = 1, ncol = 2, widths = c(1.3, 1))
 dev.off()
 
-
-
-# Cellular tumor inference
-# 
-# ct_fractions <- mean_values %>% filter(structure == "Cellular tumor") %>% data.frame()
-# 
-# ct_fraction_a <- ct_fraction_b <- rep(0, nrow(dat1))
-# for(i in 1:nrow(dat1))
-# {
-# 	cell_state <- dat1[i,"cell_state"]
-# 	
-# 	# Representation of a cell state in the leading edge
-# 	region_factor <- ct_fractions[which(ct_fractions[,"cell_state"] == cell_state), "fraction"]
-# 	
-# 	# Representation of the leading edge in a sample
-# 	region_fraction_a <- dat2[which(dat2$tumor_pair_barcode == dat1[i,"tumor_pair_barcode"] & dat2$cell_state == "CT"), "fraction_a"]
-# 	region_fraction_b <- dat2[which(dat2$tumor_pair_barcode == dat1[i,"tumor_pair_barcode"] & dat2$cell_state == "CT"), "fraction_b"]
-# 	
-# 	# Cell state fraction normalized for no leading edge
-# 	ct_fraction_a[i] = region_factor * region_fraction_a
-# 	ct_fraction_b[i] = region_factor * region_fraction_b
-# 	
-# }
-# 
-# ctdat <- data.frame(dat1, ct_fraction_a, ct_fraction_b)
-# 
-# ctdat %>%
-# group_by(tumor_pair_barcode, idh_status) %>%
-# summarise(cell_state, subtype_a, subtype_b, ct_fraction_a = ct_fraction_a/sum(ct_fraction_a), ct_fraction_b = ct_fraction_b/sum(ct_fraction_b)) %>% data.frame()
-# ungroup() %>%
-# group_by(cell_state, idh_status, subtype_a, subtype_b) %>%
-# summarise(pval = wilcox.test(ct_fraction_a, ct_fraction_b, paired=TRUE)$p.value, eff = median(ct_fraction_b - ct_fraction_a)) %>% 
-# data.frame()

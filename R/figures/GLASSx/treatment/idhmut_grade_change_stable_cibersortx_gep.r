@@ -119,14 +119,15 @@ plot_res <- plot_res %>%
 			filter(cell_state %in% c("differentiated_tumor", "stemcell_tumor")) %>%
 			mutate(cell_state = recode(cell_state, "differentiated_tumor" = "Diff.-like", "stemcell_tumor" = "Stem-like")) %>%
 			mutate(status = fct_relevel(timepoint, "Initial","Recurrent")) %>%
-			mutate(direction = fct_relevel(direction, "Up","Down"))
+			mutate(direction = fct_relevel(direction, "Up","Down")) %>%
+			filter(direction == "Up")
 
 # Plot it
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_gep_idhmut_grade_change_boxplot.pdf", width=2.8,height=1.8)
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/cibersortx_gep_idhmut_grade_change_boxplot.pdf", width=1.8,height=1.8)
 ggplot(data = plot_res, aes(x = cell_state, y = sig, fill = timepoint)) +
 geom_boxplot(outlier.size=1,colour="black") +
 scale_fill_manual(values=c("#a6611a", "#018571")) +
-facet_grid(grade_change ~ direction) +
+facet_grid(grade_change ~ .) +
 labs(y = "Signature score") +
 theme_classic() +
 theme(plot.title = element_text(size= 7, hjust = 0.5),

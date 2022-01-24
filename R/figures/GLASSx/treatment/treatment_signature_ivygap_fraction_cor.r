@@ -72,6 +72,9 @@ aliquot_barcode <- names(sig_score[[1]])
 sig_mat <- data.frame(sig_score[[1]], sig_score[[2]], sig_score[[3]])
 colnames(sig_mat) <- cell_state
 
+# Make a table with these scores
+#write.table(sig_mat, "data/res/CIBERSORTx/analysis/idhwt_signature_scores.txt", sep = "\t", row.names=TRUE, quote=FALSE)
+
 sig_mat_a <- sig_mat[dat[,"tumor_barcode_a"],]
 colnames(sig_mat_a) <- paste(colnames(sig_mat_a), "_a", sep="")
 dat <- cbind(dat,sig_mat_a)
@@ -132,6 +135,29 @@ ggplot(plot_res, aes(x = fraction * 100, y = score)) +
 	geom_text(data=annotation_text,label=pcor, size=2.5, parse=TRUE) +
 	scale_colour_manual(values = c("Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15", "Stem-like" = "#fb6a4a")) + 
 	facet_grid(status ~ cell_state) + 
+	labs(x="Leading edge fraction (%)", y="Signature score") +
+	theme_bw() +
+	theme(panel.grid.major = element_blank(),
+	panel.grid.minor = element_blank(),
+	axis.text = element_text(size=7),
+	axis.title = element_text(size=7),
+	strip.background = element_blank(),
+	strip.text = element_text(size=7),
+	legend.position="none")
+dev.off()
+
+stem_res <- plot_res %>% filter(cell_state == "Stem-like")
+stem_text = annotation_text %>% filter(cell_state == "Stem-like")
+stem_text[,"score"] <- c(1.0, 1.0)
+stemcor <- pcor[c(2,5)]
+
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/idhwt_leading_edge_sig_cors_stem.pdf", width=1.55,height=2.2)
+ggplot(stem_res, aes(x = fraction * 100, y = score)) + 
+	geom_point() +
+	geom_smooth(method = "lm", se=FALSE, aes(colour=cell_state)) +
+	geom_text(data=stem_text,label=stemcor, size=2.5, parse=TRUE) +
+	scale_colour_manual(values = c("Diff.-like" = "#fcbba1", "Prolif. stem-like" = "#a50f15", "Stem-like" = "#fb6a4a")) + 
+	facet_grid(status ~ .) + 
 	labs(x="Leading edge fraction (%)", y="Signature score") +
 	theme_bw() +
 	theme(panel.grid.major = element_blank(),

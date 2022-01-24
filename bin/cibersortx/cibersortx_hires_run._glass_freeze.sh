@@ -5,13 +5,13 @@
 #SBATCH --output /projects/verhaak-lab/GLASS-III/logs/slurm/CIBERSORTx_HiRes.out
 #SBATCH --error /projects/verhaak-lab/GLASS-III/logs/slurm/CIBERSORTx_HiRes.err
 
-#sbatch cibersortx_hires_run.sh --job-name cibersortx_hires
+#sbatch cibersortx_hires_run._glass_freeze.sh --job-name cibersortx_hires
 #srun -q batch -N 1 --cpus-per-task=12 --mem 36G -t 8:00:00 --pty bash 
 
 module load singularity
 
 singularity exec \
--B /projects/verhaak-lab/GLASS-III/data/cibersortx/glass_20201102/:/src/data \
+-B /projects/verhaak-lab/GLASS-III/data/cibersortx/glass_20210923/:/src/data \
 -B /projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS-freeze/:/src/outdir \
 /projects/verhaak-lab/varnf/docker/CIBERSORTx/hires_latest.sif "/src/CIBERSORTxHiRes" \
 --username Frederick.S.Varn.Jr.GR@dartmouth.edu \

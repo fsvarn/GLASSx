@@ -33,7 +33,7 @@ unique_thr <- mean(ka[,"p_unique"]) - 2*sd(ka[,"p_unique"])
 qc[,"premium"] <- as.factor(as.numeric(qc[,"p_unique"] < unique_thr))
 ka[,"premium"] <- as.factor(as.numeric(ka[,"p_unique"] < unique_thr))
 
-pdf("/projects/varnf/GLASS-III/GLASS-III/figures/qc/qc_metrics_by_batch.pdf",width=7,height=4)
+pdf("/projects/verhaak-lab/GLASS-III/figures/qc/qc_metrics_by_batch.pdf",width=7,height=4)
 
 #total reads 
 ggplot(qc,aes(y = total_reads, x = aliquot_batch)) +

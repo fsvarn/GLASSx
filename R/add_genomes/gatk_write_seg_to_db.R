@@ -17,18 +17,24 @@ segs <- parallel::mclapply(segfiles, function(f) {
 segs <- data.table::rbindlist(segs) %>% as.data.frame()
 
 # Add the new HF cohort
-hf_segs <- segs[grep("GLSS-HF-",segs[,"aliquot_barcode"]),]
-hf_segs <- hf_segs[-grep("GLSS-HF-2",hf_segs[,"aliquot_barcode"]),]
-hf_segs <- hf_segs[-grep("GLSS-HF-3",hf_segs[,"aliquot_barcode"]),]
+# hf_segs <- segs[grep("GLSS-HF-",segs[,"aliquot_barcode"]),]
+# hf_segs <- hf_segs[-grep("GLSS-HF-2",hf_segs[,"aliquot_barcode"]),]
+# hf_segs <- hf_segs[-grep("GLSS-HF-3",hf_segs[,"aliquot_barcode"]),]
+# 
+# hf_segs[which(hf_segs[,"chrom"] == "X"),"chrom"] <- 23
+# hf_segs[which(hf_segs[,"chrom"] == "Y"),"chrom"] <- 24
 
-hf_segs[which(hf_segs[,"chrom"] == "X"),"chrom"] <- 23
-hf_segs[which(hf_segs[,"chrom"] == "Y"),"chrom"] <- 24
+# Add the new SN cohort
+sn_segs <- segs[grep("GLSS-SN-",segs[,"aliquot_barcode"]),]
+
+sn_segs[which(sn_segs[,"chrom"] == "X"),"chrom"] <- 23
+sn_segs[which(sn_segs[,"chrom"] == "Y"),"chrom"] <- 24
 
 # Check for conflicts with aliquots table
-q <-"SELECT * FROM biospecimen.aliquots WHERE aliquot_batch = 'GLSS-H2-WXS'"
+q <-"SELECT * FROM biospecimen.aliquots WHERE aliquot_batch = 'GLSS-SN-WGS'"
 aliquots <- dbGetQuery(con, q)
 
 # Two aliquots were removed early in the process due to high contamination issues
-hf_segs_final <- hf_segs[which(hf_segs[,"aliquot_barcode"] %in% aliquots[,"aliquot_barcode"]),]
+sn_segs_final <- sn_segs[which(sn_segs[,"aliquot_barcode"] %in% aliquots[,"aliquot_barcode"]),]
 
-dbWriteTable(con, Id(schema="variants",table="gatk_seg"), hf_segs_final, append=TRUE)
+dbWriteTable(con, Id(schema="variants",table="gatk_seg"), sn_segs_final, append=TRUE)

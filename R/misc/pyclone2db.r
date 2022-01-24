@@ -9,10 +9,11 @@ myDir <- 'results/pyclone/run/'
 files <- dir(myDir)
 files <- paste(myDir, files, sep = '')
 
-# Select H2 and PD cohorts:
+# Select H2, PD, or SN cohorts:
 # files <- files[grep("GLSS-CU-P|GLSS-HF", files)]
 # files <- files[-grep("GLSS-HF-2", files)]
 # files <- files[-grep("GLSS-HF-3", files)]
+#files <- files[grep("GLSS-SN-", files)]
 
 clust <- paste(files, '/tables/cluster.tsv', sep='')
 loci <- paste(files, '/tables/loci.tsv', sep='')

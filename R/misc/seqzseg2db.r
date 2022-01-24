@@ -49,7 +49,11 @@ old_pairs <- unique(old[,"pair_barcode"])
 df_new <- df[-which(df[,"pair_barcode"] %in% old_pairs),]
 
 # Limit to new cohorts (GLSS-PD-WXS, GLSS-H2-WXS)
-df_new <- df_new[grep("GLSS-HF-|GLSS-CU-P",df_new[,"pair_barcode"]),]
+#df_new <- df_new[grep("GLSS-HF-|GLSS-CU-P",df_new[,"pair_barcode"]),]
+
+# Limit to new cohorts (GLSS-SN-WGS)
+df_new <- df_new[grep("GLSS-SN",df_new[,"pair_barcode"]),]
+
 df_new[,"chrom"] <- as.character(df_new[,"chrom"])
 df_new[which(df_new[,"chrom"]=='X'),"chrom"] <- 23
 df_new[,"chrom"] <- as.numeric(df_new[,"chrom"])
@@ -76,7 +80,10 @@ old_pairs <- unique(old[,"pair_barcode"])
 dat_new <- dat[-which(dat[,"pair_barcode"] %in% old_pairs),]
 
 # Limit to new cohorts (GLSS-PD-WXS, GLSS-H2-WXS)
-dat_new <- dat_new[grep("GLSS-HF-|GLSS-CU-P",dat_new[,"pair_barcode"]),]
+#dat_new <- dat_new[grep("GLSS-HF-|GLSS-CU-P",dat_new[,"pair_barcode"]),]
+# Limit to new cohorts (GLSS-SN-WGS)
+dat_new <- dat_new[grep("GLSS-SN-",dat_new[,"pair_barcode"]),]
+
 
 # Write new results to db
 dbWriteTable(con, Id(schema="variants",table="seqz_params"), dat_new, append = TRUE)

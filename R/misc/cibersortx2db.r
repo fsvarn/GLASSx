@@ -14,11 +14,11 @@ library(DBI)
 #Establish connection
 con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
 
-# November data freeze data 
+# Final data freeze data 
 #myinf1 <- "/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS-freeze/CIBERSORTxGEP_GLASS_Fractions-Adjusted.txt"
-#myinf1 <- "/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS_neftel_freeze/CIBERSORTxGEP_GLASS_Fractions-Adjusted.txt"
+myinf1 <- "/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS_neftel_freeze/CIBERSORTxGEP_GLASS_Fractions-Adjusted.txt"
 #myinf1 <- "/projects/verhaak-lab/GLASS-III/results/cibersortx/hires/GLASS_venteicher_freeze/CIBERSORTxGEP_GLASS_Fractions-Adjusted.txt"
-myinf1 <- "/projects/verhaak-lab/GLASS-III/data/cibersortx/ivyGAP/CIBERSORTx_GLASS_20201109_ivyGAP_fractions.txt"
+#myinf1 <- "/projects/verhaak-lab/GLASS-III/data/cibersortx/ivyGAP/CIBERSORTx_GLASS_20210923_ivyGAP_fractions.txt"
 
 # Original GLASS Neftel data from August
 #myinf1 <-  "/projects/verhaak-lab/GLASS-III/data/res/neftel_GLASS_cibersortx_prop_08052020.txt"
@@ -33,7 +33,7 @@ prop[,"Mixture"] <- gsub("\\.","-",prop[,"Mixture"])
 db_table <- prop %>% pivot_longer(-Mixture, values_to = "fraction", names_to = "cell_state")
 colnames(db_table)[1] <- c("aliquot_barcode")
 
-dbWriteTable(con, Id(schema="analysis", table="cibersortx_ivygap"), db_table, overwrite=TRUE)
-#dbWriteTable(con, Id(schema="analysis", table="cibersortx_neftel"), db_table, overwrite=TRUE)
+#dbWriteTable(con, Id(schema="analysis", table="cibersortx_ivygap"), db_table, overwrite=TRUE)
+dbWriteTable(con, Id(schema="analysis", table="cibersortx_neftel"), db_table, overwrite=TRUE)
 #dbWriteTable(con, Id(schema="analysis", table="cibersortx_scgp"), db_table, overwrite=TRUE)
 

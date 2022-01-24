@@ -62,7 +62,7 @@ names(gene) <- rownames(featuredata)
 
 rownames(log2cpm_myeloid) <- gene
 
-tcga_dat <- read.delim("data/res/CIBERSORTx/analysis/TCGA_myeloid_ts_result_v3.txt")
+tcga_dat <- read.delim("data/res/CIBERSORTx/analysis/TCGA_myeloid_ts_result_v4.txt")
 tcga_sig <- rownames(tcga_dat %>% filter(q.val < 0.05 & eff > log2(1.1)))
 
 sc_mes_score <- apply(log2cpm_myeloid[tcga_sig,],2,mean)
@@ -71,7 +71,7 @@ plot_res <- data.frame(names(sc_mes_score), sc_mes_score, sample_id)
 colnames(plot_res) <- c("cell_id","sc_mes_score","sample_id")
 
 # Plot density and arrange by patient
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/myeloid_scmes_score_density.pdf",width=1.5,height=1)  
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/myeloid_scmes_score_density_v2.pdf",width=1.5,height=1)  
 ggplot(plot_res, aes(x = sc_mes_score)) +
 geom_density() +
 theme_classic() +
@@ -106,7 +106,7 @@ ungroup() %>%
 inner_join(bulk_mes, by = "sample_id") %>%
 as.data.frame()
 
-pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/myeloid_sc_bulk_mes_scatterplot.pdf",width=1.9,height=1.5)  
+pdf("/projects/verhaak-lab/GLASS-III/figures/analysis/myeloid_sc_bulk_mes_scatterplot_v2.pdf",width=1.9,height=1.5)  
 ggplot(plot_res, aes(x = mean, y = enrichment_score/1000)) +
 geom_point() +
 geom_smooth(method = lm, se = FALSE) + 
