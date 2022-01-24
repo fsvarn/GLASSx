@@ -1,0 +1,184 @@
+library(odbc)
+library(DBI)
+library(tidyverse)
+library(stringr)
+library(stringi)
+
+rm(list=ls())
+setwd("/Users/varnf/Documents/Projects/GLASS/GLASS-III/")
+set.seed(11)
+
+# Connect to DB
+con <- DBI::dbConnect(odbc::odbc(), "GLASSv3")
+
+cases <- read.delim("file_metadata/NorLux/norlux-cases-jax-database-20210907-mRNA_exists.txt",stringsAsFactors=FALSE)
+samples <- read.delim("file_metadata/NorLux/norlux-samples-jax-database-plus-linker-20210907-mRNA_exists.txt",stringsAsFactors=FALSE)
+
+# Cases table
+#dbWriteTable(con, Id(schema="clinical",table = "cases"), cases, append = TRUE)
+
+# Samples table
+samples_upload <- samples[,c("case_barcode", "sample_barcode")]
+sample_type <- substring(samples_upload$sample_barcode, 14, 16)
+samples_upload <- data.frame(samples_upload, sample_type)
+
+#dbWriteTable(con, Id(schema="biospecimen",table = "samples"), samples_upload, append = TRUE)
+
+#-------------------------
+# Create aliquots table
+snu_linker <- read.delim("/Users/varnf/Documents/Projects/IMC_Glioma/SNU/sample_storage/snu_cohort_mapping_table.txt",stringsAsFactors=FALSE)
+
+q <- "SELECT * FROM biospecimen.samples WHERE sample_barcode LIKE 'GLSS-SN-%'"
+snu_samples <- dbGetQuery(con, q)
+
+snu_sample_barcode <- snu_samples$sample_barcode
+snu_sample_barcode <- snu_sample_barcode[-grep("-NB", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0005", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0014", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0011", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0012", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0007-TP", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0008-R2", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0009-R1", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0013-R1", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0013-R2", snu_sample_barcode)]
+snu_sample_barcode <- snu_sample_barcode[-grep("GLSS-SN-0015-R1", snu_sample_barcode)]
+
+norlux_sample_barcode <- samples_upload$sample_barcode
+
+sample_barcode <- c(snu_sample_barcode, norlux_sample_barcode)
+
+aliquot_analyte_type <- rep("R",length(sample_barcode))
+aliquot_analysis_type <- rep("RNA",length(sample_barcode))
+aliquot_portion <- rep(1,length(sample_barcode))
+#aliquot_batch <- paste(substring(sample_barcode,1,8),"RNA",sep="")
+aliquot_batch <- rep("GLSS-SN-RNA",length(sample_barcode))  # Using this as the batch because all samples were processed together
+
+# Read in all previous UUIDs to ensure that they do not conflict
+old_table <- read.delim("file_metadata/SNU/synapse_aliquots_release_20210823.txt",stringsAsFactors=FALSE)
+old_uuids <- old_table$aliquot_uuid_short
+db_table <- dbReadTable(con, Id(schema = "biospecimen", table="aliquots"))
+db_uuids <- db_table$aliquot_uuid_short
+old_uuids <- union(old_uuids, db_uuids)
+
+#Add a short 6-character UUID to the aliquot barcodes that need it
+#This snippit of code was pulled from the GLASS Github (GLASS/R/Manifest/life-history-barcode-generation.R)
+aliquot_uuid <- stri_rand_strings((length(old_uuids) + length(sample_barcode) + 17), 6, "[A-Z0-9]") # Adding 14 because several uuids were removed post-hoc
+aliquot_uuid_short <- aliquot_uuid[(length(aliquot_uuid)-(length(sample_barcode)-1)):length(aliquot_uuid)]
+
+#Check to make sure there is no overlap between new UUIDs and current ones
+ifelse(sum(old_uuids%in%aliquot_uuid_short) == 0, 
+       message("UUIDs do not overlap"), 
+       message("WARNING! Overlap"))
+
+#Check to make sure each UUID is unique
+ifelse(n_distinct(aliquot_uuid_short)==length(aliquot_uuid_short)[1], 
+       message("UUIDs are unique."), 
+       message("WARNING! Not unique"))
+
+aliquot_barcode <- paste(sample_barcode, "-", str_pad(aliquot_portion, 2, pad = "0"), aliquot_analyte_type, "-", aliquot_analysis_type, "-", aliquot_uuid_short,sep="")
+
+aliquots <- data.frame(aliquot_barcode, sample_barcode, aliquot_uuid_short, aliquot_analyte_type, aliquot_analysis_type, aliquot_portion, aliquot_batch)
+
+#dbWriteTable(con, Id(schema="biospecimen",table = "aliquots"), aliquots, append = TRUE)
+
+#-------------------------
+# Create readgroups table
+
+conIn <- file("file_metadata/NorLux/rna_fastq_headers.txt","r")
+fastq <- readLines(conIn)
+close(conIn)
+
+file_name <- fastq[seq(from = 1, to = length(fastq), by=2)]
+file_path <- paste("/fastscratch/varnf/tmp_storage/SNU_NorLux/",file_name,sep="")
+fastq_header <- fastq[seq(from = 2, to = length(fastq), by=2)]
+
+file_info <- data.frame(file_path, file_name, fastq_header,stringsAsFactors = FALSE)
+
+# Extract legacy sample ID to map fastq to GLASS barcode
+legacy_sample_id <- sapply(strsplit(file_name,"_",),function(x)x[1])
+
+# Extract readgroup_idtag info
+flowcell_id <- sapply(strsplit(fastq_header,":"),function(x)x[3])
+lane <- sapply(strsplit(fastq_header,":"),function(x)x[4])
+readgroup_idtag <- paste(substring(flowcell_id,1, 5), ".", lane,sep="")
+
+# Create idtag_legacy and platform columns (same for all samples)
+readgroup_idtag_legacy <- rep(NA, nrow(file_info))
+readgroup_platform <- rep("Illumina", nrow(file_info))
+
+# Create readgroup_library and readgroup_platform_unit ({flowcell_barcode}.{lane}.{library_id})
+readgroup_library <- sapply(strsplit(file_name, "_"),function(x)x[2])
+readgroup_platform_unit <- paste(readgroup_idtag, readgroup_library,sep=".")
+
+# Create readgroup_center (all samples done at JAX)
+readgroup_center <- rep("JAX", nrow(file_info))
+readgroup_timestamp <- rep(NA, nrow(file_info))
+
+# Get aliquot_barcode and readgroup_sample_id (same thing for this project) by using the linker table
+# Read in linker table
+linker <- read.delim("/Users/varnf/Documents/Projects/IMC_Glioma/SNU/sample_storage/snu_cohort_mapping_table.txt",stringsAsFactors=FALSE)
+frozen_id <- c(linker$Frozen.banking.number..initial., linker$Frozen.banking.number..recurrent.,linker$Frozen.banking.number..normal)
+glass_id <- c(linker$sample_barcode..initial., linker$sample_barcode..recurrent.,linker$sample_barcode..normal.)
+frozen_glass <- data.frame(frozen_id, glass_id)
+frozen_glass <- frozen_glass %>%
+  inner_join(aliquots %>% select(aliquot_barcode, sample_barcode), by = c("glass_id" = "sample_barcode")) %>%
+  mutate(frozen_id = recode(frozen_id, "4655/4656" = "4655", "4111-_/4111-_/4111-_" = "4111", "4045/4046/4047" = "4045", "4792/4793/4794" = "4792"))
+
+# Add the NorLux table
+norlux_linker <- samples[,c("sampleId","sample_barcode")]
+norlux_linker <- norlux_linker %>%
+                 inner_join(aliquots, by="sample_barcode") %>%
+                 select(sampleId, sample_barcode, aliquot_barcode)
+colnames(norlux_linker) <- c("frozen_id", "glass_id", "aliquot_barcode")
+frozen_glass <- rbind(frozen_glass, norlux_linker)
+
+sub_readgroups <- data.frame(legacy_sample_id, readgroup_idtag, readgroup_idtag_legacy, readgroup_platform, readgroup_library, readgroup_platform_unit, readgroup_center, readgroup_timestamp)
+
+readgroups <- sub_readgroups %>% inner_join(frozen_glass, by = c("legacy_sample_id" = "frozen_id"))
+readgroups <- readgroups[,c("aliquot_barcode", "readgroup_idtag", "readgroup_idtag_legacy", "readgroup_platform", "readgroup_platform_unit", "readgroup_library", "readgroup_center", "aliquot_barcode", "readgroup_timestamp")]
+colnames(readgroups) <- c("aliquot_barcode", "readgroup_idtag", "readgroup_idtag_legacy", "readgroup_platform", "readgroup_platform_unit", "readgroup_library", "readgroup_center", "readgroup_sample_id", "readgroup_timestamp")
+
+# Remove duplicates (paired-end reads so 2 entries per file)
+readgroups <- readgroups[-which(duplicated(readgroups)),]
+#dbWriteTable(con, Id(schema="biospecimen",table = "readgroups"), readgroups, append = TRUE)
+
+# Create analysis.files table
+file_sizes <- read.delim("file_metadata/NorLux/snu_norlux_rna_size.txt",sep="\t", header=FALSE)
+md5sum <- read.delim("file_metadata/NorLux/snu_norlux_rna_md5sum.txt",sep=" ",header=FALSE)
+file_info <- file_sizes %>%
+  inner_join(md5sum, by = c("V2" = "V3"))
+colnames(file_info) <- c("file_size", "file_path", "file_md5sum", "NA")
+file_info <- file_info[,-which(colnames(file_info) == "NA")]
+file_info$file_path <- paste("/fastscratch/varnf/tmp_storage/SNU_NorLux/",file_info$file_path,sep="")
+
+file_info[,"file_name"] <- sapply(strsplit(file_info$file_path,"/"),function(x)x[length(x)])
+file_info[,"file_format"] <- "FASTQ"
+file_info <- file_info[,c("file_name","file_size", "file_md5sum", "file_format", "file_path")]
+
+# Link aliquot barcode to files table
+file_info[,"legacy_id"] <- sapply(strsplit(file_info$file_name,"_"), function(x)x[1])
+file_info <- file_info %>%
+  inner_join(frozen_glass, by=c("legacy_id" = "frozen_id"))
+
+files <- file_info[,c("aliquot_barcode", "file_name", "file_size", "file_md5sum", "file_format", "file_path")]
+#dbWriteTable(con, Id(schema="analysis",table = "files"), files, append = TRUE)
+
+
+# Create files_readgroups
+files_readgroups <- readgroups %>%
+  inner_join(files, by= c("readgroup_sample_id" = "aliquot_barcode")) %>%
+  select(file_name, readgroup_idtag, readgroup_sample_id)
+
+#dbWriteTable(con, Id(schema="analysis",table = "files_readgroups"), files_readgroups, append = TRUE)
+
+# Add NorLux clinical data
+surgeries <- read.delim("file_metadata/NorLux/norlux-surgeries-jax-database-plus-linker-20211004.txt")
+
+surgeries <- surgeries %>%
+             select(-c(patientId, sampleId)) %>%
+             mutate(histology = recode(histology, "Anaplastic astrocytoma" = "Astrocytoma")) %>%
+             mutate(surgery_location = recode(surgery_location, "Temporo-Frontal lobe" = "Fronto-Temporal lobe", "Parietal" = "Parietal lobe"))
+
+dbWriteTable(con, Id(schema="clinical",table = "surgeries"), surgeries, append = TRUE)
+
