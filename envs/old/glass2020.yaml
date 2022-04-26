@@ -1,6 +1,5 @@
 name: glass
 channels:
-  - liulab-dfci
   - conda-forge
   - bioconda
   - defaults

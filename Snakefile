@@ -47,7 +47,7 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 
 #DNA modules
 #include: "snakemake/download.smk"
-#include: "snakemake/align.smk"
+include: "snakemake/align.smk"
 #include: "snakemake/haplotype-map.smk"
 #include: "snakemake/fingerprinting.smk"
 #include: "snakemake/telseq.smk"
@@ -61,7 +61,7 @@ WGS_SCATTERLIST = ["temp_{num}_of_50".format(num=str(j+1).zfill(4)) for j in ran
 #include: "snakemake/cnv.smk"
 #include: "snakemake/sequenza.smk"
 #include: "snakemake/optitype.smk"
-include: "snakemake/pvacseq.smk"
+#include: "snakemake/pvacseq.smk"
 #include: "snakemake/lohhla.smk"
 #include: "snakemake/cnv-post.smk"		(Deprecated)
 #include: "snakemake/titan.smk"

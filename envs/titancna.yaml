@@ -1,0 +1,14 @@
+name: titancna_env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - r-optparse
+  - bioconductor-titancna
+  - r-data.table
+  - bioconductor-titancna
+  - bioconductor-genomicranges
+  - r-dplyr
+  - r-domc
+  - bioconductor-bsgenome.hsapiens.ucsc.hg19

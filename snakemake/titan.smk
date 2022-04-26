@@ -53,7 +53,7 @@ rule titan:
     shell:
     	"""
     	set +u
-        source {config[conda_dir]}/activate r_3.4.1
+        source {config[conda_dir]}/activate titancna_env
         set -u
     	Rscript /projects/verhaak-lab/USERS/barthf/opt/TitanCNA/scripts/R_scripts/titanCNA.R \
 			--genomeBuild hg19 \
@@ -95,7 +95,7 @@ rule selecttitan:
     shell:
     	"""
     	set +u
-        source {config[conda_dir]}/activate r_3.4.1
+        source {config[conda_dir]}/activate titancna_env
         set -u
     	Rscript /projects/verhaak-lab/USERS/barthf/opt/TitanCNA/scripts/R_scripts/selectSolution.R \
 			--ploidyRun2=results/cnv/titan/{wildcards.pair_barcode}/ploidy2 \
