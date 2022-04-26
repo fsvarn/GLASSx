@@ -5,6 +5,11 @@
 ### Overview
 The Glioma Longitudinal AnalySiS (GLASS) consortium consists of clinical, bioinformaticians, and basic science researchers from leading institutions across the world striving to better understand glioma tumor evolution and to expose its therapeutic vulnerabilities. For more information, please read our position paper: **The Glioma Longitudinal Analysis Consortium. Glioma Through the Looking GLASS: Molecular Evolution of Diffuse Gliomas and the Glioma Longitudinal AnalySiS Consortium.** *Neuro Oncol. 2018* PMID: 29432615. 
 
+The code in this respository was used to generate the figures and perform the analyses described in the [2021 bioRxiv preprint](https://www.biorxiv.org/content/10.1101/2021.05.03.442486v1).
+
+Previous projects and associated repositories are listed below:
+Barthel, F.P., Johnson, K.C., Varn, F.S., Moskalik, A.D., Tanner, G., Kocakavuk, E., Anderson, K.J., Abiola, O., Aldape, K., Alfaro, K.D., et al. (2019). Longitudinal molecular trajectories of diffuse glioma in adults. Nature 576, 112-120. [Paper.](https://www.nature.com/articles/s41586-019-1775-1) [Code.] (https://github.com/TheJacksonLaboratory/GLASS)
+
 ### The GLASS Data Model
 
 The GLASS data model was built to carefully take into the account the temporal nature of the dataset. The layers of the dataset is best explained using the diagram below. Here we see a single hypothetical patient (left-most column) from which we have obtained tumor samples at three different time points (second column), including a second tumor sub-sample (eg. multisector sample) from the primary tumor (third column). Moreover, a simultaneous DNA-RNA extraction was performed on 1st tumor recurrence and both were sequenced (fourth column). Lastly, some of the DNA aliquots were split off and separately sent off for whole genome and whole exome sequencing (fifth column).
@@ -23,14 +28,8 @@ The GLASS barcodes are inspired by the TCGA barcodes and are constructed in a re
 
 Key parts of the data model are represented in the barcode.
 
-### Data Release version March 2019.
-The data available here marks the second release of the GLASS project dataset, which is managed internally using the PostgreSQL database management system. The data available here represents the `March-2019` snapshot of our dataset. These data are under active curation so future versions will include additional data as well as correct potential errors. Please report any inconsistencies you find on the discussion board here or on our Github issue tracker https://github.com/TheJacksonLaboratory/GLASS.
-
-#### Current Data by the Numbers
-
-The following infographic shows the some summary statistics of the `March-2019` release of the GLASS dataset.
-
-![glass-numbers](https://user-images.githubusercontent.com/6731211/64620380-c0461000-d3b1-11e9-8ecf-ec3d10487784.jpg)
+### Data Release version spring 2022.
+The data available here marks the third release of the GLASS project dataset, which is managed internally using the PostgreSQL database management system. The data available here represents the `spring-2022` snapshot of our dataset as described in the upcoming GLASS manuscript that will soon be published. These data are under active curation so future versions will include additional data as well as correct potential errors.
 
 #### Data Download
-The GLASS data can be downloaded from the `Tables` page [here](https://www.synapse.org/#!Synapse:syn17038081/tables/). It is also possible to query the data directly using the the API by using queries. You can read more about that [here](https://docs.synapse.org/articles/tables.html).
+The GLASS data can be downloaded from the `Tables` page [here](https://www.synapse.org/#!Synapse:syn17038081/tables/) and the `Files` page [here](https://www.synapse.org/#!Synapse:syn26465623). It is also possible to query the data directly using the the API by using queries. You can read more about that [here](https://docs.synapse.org/articles/tables.html).
