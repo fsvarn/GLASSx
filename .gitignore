@@ -7,6 +7,10 @@ R/md-anderson-clinical.R
 R/manifest/yung-create-manifest.R
 R/manifest/RNAseq-file-pairs-create-manifest.R 
 R/RData/**
+R/expression/**
+R/immune/**
+R/figures/GLASS_2019/**
+R/figures/GLASSx/**
 sandbox/**
 archive/**
 documents/**
