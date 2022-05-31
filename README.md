@@ -3,7 +3,7 @@
 ## The GLASS consortium
 
 ### Overview
-The Glioma Longitudinal AnalySiS (GLASS) consortium consists of clinical, bioinformaticians, and basic science researchers from leading institutions across the world striving to better understand glioma tumor evolution and to expose its therapeutic vulnerabilities. The code in this respository was used to generate the figures and perform the analyses described in the [2021 bioRxiv preprint](https://www.biorxiv.org/content/10.1101/2021.05.03.442486v1).
+The Glioma Longitudinal AnalySiS (GLASS) consortium consists of clinical, bioinformaticians, and basic science researchers from leading institutions across the world striving to better understand glioma tumor evolution and to expose its therapeutic vulnerabilities. The code in this respository was used to generate the figures and perform the analyses described in our [2022 publication](https://www.cell.com/cell/fulltext/S0092-8674(22)00536-0) in Cell.
 
 R code used to make each of the figures can be found in the R/figures/GLASSxrev subdirectory.
 
